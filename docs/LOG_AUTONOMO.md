@@ -120,3 +120,27 @@ docker build -t portafolio-api .\backend
 ```bash
 cd frontend && npm install && npm run build
 ```
+
+---
+
+## FASE 5 — Sistema Multiempresa
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- RLS sobre JSONB de API keys: capa extra defensiva contra filtraciones entre tenants.
+- `current_setting('app.tenant_id')` para RLS: evita tener que pasar tenant_id en cada query.
+- API Keys con formato `pk_` + hex (compatible con estándar del mercado).
+- Middleware combinado: JWT para dashboard, API Key para webhooks.
+- API Keys almacenadas como JSONB dentro de tenants (evita tabla separada para MVP).
+
+**Solución aplicada:** RLS policies, API key CRUD, middleware dual auth, documentación.
+
+**Comandos usados:**
+```bash
+# Aplicar RLS
+cat database/migrations/010_enable_rls.sql | docker exec -i portafolio-postgres-1 psql -U n8n
+
+# Probar API Key
+curl -H "x-api-key: pk_..." http://localhost:3000/api/leads
+```

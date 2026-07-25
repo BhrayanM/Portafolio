@@ -4,7 +4,7 @@
 > **Stack base:** n8n · Docker · PostgreSQL · Node.js · Next.js · OpenAI · Hetzner  
 > **Objetivo:** De automatizaciones IA aisladas → Plataforma multi-tenant SaaS  
 > **Total fases:** 14  
-> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 — En ejecución
+> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 [DONE] · FASE 6 — En ejecución
 
 ---
 
@@ -484,7 +484,7 @@ frontend/
 
 ---
 
-## FASE 5 — Sistema Multiempresa [EN EJECUCIÓN]
+## FASE 5 — Sistema Multiempresa [DONE]
 
 ### Objetivo de negocio
 Un mismo backend sirve a N clientes. Cada cliente tiene sus datos aislados, su API key y su plan.
