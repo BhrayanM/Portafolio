@@ -4,7 +4,7 @@
 > **Stack base:** n8n · Docker · PostgreSQL · Node.js · Next.js · OpenAI · Hetzner  
 > **Objetivo:** De automatizaciones IA aisladas → Plataforma multi-tenant SaaS  
 > **Total fases:** 14  
-> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 — En ejecución
+> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 — En ejecución
 
 ---
 
@@ -258,7 +258,7 @@ SLACK_CHANNEL_ID=...
 
 ---
 
-## FASE 2 — Base de Datos Central (PostgreSQL) [EN EJECUCIÓN]
+## FASE 2 — Base de Datos Central (PostgreSQL) [DONE]
 
 ### Objetivo de negocio
 Dejar de depender de HubSpot como sistema de registro. Base de datos propia con todas las entidades del negocio. HubSpot pasa a ser solo integración CRM.

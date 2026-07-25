@@ -58,3 +58,23 @@ curl -X POST http://localhost:5678/webhook/lead-qualification \
 # Ver logs de n8n
 docker compose logs n8n
 ```
+
+---
+
+## FASE 2 — Base de Datos Central
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- UUIDs como PK en todas las tablas (mejor para multi-tenant y sharding futuro).
+- `dedup_key` en leads con UNIQUE(tenant_id, dedup_key) para idempotencia.
+- `settings` como JSONB para flexibilidad sin alter table.
+- `error_log` con `created_at` como BIGINT (timestamp UNIX) para compatibilidad con n8n.
+- Migraciones SQL puras (sin ORM) para mantener independencia de backend.
+
+**Solución aplicada:** 9 migraciones + 2 seeds creados. Esquema completo multi-tenant.
+
+**Comandos usados:**
+```bash
+cat database/migrations/*.sql | docker exec -i portafolio-postgres-1 psql -U n8n
+```
