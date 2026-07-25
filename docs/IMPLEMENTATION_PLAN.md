@@ -4,7 +4,7 @@
 > **Stack base:** n8n · Docker · PostgreSQL · Node.js · Next.js · OpenAI · Hetzner  
 > **Objetivo:** De automatizaciones IA aisladas → Plataforma multi-tenant SaaS  
 > **Total fases:** 14  
-> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 [DONE] · FASE 6 [DONE] · FASE 7 [DONE] · FASE 8 — En ejecución
+> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 [DONE] · FASE 6 [DONE] · FASE 7 [DONE] · FASE 8 [DONE] · FASE 9 [DONE] · FASE 10 [DONE] · FASE 11 [DONE] · FASE 12 [DONE] · FASE 13 [DONE]
 
 ---
 
@@ -623,7 +623,7 @@ Saber qué está pasando en producción antes de que el cliente lo reporte.
 
 ---
 
-## FASE 9 — Seguridad
+## FASE 9 — Seguridad [DONE]
 
 ### Objetivo de negocio
 Capa de seguridad profesional: rate limiting, firewall, auditoría, recovery plan.
@@ -648,7 +648,7 @@ Capa de seguridad profesional: rate limiting, firewall, auditoría, recovery pla
 
 ---
 
-## FASE 10 — Facturación (Stripe)
+## FASE 10 — Facturación (Stripe) [DONE]
 
 ### Objetivo de negocio
 Cobrar a los clientes. Planes, suscripciones, webhooks de pago.
@@ -687,7 +687,7 @@ Usuario ──► Selecciona plan ──► Stripe Checkout ──► Pago
 
 ---
 
-## FASE 11 — Portal Cliente
+## FASE 11 — Portal Cliente [DONE]
 
 ### Objetivo de negocio
 El cliente tiene su propio espacio: ve facturas, cambia plan, configura integraciones, ve uso.
@@ -711,7 +711,7 @@ El cliente tiene su propio espacio: ve facturas, cambia plan, configura integrac
 
 ---
 
-## FASE 12 — Marketplace de Automatizaciones
+## FASE 12 — Marketplace de Automatizaciones [DONE]
 
 ### Objetivo de negocio
 Los clientes pueden instalar automatizaciones pre-construidas desde un marketplace. Como App Store pero para n8n.
@@ -743,7 +743,7 @@ Al instalar:
 
 ---
 
-## FASE 13 — Escalabilidad
+## FASE 13 — Escalabilidad [DONE]
 
 ### Objetivo de negocio
 El VPS de $20 ya no da abasto. Preparar la arquitectura para escalar horizontalmente.

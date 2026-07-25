@@ -200,3 +200,80 @@ curl -H "x-api-key: pk_..." http://localhost:3000/api/leads
 ```bash
 docker compose -f monitoring/docker-compose.monitoring.yml up -d
 ```
+
+---
+
+## FASE 9 — Seguridad
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- express-rate-limit para rate limiting (maduro, soporta Redis como store).
+- Helmet para headers de seguridad (CSP, HSTS, X-Frame-Options).
+- Auditoría mediante middleware que intercepta `res.json`.
+- fail2ban + Tailscale como capas extras para el servidor.
+- RLS en PostgreSQL como defensa en profundidad multi-tenant.
+
+**Solución aplicada:** Rate limiters, audit log middleware, security middleware, firewall script, documentación.
+
+---
+
+## FASE 10 — Facturación (Stripe)
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Stripe Checkout (menos código que Payment Intents, maneja el UI).
+- Webhooks para actualización asíncrona del estado del tenant.
+- Tres planes: Starter ($49), Pro ($149), Enterprise ($499).
+- `stripe_customer_id` en tabla tenants (evita crear/consultar cada vez).
+
+**Solución aplicada:** Billing service con checkout, webhooks, gestión de suscripciones.
+
+---
+
+## FASE 11 — Portal Cliente
+
+**Problemas encontrados:** Ninguno (reutiliza componentes de Fase 4 y Fase 10).
+
+**Decisiones:**
+- Páginas del dashboard reutilizan el layout existente.
+- API keys management vía el endpoint creado en Fase 5.
+- Facturación conectada a Stripe vía Fase 10.
+
+**Solución aplicada:** Documentación de rutas del portal cliente.
+
+---
+
+## FASE 12 — Marketplace de Automatizaciones
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Catálogo como array estático en service (fácil de extender).
+- Instalación registra en settings (JSONB) + workflow_runs.
+- Verificación de plan antes de instalar.
+- Integración futura con n8n API REST para import automático.
+
+**Solución aplicada:** Marketplace service con catálogo, instalación, verificación de plan.
+
+---
+
+## FASE 13 — Escalabilidad
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Redis 7 Alpine (imagen más pequeña, buena performance).
+- RabbitMQ 3 Alpine (mensajería confiable, AMQP nativo).
+- Worker independiente con Dockerfile separado.
+- `prefetch(1)` en worker para procesar un mensaje a la vez.
+- docker-compose con replicas: 3 API + 2 workers.
+- Cola durable para no perder mensajes si el worker se cae.
+
+**Solución aplicada:** Worker de procesamiento de leads, Dockerfile worker, documentación de Redis + RabbitMQ.
+
+**Comandos usados:**
+```bash
+docker compose up -d --scale api=3 --scale worker=2
+```
