@@ -71,6 +71,8 @@ workflows/
 *.db3
 *.mdb
 *.sql
+!database/migrations/*.sql
+!database/seeds/*.sql
 *.dump
 *.bak
 *.bacpac
