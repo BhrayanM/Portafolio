@@ -78,3 +78,25 @@ docker compose logs n8n
 ```bash
 cat database/migrations/*.sql | docker exec -i portafolio-postgres-1 psql -U n8n
 ```
+
+---
+
+## FASE 3 — Backend Profesional
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Express.js sobre Fastify por ecosistema más maduro y middleware JWT existente.
+- pg raw sobre Prisma/Knex para evitar peso extra y mantener control total sobre queries.
+- Arquitectura en capas: routes → controllers → services → db (escalable a futuro).
+- JWT con 7d de expiración (balance seguridad vs UX).
+- Docker multi-stage para imagen final pequeña (~20MB).
+- Helmet + CORS + Morgan + rate-limit preparado.
+
+**Solución aplicada:** API REST completa con auth JWT, CRUD de users/leads/tenants, roles, middleware de tenant, error handler.
+
+**Comandos usados:**
+```bash
+cd backend && npm install && npm run dev
+docker build -t portafolio-api .\backend
+```
