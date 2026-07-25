@@ -1,5 +1,4 @@
 const helmet = require('helmet');
-const { globalLimiter, authLimiter } = require('./rateLimit');
 
 const securityMiddleware = (app) => {
   app.use(helmet({
@@ -15,10 +14,6 @@ const securityMiddleware = (app) => {
     frameguard: { action: 'deny' },
     referrerPolicy: { policy: 'same-origin' },
   }));
-
-  app.use('/api', globalLimiter);
-  app.use('/api/auth/login', authLimiter);
-  app.use('/api/auth/register', authLimiter);
 
   app.disable('x-powered-by');
 
