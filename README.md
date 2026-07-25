@@ -203,3 +203,53 @@ IDs de hojas/canales/instancias, cadenas de conexión ni datos de clientes.
 <sub>© 2026 Bhrayan Márquez · Todos los derechos reservados · Portafolio técnico, no software de código abierto</sub>
 
 </div>
+
+---
+
+## 🚀 FASE 0 — Infraestructura Base (Docker + n8n + PostgreSQL)
+
+### Requisitos
+
+- Docker & Docker Compose (v2+)
+- Git
+
+### Inicio rápido
+
+```bash
+# 1. Clonar
+git clone https://github.com/BhrayanM/Portafolio.git
+cd Portafolio
+
+# 2. Configurar entorno
+cp .env.example .env
+# Editar .env con tus valores reales (nunca se commitea)
+
+# 3. Levantar servicios
+docker compose up -d
+
+# 4. Acceder
+# n8n:     http://localhost:5678
+# Postgres: localhost:5432
+
+# 5. Ver logs
+docker compose logs -f
+```
+
+### Servicios
+
+| Servicio   | Puerto | Imagen                | Persistencia     |
+|-----------|--------|-----------------------|------------------|
+| n8n       | 5678   | n8nio/n8n:latest      | n8n_data volume  |
+| PostgreSQL| 5432   | postgres:15-alpine    | postgres_data vol|
+
+### Respaldo
+
+```bash
+./scripts/backup.sh
+```
+
+### Roadmap completo
+
+Ver [`docs/IMPLEMENTATION_PLAN.md`](./docs/IMPLEMENTATION_PLAN.md) para el plan maestro de 14 fases.
+
+</div>
