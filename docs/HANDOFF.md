@@ -6,26 +6,23 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**BLOQUE B — Auth HttpOnly.** Commit: ver `git log --oneline`.
+**BLOQUE C — Tests.** Commit: ver `git log --oneline`.
 
 ## Bloque en curso
 
-**BLOQUE C — Tests.** No empezado todavía.
+**BLOQUE D — CI/CD.** No empezado todavía.
 
 ## Siguiente paso exacto
 
-Escribir tests de lo que NO llama a APIs externas. Ya existe `backend/tests/auth.cookie.test.js`
-(11 verdes) y `backend/jest.config.js`. Falta cubrir:
+Crear `.github/workflows/ci.yml` con lint + tests en cada push y PR:
 
-1. **Sanitización y validación** del lead — la lógica vive en el Code node `Sanitize & Validate`
-   del workflow n8n, no en el repo. Hay que extraerla a un módulo testeable en
-   `backend/src/` (p. ej. `utils/leadSanitizer.js`) y que el nodo quede como copia, o
-   testear una reimplementación fiel. **Decidir esto primero.**
-2. **Parseo del score de IA** — misma situación (`Parse AI Response`).
-3. **Lógica `Is Hot?`** — umbral HOT/WARM/COLD.
-4. **Auth** — ya cubierta.
+1. Job de backend: `npm ci`, `npm run lint`, `npm test` (Node 20).
+2. Job de frontend: `npm ci`, `npx tsc --noEmit`, `npm run build`.
+3. No hace falta base de datos: los tests usan un doble del pool de `pg`.
+4. Verificar `.env.example` — que estén todas las claves que consume `src/config/index.js`
+   (incluidas las nuevas: `AUTH_COOKIE_*`, `CORS_ORIGINS`, `AUTH_RATE_LIMIT_MAX`).
 
-Ejecutar con: `cd backend && npm test`
+Comprobar antes: `cd backend && npm run lint` (eslint puede no estar configurado aún).
 
 ## Bloques pendientes
 
@@ -33,8 +30,8 @@ Ejecutar con: `cd backend && npm test`
 |---|---|
 | A — Fixes checklist producción | ✅ Cerrado |
 | B — Auth HttpOnly | ✅ Cerrado |
-| C — Tests (sin APIs externas) | ⬜ Siguiente |
-| D — CI/CD (.github/workflows) | ⬜ |
+| C — Tests (sin APIs externas) | ✅ Cerrado |
+| D — CI/CD (.github/workflows) | ⬜ Siguiente |
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ⬜ Al cerrar D |
 
 ## Estado que se pierde al cortar
@@ -49,6 +46,10 @@ Ejecutar con: `cd backend && npm test`
 - **Auth ya es por cookie HttpOnly** (`access_token`). El backend acepta también
   `Authorization: Bearer` para clientes no-navegador. `npm test` en `backend/` → 11 verdes.
 - El rate limiter de login se desactiva con `NODE_ENV=test` (jest lo pone solo).
+- **`backend/src/lib/lead.js` es la implementación de referencia** de los Code nodes
+  `Sanitize & Validate` / `Parse AI Response` / `Is Hot?`. Si cambias uno, sincroniza el otro
+  y **publica** el workflow. Ahora mismo están sincronizados.
+- `npm test` en `backend/` → **59 verdes** (11 auth + 48 lógica de leads).
 
 ## Reglas vigentes
 
