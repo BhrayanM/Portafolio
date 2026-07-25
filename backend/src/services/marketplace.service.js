@@ -27,7 +27,7 @@ class MarketplaceService {
 
     // Registrar instalación
     await pool.query(
-      `INSERT INTO settings (tenant_id, key, value) VALUES ($1, $2, $3)
+      `INSERT INTO tenant_settings (tenant_id, key, value) VALUES ($1, $2, $3)
        ON CONFLICT (tenant_id, key) DO UPDATE SET value = $3, updated_at = CURRENT_TIMESTAMP`,
       [tenantId, `marketplace_${workflowId}`, JSON.stringify({ installed: true, installed_at: new Date().toISOString() })]
     );
@@ -44,7 +44,7 @@ class MarketplaceService {
 
   async getInstalled(tenantId) {
     const result = await pool.query(
-      `SELECT key, value FROM settings WHERE tenant_id = $1 AND key LIKE 'marketplace_%'`,
+      `SELECT key, value FROM tenant_settings WHERE tenant_id = $1 AND key LIKE 'marketplace_%'`,
       [tenantId]
     );
 
