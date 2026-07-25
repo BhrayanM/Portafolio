@@ -6,6 +6,33 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
+**F18.3 — Limpieza de lint backend completada.** `npm run lint` sale **limpio** (antes: 5 errores).
+
+| Archivo | Qué se quitó / cambió |
+|---|---|
+| `backend/src/routes/billing.routes.js` | Import muerto de `handleWebhook`. **No es un bug**: la ruta `/api/billing/webhook` sí está registrada, en `app.js:33`, antes de `express.json()` porque Stripe exige body raw. El import aquí era un resto. Comentario dejado para que nadie lo "arregle" volviéndolo a añadir. |
+| `backend/src/services/voice.service.js` | Import muerto `require('../config')`. El servicio lee `process.env.TWILIO_*` directo. |
+| `backend/src/services/whatsapp.service.js` | Import muerto `require('../config')`. El servicio lee `process.env.WHATSAPP_*` directo. |
+| `backend/eslint.config.js` | Añadidas las globales de Fetch API (`fetch`, `Response`, `Request`, `Headers`, `FormData`, `AbortController`) a `nodeGlobals`. |
+
+**Los 2 errores `'fetch' is not defined` no eran un bug de código**: `fetch` es global nativo en
+Node ≥18 (aquí corre **Node v24.18.0**, verificado con `typeof fetch === 'function'`). La lista
+`nodeGlobals` de `eslint.config.js` se mantiene a mano y no lo incluía. Se arregló la config,
+**no** se importó `undici` — eso habría añadido dependencia y cambiado comportamiento.
+
+**Verificación antes de borrar los `require('../config')`** (tenían efecto secundario: `config/index.js:2`
+carga `dotenv`): `app.js:6` e `index.js:5` requieren `./config` **antes** de montar rutas y servicios,
+así que `process.env` ya está poblado cuando se alcanza voice/whatsapp. Borrarlos no cambia
+comportamiento. Confirmado por grep, no asumido.
+
+Ningún error de lint reveló un bug real, así que no quedó deuda nueva por este bloque.
+Tests: **78/78 verdes** (no bajaron). Sin cambios de lógica de negocio.
+
+Nota menor: el script es `eslint src/`, no cubre `tests/`. Se comprobó aparte
+(`npx eslint tests/`) y también sale limpio. Ampliar el script queda fuera del alcance de F18.3.
+
+---
+
 **F18.2 — Alineación de enums de Lead completada.**
 
 Canónico fijado: **`ai_category` = `HOT` | `WARM` | `COLD`** (mayúsculas, tal y como n8n escribe).
@@ -59,6 +86,7 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | Backup script + doc fix | ✅ Cerrado |
 | F18.1 — Normalización Billing Plans | ✅ Cerrado |
 | F18.2 — Alineación enums de Lead | ✅ Cerrado |
+| F18.3 — Limpieza lint backend | ✅ Cerrado |
 
 ## Estado que se pierde al cortar
 
@@ -81,10 +109,9 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 - Canal de Slack: `C0BJYN0QKPT` (`#nuevo-canal`), fijado literal en el nodo porque `$env` está
   vacío dentro del contenedor.
 - Credencial HubSpot nueva de tipo `hubspotAppToken` (la legacy `hubspotApi` no sirve para `pat-`).
-- `npm run lint`: **5 errores preexistentes** (`billing.routes.js` `handleWebhook` sin usar;
-  `voice.service.js` y `whatsapp.service.js` con `config` sin usar y `fetch` no definido).
-  No los introdujo F18.2 y quedan fuera de su alcance. Config: `backend/eslint.config.js`
-  (ESLint 9 flat).
+- `npm run lint` **limpio** desde F18.3 (los 5 errores que arrastraba quedaron resueltos ahí).
+  Config: `backend/eslint.config.js` (ESLint 9 flat). Si añades código que use APIs web nuevas,
+  recuerda que `nodeGlobals` es una lista **manual**: puede que haya que declarar la global.
 - CI en `.github/workflows/ci.yml`: 3 jobs (backend, frontend, secrets). **Nunca ha corrido
   en GitHub**: no se ha hecho push. `origin/main` sigue en `e2cadc3`.
 
