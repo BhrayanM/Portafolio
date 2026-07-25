@@ -145,6 +145,46 @@ describe('GET /api/billing/plans', () => {
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
   });
+
+  it('tiene los slugs correctos: starter, growth, enterprise', async () => {
+    const res = await request(app).get('/api/billing/plans');
+    const slugs = res.body.map(p => p.slug).sort();
+    expect(slugs).toEqual(['enterprise', 'growth', 'starter']);
+  });
+});
+
+describe('POST /api/billing/checkout', () => {
+  it('responde 401 sin token', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .send({ plan: 'starter' });
+    expect(res.status).toBe(401);
+  });
+
+  it('responde 400 con plan invalido', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ plan: 'invalid-plan' });
+    expect(res.status).toBe(400);
+  });
+
+  it('responde 400 con plan vacio', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({});
+    expect(res.status).toBe(400);
+  });
+
+  it('acepta plan growth (C-01: schema y service unificados)', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ plan: 'growth' });
+    expect(res.status).not.toBe(400);
+    expect(res.status).not.toBe(401);
+  });
 });
 
 describe('GET /api/nonexistent', () => {

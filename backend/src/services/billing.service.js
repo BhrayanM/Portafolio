@@ -14,7 +14,7 @@ function getStripe() {
 
 const PLANS = {
   starter: { priceId: 'price_starter_monthly', name: 'Starter', amount: 4900, currency: 'usd' },
-  pro: { priceId: 'price_pro_monthly', name: 'Pro', amount: 14900, currency: 'usd' },
+  growth: { priceId: 'price_growth_monthly', name: 'Growth', amount: 14900, currency: 'usd' },
   enterprise: { priceId: 'price_enterprise_monthly', name: 'Enterprise', amount: 49900, currency: 'usd' },
 };
 
