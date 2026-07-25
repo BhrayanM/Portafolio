@@ -144,3 +144,24 @@ cat database/migrations/010_enable_rls.sql | docker exec -i portafolio-postgres-
 # Probar API Key
 curl -H "x-api-key: pk_..." http://localhost:3000/api/leads
 ```
+
+---
+
+## FASE 6 — Agentes IA
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Tres workflows n8n separados (un agente por workflow) para mantener independencia operativa.
+- gpt-4o-mini para todos los agentes (balance costo/calidad).
+- Fast ACK prioritario en WhatsApp (anti-duplicación por message_id).
+- Voice agent con detección de idioma + intención en un solo paso (evita latencia extra).
+- Tool Router en Code node (Swift) para respuestas instantáneas sin llamada HTTP.
+
+**Solución aplicada:** 3 workflows n8n importables + prompts + documentación.
+
+**Comandos usados:**
+```bash
+# Importar workflows en n8n:
+# Settings → Import → Seleccionar archivo JSON
+```

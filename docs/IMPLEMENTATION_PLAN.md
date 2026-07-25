@@ -524,7 +524,7 @@ Request ──► API Gateway ──► Tenant Resolver ──► DB con tenant_
 
 ---
 
-## FASE 6 — Agentes IA
+## FASE 6 — Agentes IA [DONE]
 
 ### Objetivo de negocio
 Agentes autónomos: Sales Agent (web), Support Agent (WhatsApp), Voice Agent (Twilio/Vapi). Cada uno con su propio contexto y herramientas.
@@ -561,7 +561,7 @@ Usuario ──► Canal ──► n8n ──► Agent Handler ──► Tools
 
 ---
 
-## FASE 7 — Infraestructura Cloud
+## FASE 7 — Infraestructura Cloud [EN EJECUCIÓN]
 
 ### Objetivo de negocio
 Pasar de localhost a producción real con HTTPS, dominio, CDN y backups automáticos.
