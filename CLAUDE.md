@@ -5,10 +5,10 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 ## ESTADO VERIFICADO (no lo re-audites)
 
 - **n8n v2.31.6** en Docker, contenedor `portafolio-publico-n8n-1`, puerto `5678`, PostgreSQL compartido. Login REST API OK (`admin@portafolio.ai`).
-- **Workflow "Lead Qualification"** (`92fIV59ijURIYfwT`, 17 nodos) **activo**.
+- **Workflow "Lead Qualification"** (`<workflow-id>`, 17 nodos) **activo**.
 - `POST /webhook/lead-qualification` responde **200** con `{"received":true}` (Fast ACK). **No romper esto.**
 - El flujo avanza hasta el nodo OpenAI. Fallo 401 histórico = credencial vacía (ver abajo).
-- **PostgreSQL**: 10 migraciones ejecutadas, 9 tablas, seeds insertados, RLS activo (6 políticas). Credencial n8n `1SSa86iJODaXpkD6` funcional.
+- **PostgreSQL**: 10 migraciones ejecutadas, 9 tablas, seeds insertados, RLS activo (6 políticas). Credencial n8n `<cred-postgres>` funcional.
 - **Backend**: `/health`, `/api/auth/login`, `/api/leads` responden 200.
 - **Frontend**: build Next.js 14.2.35 OK. Faltan rutas billing/invoices/usage/activity.
 - **Testing**: 0 tests escritos.
@@ -17,10 +17,10 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 
 | Credencial | ID | Estado |
 |---|---|---|
-| PostgreSQL DB | `1SSa86iJODaXpkD6` | Funcional |
-| OpenAI API (`httpHeaderAuth`) | `5mpbT73GTHmK5DJ9` | Key real cargada desde `.env` (Sprint 2) |
-| Slack API | `aEsbKrH2FsoB9UHJ` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
-| HubSpot API | `nsmboIIIBBp8pCRW` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
+| PostgreSQL DB | `<cred-postgres>` | Funcional |
+| OpenAI API (`httpHeaderAuth`) | `<cred-openai>` | Key real cargada desde `.env` (Sprint 2) |
+| Slack API | `<cred-slack>` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
+| HubSpot API | `<cred-hubspot>` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
 
 > Las credenciales "placeholder" en realidad estaban **vacías**: contenían el centinela
 > `__n8n_BLANK_VALUE_<uuid>` de n8n, no una key falsa.
@@ -42,6 +42,38 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 - `docs/VALIDACION_RUNTIME.md`
 - `docs/SPRINT1_N8N.md`
 - `docs/SPRINT2_SERVICIOS_EXTERNOS.md`
+- `docs/ARQUITECTURA.md`
+- `docs/PRODUCCION_CHECKLIST.md`
+
+## Repo PÚBLICO — qué nunca se commitea
+
+`origin` es público (`github.com/BhrayanM/Portafolio`). `SECURITY.md` §1 manda.
+
+**Nunca a git:** exports de workflows n8n (`.json`), grafo real / Code nodes, prompts de
+producción, credential IDs, tokens, URLs de webhook con host no local, cadenas de conexión
+Postgres, PII.
+
+- El export del workflow se queda en `n8n/workflows/` **sin trackear** (gitignored) como respaldo local.
+- En la documentación, los IDs van redactados: `<cred-openai>`, `<cred-postgres>`,
+  `<cred-slack>`, `<cred-hubspot>`, `<workflow-id>`.
+- `.git/hooks/pre-commit` bloquea todo lo anterior. Vive fuera del control de versiones:
+  **si clonas el repo de nuevo, hay que reinstalarlo.**
+
+## n8n 2.x: publicar el borrador (CRÍTICO)
+
+n8n v2.31.6 separa **borrador** (`workflow_entity.nodes`) de **versión activa**
+(`workflow_entity.activeVersionId` → `workflow_history`). La ejecución usa la versión activa.
+
+- `PATCH /rest/workflows/:id` **solo edita el borrador**: no cambia nada en runtime.
+- `PATCH {"active": false}` es un **no-op silencioso** (devuelve `active: true`).
+- Reiniciar el contenedor **no** recarga el borrador.
+
+Tras cada edición del workflow hay que publicar:
+
+```bash
+POST /rest/workflows/{id}/deactivate            # body {}
+POST /rest/workflows/{id}/activate              # body {"versionId": "<workflow_entity.versionId>"}
+```
 
 ## Flujo Lead Qualification
 
@@ -83,7 +115,7 @@ curl -s -c cookie.txt -X POST http://localhost:5678/rest/login \
 bash scripts/test-lead-webhook.sh
 
 # Ejecuciones del workflow
-curl -s -b cookie.txt "http://localhost:5678/rest/executions?filter=%7B%22workflowId%22%3A%2292fIV59ijURIYfwT%22%7D"
+curl -s -b cookie.txt "http://localhost:5678/rest/executions?filter=%7B%22workflowId%22%3A%22<workflow-id>%22%7D"
 ```
 
 ## Fuera de alcance actual

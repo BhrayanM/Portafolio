@@ -39,10 +39,10 @@ Connect n8n (v2.31.6) to the existing backend via webhook to automate lead quali
 ### Credentials Created
 | Credential | ID | Status |
 |-----------|----|--------|
-| PostgreSQL DB | `1SSa86iJODaXpkD6` | ✅ Funcional |
-| OpenAI API | `5mpbT73GTHmK5DJ9` | ❌ Placeholder (`sk-place...-key`) |
-| Slack API | `aEsbKrH2FsoB9UHJ` | ❌ Placeholder |
-| HubSpot API | `nsmboIIIBBp8pCRW` | ❌ Placeholder |
+| PostgreSQL DB | `<cred-postgres>` | ✅ Funcional |
+| OpenAI API | `<cred-openai>` | ❌ Placeholder (`sk-place...-key`) |
+| Slack API | `<cred-slack>` | ❌ Placeholder |
+| HubSpot API | `<cred-hubspot>` | ❌ Placeholder |
 
 ## Bugs Fixed
 
@@ -66,9 +66,9 @@ Connect n8n (v2.31.6) to the existing backend via webhook to automate lead quali
 
 ## Blockers
 
-1. **OpenAI API Key real**: necesaria para scoring de leads. Regenerar en https://platform.openai.com/api-keys y actualizar credential `5mpbT73GTHmK5DJ9`.
-2. **Slack API Token/Bot**: necesario para notificación de aprobación humana. Configurar app en Slack, obtener token, actualizar credential `aEsbKrH2FsoB9UHJ`.
-3. **HubSpot API Key**: necesario para upsert de contactos. Obtener de HubSpot Settings > Integrations > API Key, actualizar credential `nsmboIIIBBp8pCRW`.
+1. **OpenAI API Key real**: necesaria para scoring de leads. Regenerar en https://platform.openai.com/api-keys y actualizar credential `<cred-openai>`.
+2. **Slack API Token/Bot**: necesario para notificación de aprobación humana. Configurar app en Slack, obtener token, actualizar credential `<cred-slack>`.
+3. **HubSpot API Key**: necesario para upsert de contactos. Obtener de HubSpot Settings > Integrations > API Key, actualizar credential `<cred-hubspot>`.
 
 ## Next Steps (Sprint 2)
 
