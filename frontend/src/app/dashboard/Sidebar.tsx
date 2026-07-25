@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
-import { LayoutDashboard, Users, BarChart3, Settings, CreditCard, Activity, Terminal } from 'lucide-react';
+import { LayoutDashboard, Users, BarChart3, Settings, CreditCard, Activity, Terminal, Puzzle, Store } from 'lucide-react';
 
 const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -11,6 +11,8 @@ const links = [
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
   { href: '/dashboard/activity', label: 'Actividad', icon: Activity },
   { href: '/dashboard/billing', label: 'Facturación', icon: CreditCard },
+  { href: '/dashboard/integrations', label: 'Integraciones', icon: Puzzle },
+  { href: '/dashboard/marketplace', label: 'Marketplace', icon: Store },
   { href: '/dashboard/usage', label: 'Uso de API', icon: Terminal },
   { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
 ];

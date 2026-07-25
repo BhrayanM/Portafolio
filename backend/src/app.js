@@ -11,6 +11,8 @@ const leadsRoutes = require('./routes/leads.routes');
 const tenantsRoutes = require('./routes/tenants.routes');
 const apiKeysRoutes = require('./routes/apiKeys.routes');
 const billingRoutes = require('./routes/billing.routes');
+const whatsappRoutes = require('./routes/whatsapp.routes');
+const voiceRoutes = require('./routes/voice.routes');
 const marketplaceRoutes = require('./routes/marketplace.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityMiddleware } = require('./middleware/security');
@@ -53,6 +55,8 @@ app.use('/api/leads', leadsRoutes);
 app.use('/api/tenants', tenantsRoutes);
 app.use('/api/keys', apiKeysRoutes);
 app.use('/api/billing', billingRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
+app.use('/api/voice', voiceRoutes);
 app.use('/api/marketplace', marketplaceRoutes);
 
 app.use((req, res, next) => {

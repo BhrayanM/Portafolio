@@ -6,7 +6,7 @@ const { catalog, install, installed } = require('../controllers/marketplace.cont
 const router = Router();
 
 router.get('/catalog', catalog);
-router.get('/installed', authenticate, resolveTenant, installed);
 router.post('/install', authenticate, resolveTenant, install);
+router.get('/installed', authenticate, resolveTenant, installed);
 
 module.exports = router;
