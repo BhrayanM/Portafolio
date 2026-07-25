@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const morgan = require('morgan');
+const config = require('./config');
 
 const authRoutes = require('./routes/auth.routes');
 const usersRoutes = require('./routes/users.routes');
@@ -16,9 +18,11 @@ const { NotFoundError } = require('./utils/errors');
 const app = express();
 
 securityMiddleware(app);
-app.use(cors());
+// Con cookies de sesion el navegador exige un origen explicito: '*' no vale con credentials.
+app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(morgan('dev'));
 app.use(express.json({ limit: '1mb' }));
+app.use(cookieParser());
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });

@@ -6,39 +6,34 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**BLOQUE A — Fixes del checklist de producción.** Commit: ver `git log --oneline -1`.
+**BLOQUE B — Auth HttpOnly.** Commit: ver `git log --oneline`.
 
 ## Bloque en curso
 
-**BLOQUE B — Auth HttpOnly.** No empezado todavía.
+**BLOQUE C — Tests.** No empezado todavía.
 
 ## Siguiente paso exacto
 
-Migrar la autenticación de `localStorage` a cookies HttpOnly:
+Escribir tests de lo que NO llama a APIs externas. Ya existe `backend/tests/auth.cookie.test.js`
+(11 verdes) y `backend/jest.config.js`. Falta cubrir:
 
-1. Backend: en el login, emitir `Set-Cookie` con `httpOnly`, `sameSite`, `secure` (según entorno)
-   y `maxAge`; añadir endpoint de logout que limpie la cookie; leer el JWT desde `req.cookies`
-   además del header `Authorization` durante la transición.
-2. Frontend: dejar de escribir el JWT en `localStorage`; las peticiones pasan a `credentials: 'include'`.
-3. Evidencia requerida: tests de login/logout verdes + cabecera `Set-Cookie` en la respuesta.
+1. **Sanitización y validación** del lead — la lógica vive en el Code node `Sanitize & Validate`
+   del workflow n8n, no en el repo. Hay que extraerla a un módulo testeable en
+   `backend/src/` (p. ej. `utils/leadSanitizer.js`) y que el nodo quede como copia, o
+   testear una reimplementación fiel. **Decidir esto primero.**
+2. **Parseo del score de IA** — misma situación (`Parse AI Response`).
+3. **Lógica `Is Hot?`** — umbral HOT/WARM/COLD.
+4. **Auth** — ya cubierta.
 
-Archivos probables: `backend/src/routes/auth*`, `backend/src/middleware/auth*`, `backend/src/app.js`
-(necesita `cookie-parser`), y en el frontend donde se use `localStorage`.
-
-Comando para localizarlos:
-
-```bash
-grep -rn "localStorage" frontend/ --include=*.tsx --include=*.ts | grep -v node_modules
-grep -rln "jwt\|jsonwebtoken" backend/src/
-```
+Ejecutar con: `cd backend && npm test`
 
 ## Bloques pendientes
 
 | Bloque | Estado |
 |---|---|
 | A — Fixes checklist producción | ✅ Cerrado |
-| B — Auth HttpOnly | ⬜ Siguiente |
-| C — Tests (sin APIs externas) | ⬜ |
+| B — Auth HttpOnly | ✅ Cerrado |
+| C — Tests (sin APIs externas) | ⬜ Siguiente |
 | D — CI/CD (.github/workflows) | ⬜ |
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ⬜ Al cerrar D |
 
@@ -51,6 +46,9 @@ grep -rln "jwt\|jsonwebtoken" backend/src/
 - **`lead_log` fila 1** y **`error_log` filas 1-10** son datos de QA de sprints anteriores.
 - **`.git/hooks/pre-commit`** no se versiona: si se clona el repo de nuevo, hay que reinstalarlo.
 - `backups/` está gitignored; los dumps generados no se commitean.
+- **Auth ya es por cookie HttpOnly** (`access_token`). El backend acepta también
+  `Authorization: Bearer` para clientes no-navegador. `npm test` en `backend/` → 11 verdes.
+- El rate limiter de login se desactiva con `NODE_ENV=test` (jest lo pone solo).
 
 ## Reglas vigentes
 

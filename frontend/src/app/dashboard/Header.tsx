@@ -1,13 +1,18 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { logout } from '@/lib/api';
 
 export default function Header({ user }: { user: any }) {
   const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage.removeItem('token');
-    router.push('/login');
+  // La cookie es HttpOnly: solo el backend puede borrarla.
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } finally {
+      router.push('/login');
+    }
   };
 
   return (

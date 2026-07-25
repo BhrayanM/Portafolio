@@ -4,37 +4,19 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from './Header';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
-
-async function fetchWithAuth(url: string, token: string) {
-  const res = await fetch(`${API}${url}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) throw new Error('Error fetching data');
-  return res.json();
-}
+import { apiFetch } from '@/lib/api';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const t = localStorage.getItem('token');
-    if (!t) {
-      router.push('/login');
-      return;
-    }
-    setToken(t);
-
-    fetchWithAuth('/auth/me', t)
+    // No hay token que inspeccionar: la cookie es HttpOnly. La sesión se comprueba
+    // preguntando al backend, y un 401 significa "no autenticado".
+    apiFetch('/auth/me')
       .then((data) => setUser(data.user))
-      .catch(() => {
-        localStorage.removeItem('token');
-        router.push('/login');
-      })
+      .catch(() => router.push('/login'))
       .finally(() => setLoading(false));
   }, [router]);
 
