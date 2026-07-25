@@ -253,3 +253,146 @@ restante es lo que no se puede comprobar sin credenciales ni sin que el CI corra
 | `.env.example` completo | 100% | 0 variables usadas sin declarar |
 | CI funciona en GitHub | 60% | YAML válido y job de secretos simulado en local, pero **nunca ejecutado en Actions** |
 | Flujo E2E de leads | 0% | Bloqueado por credenciales |
+
+---
+
+# E2E con credenciales reales — 2026-07-25
+
+## Probes de credenciales
+
+| Servicio | Presente en `.env` | Probe | Status |
+|---|---|---|---|
+| **LLM — Groq** | sí | `POST /openai/v1/chat/completions`, `llama-3.3-70b-versatile` → **HTTP 200**, respuesta `"ok"` | ✅ PASA |
+| LLM — OpenAI | sí | `POST /v1/chat/completions` → **HTTP 429 `insufficient_quota`** (cuenta sin saldo) | ❌ se usa Groq |
+| **Slack** | sí | `auth.test` → `ok=true`, team `AI Automation Lab`, bot `n8n_leads_bot_avanzad` | ✅ PASA |
+| **HubSpot** | sí | `GET /crm/v3/objects/contacts` → **HTTP 200** | ✅ PASA |
+| **Stripe** | sí | `GET /v1/balance` → **HTTP 200**, `livemode=false` | ✅ PASA |
+
+Notas de los probes:
+
+- **Groq responde 403 (Cloudflare error 1010) al User-Agent por defecto de `urllib`.** No es un
+  problema de credencial: con `User-Agent: curl/8.0.0` devuelve 200. El nodo HTTP de n8n lleva
+  ahora esa cabecera explícita.
+- **Slack: el bot ya estaba en `#nuevo-canal`** (`C0BJYN0QKPT`), verificado publicando un mensaje
+  real. No hizo falta invitarlo. `conversations.list` devuelve `missing_scope` (falta
+  `channels:read`), por eso la comprobación se hizo publicando.
+- **`SLACK_CHANNEL_ID` estaba vacía.** `.env` tiene claves duplicadas: la segunda aparición
+  (vacía) pisaba a la primera. Corregido a `C0BJYN0QKPT`.
+
+## Bugs encontrados al ejecutar el flujo real
+
+Tres defectos más del mismo patrón que los anteriores: **parámetros escritos para otra versión
+del nodo**, que n8n descarta en silencio.
+
+### BUG #6 — Los nodos IF enrutaban mal: todo iba a la rama HOT
+
+`Is Hot?` e `Is Approved?` eran `typeVersion 1` pero con parámetros en formato v2
+(`conditions.conditions[]`). IF v1 espera `conditions.string[]`; al no encontrarlo evalúa un
+conjunto vacío de condiciones con combinador AND, que da **TRUE**.
+
+Consecuencias reales:
+
+- Un lead **WARM** (score 60) se fue a `Human Approval (Slack)` — evidencia: exec 41.
+- `Is Approved?` habría marcado **cualquier** lead como aprobado sin leer la respuesta humana.
+
+Solución: ambos nodos a `typeVersion 2.2`. Verificado: el WARM siguiente fue directo a HubSpot.
+
+### BUG #7 — El nodo HubSpot no enviaba ningún campo y usaba el tipo de credencial equivocado
+
+Tres problemas encadenados:
+
+1. El nodo llevaba un parámetro `properties`, que **no existe** en `contact:upsert`. n8n lo
+   descartaba y solo enviaba el email. El parámetro real es `additionalFields`, con claves
+   camelCase propias del nodo (`firstName`, `companyName`, `phoneNumber`, `leadStatus`, `message`).
+2. Escribía `hs_score`, `hs_message` y `hs_source`, que **no existen en el portal** (verificado
+   contra `/crm/v3/properties/contacts`: 403 propiedades, ninguna de esas tres).
+   `hubspotscore` sí existe pero es de **solo lectura**, y `hs_lead_status` es un **enum cerrado**
+   (`NEW`, `OPEN`, `IN_PROGRESS`, `OPEN_DEAL`, `UNQUALIFIED`, …), así que `HOT`/`WARM`/`COLD`
+   habrían sido rechazados.
+3. La credencial era del tipo legacy `hubspotApi` (API Key), pero el token es un **private app
+   token** (`pat-`), que requiere el tipo `hubspotAppToken` y `authentication: appToken`.
+
+Solución: credencial nueva de tipo `hubspotAppToken`, `additionalFields` con claves válidas, y
+mapeo `HOT→NEW`, `WARM→OPEN`, `COLD→UNQUALIFIED`. El score, la categoría y el motivo de la IA
+van al campo `message`, que sí existe y es escribible.
+
+> Ese mapeo de `leadStatus` es una decisión de negocio que tomé para desbloquear el E2E.
+> Cámbialo si tu equipo usa otra semántica.
+
+### BUG #8 — `Log to PostgreSQL` insertaba todo a null
+
+`Upsert HubSpot` tiene `resolveData: true`, así que **sustituye el item** por el contacto de
+HubSpot. El nodo Postgres seguía leyendo `$json.email`, que ya no existía:
+
+```
+null value in column "email" of relation "lead_log" violates not-null constraint
+Failing row contains (2, null, null, ..., cold, null, null, ...)
+```
+
+Solución: leer los campos desde `$('Parse AI Response').item.json`, y los flags de aprobación
+desde `Check Approval` protegidos con `.isExecuted` (solo existen en la rama HOT).
+
+## E2E rama WARM — ✅ COMPLETO
+
+```bash
+curl -X POST http://localhost:5678/webhook/lead-qualification \
+  -H "Content-Type: application/json" \
+  -d '{"email":"e2e.warm4@example.com","name":"Marta Ruiz","company":"Example Corp",
+       "phone":"+34600555111","message":"Hola, estoy comparando opciones de automatizacion...",
+       "source":"e2e-warm"}'
+```
+
+**Execution 46 — `success`.** Todos los nodos en verde y por la rama correcta (sin pasar por Slack):
+
+```
+Webhook → Fast ACK → Sanitize & Validate → OpenAI Score Lead → Parse AI Response
+        → Is Hot? → Upsert HubSpot → Log to PostgreSQL → Done
+```
+
+La IA (Groq, `llama-3.3-70b-versatile`) devolvió `score 60`, `WARM`, categoría
+`Automatización`.
+
+**Fila real en `lead_log`:**
+
+```
+ id |         email         |    name    |   company    | ai_score | ai_category | status | source
+----+-----------------------+------------+--------------+----------+-------------+--------+----------
+  3 | e2e.warm4@example.com | Marta Ruiz | Example Corp |       60 | WARM        | warm   | e2e-warm
+```
+
+**Contacto real en HubSpot — contact ID `525380986565`:**
+
+```
+email: e2e.warm4@example.com · firstname: Marta · lastname: Ruiz
+company: Example Corp · phone: +34600555111 · hs_lead_status: OPEN
+message: [IA] score 60/100 · WARM · Automatización · Motivo: ...
+```
+
+## E2E rama HOT — ⏸ EN ESPERA DE APROBACIÓN
+
+**Execution 47 — `waiting`.** Clasificado correctamente: `score 98`, `HOT`, categoría
+`Automatización de leads`. Mensaje publicado en `#nuevo-canal`.
+
+### ⚠️ No se puede aprobar pulsando en Slack
+
+El nodo Slack publica **texto plano, sin botones interactivos**. Y añadirlos no bastaría: la
+interactividad de Slack exige una *Request URL* pública a la que Slack pueda llamar, y n8n está
+en `localhost`. Es el mismo bloqueo de dominio ya documentado.
+
+Mientras tanto, la aprobación se hace llamando al webhook de reanudación en local:
+
+```bash
+# Aprobar
+curl -X POST http://localhost:5678/webhook-waiting/47/direct \
+  -H "Content-Type: application/json" -d '{"approved": true}'
+
+# Rechazar
+curl -X POST http://localhost:5678/webhook-waiting/47/direct \
+  -H "Content-Type: application/json" -d '{"rejected": true}'
+```
+
+`Check Approval` lee `approved` / `rejected` del cuerpo. Tiempo de espera: 24 h.
+
+Para que el botón de Slack funcione de verdad hacen falta: dominio público + HTTPS,
+`WEBHOOK_URL` de n8n apuntando a ese dominio, y un nodo Slack con bloques interactivos cuya
+Request URL apunte al endpoint de reanudación.
