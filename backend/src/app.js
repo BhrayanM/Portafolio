@@ -17,6 +17,8 @@ const marketplaceRoutes = require('./routes/marketplace.routes');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityMiddleware } = require('./middleware/security');
 const { globalLimiter } = require('./middleware/rateLimit');
+const { requestId } = require('./middleware/requestId');
+const { getMetrics } = require('./controllers/metrics.controller');
 const { NotFoundError } = require('./utils/errors');
 const swaggerSpec = require('./docs/swagger');
 
@@ -24,7 +26,8 @@ const app = express();
 
 securityMiddleware(app);
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
-app.use(morgan('dev'));
+app.use(requestId);
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :req[x-request-id]'));
 
 // Stripe webhook necesita el body raw para verificar firma — debe ir ANTES de express.json()
 app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), async (req, res, next) => {
@@ -45,9 +48,23 @@ app.use('/api', globalLimiter);
 app.get('/health', (req, res) => {
   const { pool } = require('./db');
   pool.query('SELECT 1')
-    .then(() => res.json({ status: 'ok', db: 'connected', timestamp: new Date().toISOString() }))
-    .catch(() => res.status(503).json({ status: 'error', db: 'disconnected', timestamp: new Date().toISOString() }));
+    .then(() => res.json({
+      status: 'ok',
+      version: '1.0.0',
+      uptime: Math.floor(process.uptime()),
+      db: 'connected',
+      timestamp: new Date().toISOString(),
+    }))
+    .catch(() => res.status(503).json({
+      status: 'error',
+      version: '1.0.0',
+      uptime: Math.floor(process.uptime()),
+      db: 'disconnected',
+      timestamp: new Date().toISOString(),
+    }));
 });
+
+app.get('/api/metrics', getMetrics);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);

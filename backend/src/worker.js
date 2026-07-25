@@ -1,11 +1,7 @@
-// ═════════════════════════════════════════════════════════════
-//  Worker de procesamiento — Cola de leads
-//  Procesa leads de forma asíncrona via RabbitMQ
-// ═════════════════════════════════════════════════════════════
-
-require('dotenv').config();
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const amqp = require('amqplib');
 const { Pool } = require('pg');
+const { logger } = require('./utils/logger');
 
 const pool = new Pool({
   host: process.env.DB_HOST || 'postgres',
@@ -15,23 +11,19 @@ const pool = new Pool({
   database: process.env.POSTGRES_DB || 'n8n',
 });
 
-const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://admin:changeme@rabbitmq:5672';
+const RABBITMQ_URL = process.env.RABBITMQ_URL || 'amqp://admin:rabbitpass@rabbitmq:5672';
 const QUEUE = 'lead_processing';
 
 async function processLead(lead) {
-  console.log(`[Worker] Processing lead: ${lead.email}`);
+  logger.info('Worker processing lead', { email: lead.email, source: lead.source });
 
-  // Simular procesamiento (OpenAI, HubSpot, etc.)
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Registrar en DB
   await pool.query(
     `INSERT INTO lead_log (email, name, source, status, ai_score)
      VALUES ($1, $2, $3, 'processed', $4)`,
-    [lead.email, lead.name, lead.source || 'api', Math.floor(Math.random() * 100)]
+    [lead.email, lead.name || '', lead.source || 'api', null]
   );
 
-  console.log(`[Worker] Lead processed: ${lead.email}`);
+  logger.info('Worker lead processed', { email: lead.email });
 }
 
 async function start() {
@@ -41,7 +33,7 @@ async function start() {
     await channel.assertQueue(QUEUE, { durable: true });
     channel.prefetch(1);
 
-    console.log(`[Worker] Waiting for messages in ${QUEUE}...`);
+    logger.info('Worker started', { queue: QUEUE });
 
     channel.consume(QUEUE, async (msg) => {
       if (msg === null) return;
@@ -51,8 +43,8 @@ async function start() {
         await processLead(lead);
         channel.ack(msg);
       } catch (error) {
-        console.error(`[Worker] Error processing message:`, error.message);
-        channel.nack(msg, false, false); // Rechazar sin reencolar
+        logger.error('Worker error processing message', { error: error.message });
+        channel.nack(msg, false, false);
       }
     });
 
@@ -63,7 +55,7 @@ async function start() {
       process.exit(0);
     });
   } catch (error) {
-    console.error('[Worker] Failed to start:', error.message);
+    logger.error('Worker failed to start', { error: error.message });
     process.exit(1);
   }
 }
