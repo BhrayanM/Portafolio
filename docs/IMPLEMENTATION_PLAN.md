@@ -4,7 +4,7 @@
 > **Stack base:** n8n · Docker · PostgreSQL · Node.js · Next.js · OpenAI · Hetzner  
 > **Objetivo:** De automatizaciones IA aisladas → Plataforma multi-tenant SaaS  
 > **Total fases:** 14  
-> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 — En ejecución
+> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 — En ejecución
 
 ---
 
@@ -434,7 +434,7 @@ NODE_ENV=development
 
 ---
 
-## FASE 4 — Dashboard Web (Next.js)
+## FASE 4 — Dashboard Web (Next.js) [DONE]
 
 ### Objetivo de negocio
 Interfaz visual para que el cliente vea leads, analytics, y configure su cuenta. Sin depender de n8n para UI.
@@ -484,7 +484,7 @@ frontend/
 
 ---
 
-## FASE 5 — Sistema Multiempresa
+## FASE 5 — Sistema Multiempresa [EN EJECUCIÓN]
 
 ### Objetivo de negocio
 Un mismo backend sirve a N clientes. Cada cliente tiene sus datos aislados, su API key y su plan.

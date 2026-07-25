@@ -100,3 +100,23 @@ cat database/migrations/*.sql | docker exec -i portafolio-postgres-1 psql -U n8n
 cd backend && npm install && npm run dev
 docker build -t portafolio-api .\backend
 ```
+
+---
+
+## FASE 4 — Dashboard Web
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Next.js 14 con App Router (stable, server components + client components).
+- Tailwind CSS sin shadcn/ui para mantener bundles pequeños (solo 4 páginas).
+- Autenticación del lado cliente con localStorage + fetch (simplificado para MVP).
+- Docker multi-stage con output standalone (imagen autónoma sin node_modules).
+- Layout compartido con Sidebar + Header para dashboard.
+
+**Solución aplicada:** Frontend completo con login, dashboard KPIs, tabla de leads con filtros, y páginas placeholder para analytics y settings.
+
+**Comandos usados:**
+```bash
+cd frontend && npm install && npm run build
+```
