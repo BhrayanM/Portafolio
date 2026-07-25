@@ -165,3 +165,38 @@ curl -H "x-api-key: pk_..." http://localhost:3000/api/leads
 # Importar workflows en n8n:
 # Settings → Import → Seleccionar archivo JSON
 ```
+
+---
+
+## FASE 7 — Infraestructura Cloud
+
+**Problemas encontrados:** Ninguno (configuración local validada).
+
+**Decisiones:**
+- NGINX Alpine como proxy (menor consumo que Caddy en VPS).
+- Cloudflare Origin CA para SSL (certificados autofirmados por Cloudflare, sin puerto 80 expuesto).
+- docker-compose.prod.yml separado del dev (SSL, healthchecks, redes).
+- UFW como firewall (simple y efectivo para Hetzner).
+- Backups con retención de 30 días vía cron.
+
+**Solución aplicada:** NGINX config, docker-compose producción, Cloudflare setup script, UFW rules.
+
+---
+
+## FASE 8 — Observabilidad
+
+**Problemas encontrados:** Ninguno.
+
+**Decisiones:**
+- Prometheus + Grafana como stack principal (maduro, comunidad grande, gratis).
+- Loki para logs (integración nativa con Grafana).
+- Uptime Kuma sobre Checkmk/Zabbix (ligero, Docker native, notificaciones Slack).
+- Node Exporter para métricas del servidor (estándar de la industria).
+- Dashboards provisionados automáticamente (carpeta grafana-dashboards).
+
+**Solución aplicada:** Prometheus + Grafana + Loki + Uptime Kuma + Node Exporter configurados.
+
+**Comandos usados:**
+```bash
+docker compose -f monitoring/docker-compose.monitoring.yml up -d
+```

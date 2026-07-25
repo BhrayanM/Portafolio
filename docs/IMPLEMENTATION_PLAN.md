@@ -597,7 +597,7 @@ Usuario ──► Cloudflare ──► NGINX ──► Coolify ──► Contene
 
 ---
 
-## FASE 8 — Observabilidad
+## FASE 8 — Observabilidad [DONE]
 
 ### Objetivo de negocio
 Saber qué está pasando en producción antes de que el cliente lo reporte.
