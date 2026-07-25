@@ -6,14 +6,10 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**E2E rama HOT completado.** Execution 48 SUCCESS — lead HOT aprobado y sincronizado end-to-end:
-- `lead_log` id=4: `e2e.hot2@example.com` · score 98 · HOT · `status=approved` · HubSpot vid `525347024611`
-- Slack: mensaje enviado a canal `C0BJYN0QKPT` (timestamp `1785004393.447999`)
-- PostgreSQL: fila insertada en `lead_log` con `ai_category=HOT`, `status=approved`
-- HubSpot: contacto creado/actualizado (vid `525347024611`, portal `246823552`)
-- n8n execution 48: `success` (2026-07-25 18:33:12 → 18:33:43)
-
-> **Nota:** HANDOFF anterior citaba execution 47 en waiting; execution 47 completó a las 18:29 (23 min wait). El lead HOT se resolvió en execution 48 (nuevo webhook tras aprobación).
+**F18.1 — Normalización Billing Plans completada.**
+- `backend/src/services/marketplace.service.js`: fix lógica de planes — `price: 'pro'` ahora permitido para planes `growth` y `enterprise` (antes solo bloqueaba `starter` y mensaje decía "Actualiza a Pro" que no existe). Mensaje corregido a "Actualiza a Growth o Enterprise".
+- Verificado: Joi schema (`starter|growth|enterprise`), billing service PLANS, DB tenant plan `enterprise` consistentes.
+- Tests: 77/77 verdes.
 
 ## Bloque en curso
 
@@ -31,6 +27,7 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 | E2E rama HOT | ✅ exec 48, lead_log id 4, HubSpot 525347024611 |
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ✅ Creado |
 | Backup script + doc fix | ✅ Cerrado |
+| F18.1 — Normalización Billing Plans | ✅ Cerrado |
 
 ## Estado que se pierde al cortar
 

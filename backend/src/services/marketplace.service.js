@@ -21,8 +21,9 @@ class MarketplaceService {
     if (tenant.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
 
     const plan = tenant.rows[0].plan;
-    if (item.price === 'pro' && plan === 'starter') {
-      throw new Error('Plan Starter no incluye esta automatización. Actualiza a Pro.');
+    const proPlans = ['growth', 'enterprise'];
+    if (item.price === 'pro' && !proPlans.includes(plan)) {
+      throw new Error('Plan Starter no incluye esta automatización. Actualiza a Growth o Enterprise.');
     }
 
     // Registrar instalación
