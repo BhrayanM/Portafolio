@@ -6,23 +6,23 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**BLOQUE C — Tests.** Commit: ver `git log --oneline`.
+**BLOQUE D — CI/CD.** Commit: ver `git log --oneline`.
 
 ## Bloque en curso
 
-**BLOQUE D — CI/CD.** No empezado todavía.
+Ninguno. Los 4 bloques (A-D) están cerrados.
 
 ## Siguiente paso exacto
 
-Crear `.github/workflows/ci.yml` con lint + tests en cada push y PR:
+Nada pendiente de los bloques A-D. Lo que queda depende de credenciales del usuario:
+ver `docs/SPRINT_CORE_COMPLETO.md`, sección **PENDIENTE - REQUIERE MIS KEYS**.
 
-1. Job de backend: `npm ci`, `npm run lint`, `npm test` (Node 20).
-2. Job de frontend: `npm ci`, `npx tsc --noEmit`, `npm run build`.
-3. No hace falta base de datos: los tests usan un doble del pool de `pg`.
-4. Verificar `.env.example` — que estén todas las claves que consume `src/config/index.js`
-   (incluidas las nuevas: `AUTH_COOKIE_*`, `CORS_ORIGINS`, `AUTH_RATE_LIMIT_MAX`).
+Comprobación rápida al retomar:
 
-Comprobar antes: `cd backend && npm run lint` (eslint puede no estar configurado aún).
+```bash
+cd backend && npm run lint && npm test    # 59 verdes, lint limpio
+bash "$(git rev-parse --show-toplevel)/scripts/backup.sh"
+```
 
 ## Bloques pendientes
 
@@ -31,8 +31,8 @@ Comprobar antes: `cd backend && npm run lint` (eslint puede no estar configurado
 | A — Fixes checklist producción | ✅ Cerrado |
 | B — Auth HttpOnly | ✅ Cerrado |
 | C — Tests (sin APIs externas) | ✅ Cerrado |
-| D — CI/CD (.github/workflows) | ⬜ Siguiente |
-| Entregable `docs/SPRINT_CORE_COMPLETO.md` | ⬜ Al cerrar D |
+| D — CI/CD (.github/workflows) | ✅ Cerrado |
+| Entregable `docs/SPRINT_CORE_COMPLETO.md` | ✅ Creado |
 
 ## Estado que se pierde al cortar
 
@@ -50,6 +50,9 @@ Comprobar antes: `cd backend && npm run lint` (eslint puede no estar configurado
   `Sanitize & Validate` / `Parse AI Response` / `Is Hot?`. Si cambias uno, sincroniza el otro
   y **publica** el workflow. Ahora mismo están sincronizados.
 - `npm test` en `backend/` → **59 verdes** (11 auth + 48 lógica de leads).
+- `npm run lint` limpio. Config: `backend/eslint.config.js` (ESLint 9 flat).
+- CI en `.github/workflows/ci.yml`: 3 jobs (backend, frontend, secrets). **Nunca ha corrido
+  en GitHub**: no se ha hecho push. `origin/main` sigue en `e2cadc3`.
 
 ## Reglas vigentes
 

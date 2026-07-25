@@ -1,5 +1,5 @@
 const { Router } = require('express');
-const { authenticate, authorize } = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const { resolveTenant } = require('../middleware/tenant');
 const { list, getById, stats } = require('../controllers/leads.controller');
 
