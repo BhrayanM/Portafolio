@@ -104,6 +104,26 @@ describe('GET /api/leads/stats', () => {
   });
 });
 
+describe('GET /api/leads (list)', () => {
+  it('filtra por category=HOT normalizando a Hot (C-02)', async () => {
+    await request(app)
+      .get('/api/leads?category=HOT')
+      .set('Authorization', authHeader);
+    const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
+    expect(call).toBeDefined();
+    expect(call[1]).toContain('Hot');
+  });
+
+  it('filtra por category=COLD normalizando a Cold (C-02)', async () => {
+    await request(app)
+      .get('/api/leads?category=COLD')
+      .set('Authorization', authHeader);
+    const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
+    expect(call).toBeDefined();
+    expect(call[1]).toContain('Cold');
+  });
+});
+
 describe('POST /api/leads', () => {
   it('responde 401 sin token', async () => {
     const res = await request(app)
