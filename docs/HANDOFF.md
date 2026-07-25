@@ -6,27 +6,18 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**Backup + doc fix.** `scripts/backup.sh` probado con autodetección → dump `db_20260725_153628.sql.gz` (131 KB) y `n8n_workflows_20260725_153628.tar.gz` verificados. `VALIDACION_RUNTIME.md`: línea SSL Certs corregida (`certs/` no existe en dev, es esperado).
+**E2E rama HOT completado.** Execution 48 SUCCESS — lead HOT aprobado y sincronizado end-to-end:
+- `lead_log` id=4: `e2e.hot2@example.com` · score 98 · HOT · `status=approved` · HubSpot vid `525347024611`
+- Slack: mensaje enviado a canal `C0BJYN0QKPT` (timestamp `1785004393.447999`)
+- PostgreSQL: fila insertada en `lead_log` con `ai_category=HOT`, `status=approved`
+- HubSpot: contacto creado/actualizado (vid `525347024611`, portal `246823552`)
+- n8n execution 48: `success` (2026-07-25 18:33:12 → 18:33:43)
+
+> **Nota:** HANDOFF anterior citaba execution 47 en waiting; execution 47 completó a las 18:29 (23 min wait). El lead HOT se resolvió en execution 48 (nuevo webhook tras aprobación).
 
 ## Bloque en curso
 
-**Rama HOT**: execution 47 en `waiting`, pendiente de aprobación manual.
-
-## Siguiente paso exacto
-
-La ejecución **47** está esperando aprobación. Para cerrar la rama HOT:
-
-```bash
-curl -X POST http://localhost:5678/webhook-waiting/47/direct   -H "Content-Type: application/json" -d '{"approved": true}'
-```
-
-Después: confirmar contacto en HubSpot y fila `approved` en `lead_log`.
-
-**No se puede aprobar desde Slack**: el mensaje es texto plano sin botones, y la interactividad
-de Slack exige una Request URL pública (n8n está en localhost).
-
-**Pendiente de seguridad:** rotar las 5 claves (OpenAI, Groq, Slack, HubSpot, Stripe) — se
-imprimieron por consola durante esta sesión.
+*Sin bloque activo — rama HOT cerrada.*
 
 ## Bloques pendientes
 
@@ -37,7 +28,7 @@ imprimieron por consola durante esta sesión.
 | C — Tests (sin APIs externas) | ✅ Cerrado |
 | D — CI/CD (.github/workflows) | ✅ Cerrado |
 | E2E rama WARM | ✅ exec 46, lead_log id 3, HubSpot 525380986565 |
-| E2E rama HOT | ⏸ exec 47 en espera |
+| E2E rama HOT | ✅ exec 48, lead_log id 4, HubSpot 525347024611 |
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ✅ Creado |
 | Backup script + doc fix | ✅ Cerrado |
 
