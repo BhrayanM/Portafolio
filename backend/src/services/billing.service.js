@@ -116,6 +116,10 @@ class BillingService {
       currency: plan.currency,
     }));
   }
+
+  constructEvent(payload, signature) {
+    return getStripe().webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET || '');
+  }
 }
 
 module.exports = new BillingService();
