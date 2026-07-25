@@ -7,11 +7,12 @@ import type { ApiUsage } from '@/lib/types';
 export default function UsagePage() {
   const [usage, setUsage] = useState<ApiUsage | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     usageApi.get()
       .then(setUsage)
-      .catch(() => {})
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar uso de API'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -19,6 +20,12 @@ export default function UsagePage() {
     return (
       <div>
         <h1 className="text-2xl font-bold mb-6">Uso de API</h1>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+            <span className="text-sm">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+          </div>
+        )}
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 bg-gray-100 rounded" />
           <div className="h-48 bg-gray-100 rounded-xl" />
@@ -30,6 +37,13 @@ export default function UsagePage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Uso de API</h1>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+          <span className="text-sm">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200 p-6 max-w-2xl">
         {usage ? (

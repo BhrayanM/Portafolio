@@ -8,11 +8,12 @@ import { Activity as ActivityIcon } from 'lucide-react';
 export default function ActivityPage() {
   const [entries, setEntries] = useState<LeadLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     activityApi.list()
       .then(setEntries)
-      .catch(() => {})
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar actividad'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -27,6 +28,12 @@ export default function ActivityPage() {
     return (
       <div>
         <h1 className="text-2xl font-bold mb-6">Actividad</h1>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+            <span className="text-sm">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+          </div>
+        )}
         <div className="animate-pulse space-y-3">
           {[1, 2, 3, 4, 5].map((i) => (
             <div key={i} className="h-16 bg-gray-100 rounded-lg" />
@@ -39,6 +46,13 @@ export default function ActivityPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Actividad Reciente</h1>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+          <span className="text-sm">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
         {entries.length === 0 ? (

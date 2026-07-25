@@ -29,6 +29,7 @@ export default function MarketplacePage() {
   const [installed, setInstalled] = useState<InstalledItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [installing, setInstalling] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     Promise.all([
@@ -39,7 +40,7 @@ export default function MarketplacePage() {
         setCatalog(cat);
         setInstalled(inst);
       })
-      .catch(() => {})
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar marketplace'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -67,6 +68,12 @@ export default function MarketplacePage() {
     return (
       <div>
         <h1 className="text-2xl font-bold mb-6">Marketplace</h1>
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+            <span className="text-sm">{error}</span>
+            <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+          </div>
+        )}
         <div className="animate-pulse grid grid-cols-1 md:grid-cols-2 gap-6">
           {[1, 2, 3, 4].map((i) => (
             <div key={i} className="h-40 bg-gray-100 rounded-xl" />
@@ -80,6 +87,13 @@ export default function MarketplacePage() {
     <div>
       <h1 className="text-2xl font-bold mb-2">Marketplace</h1>
       <p className="text-gray-500 text-sm mb-6">Automatizaciones disponibles para tu cuenta</p>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+          <span className="text-sm">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
         {catalog.map((item) => {

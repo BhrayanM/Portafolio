@@ -9,6 +9,7 @@ export default function LeadsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const params: Record<string, string> = {};
@@ -17,7 +18,7 @@ export default function LeadsPage() {
 
     leadsApi.list(params)
       .then(setLeads)
-      .catch(() => {})
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar leads'))
       .finally(() => setLoading(false));
   }, [filter, search]);
 
@@ -33,6 +34,13 @@ export default function LeadsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Leads</h1>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+          <span className="text-sm">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <input
