@@ -6,7 +6,7 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
-**E2E con credenciales reales.** LLM (Groq), Slack, HubSpot y Stripe verificados; rama WARM completa.
+**Backup + doc fix.** `scripts/backup.sh` probado con autodetección → dump `db_20260725_153628.sql.gz` (131 KB) y `n8n_workflows_20260725_153628.tar.gz` verificados. `VALIDACION_RUNTIME.md`: línea SSL Certs corregida (`certs/` no existe en dev, es esperado).
 
 ## Bloque en curso
 
@@ -39,6 +39,7 @@ imprimieron por consola durante esta sesión.
 | E2E rama WARM | ✅ exec 46, lead_log id 3, HubSpot 525380986565 |
 | E2E rama HOT | ⏸ exec 47 en espera |
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ✅ Creado |
+| Backup script + doc fix | ✅ Cerrado |
 
 ## Estado que se pierde al cortar
 
