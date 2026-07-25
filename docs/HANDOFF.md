@@ -6,6 +6,36 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
+**F18.2 — Alineación de enums de Lead completada.**
+
+Canónico fijado: **`ai_category` = `HOT` | `WARM` | `COLD`** (mayúsculas, tal y como n8n escribe).
+Fuente única del enum: `CATEGORIES` + `normalizeCategory()` en `backend/src/lib/lead.js`.
+Las demás capas lo importan en vez de redeclararlo.
+
+| Capa | Cambio |
+|---|---|
+| `backend/src/services/leads.service.js` | Filtro `category` usa `normalizeCategory` importado de `lib/lead` (borrado el capitalizador `charAt(0).toUpperCase()` que producía `Hot`). Stats query: `'Hot'/'Warm'/'Cold'` → `'HOT'/'WARM'/'COLD'`. `create()` inserta `'COLD'` y persiste `ai_business_category`. |
+| `backend/src/schemas/lead.schema.js` | `category` valida con `...CATEGORIES` importado. Añadido `ai_business_category`: string libre, `max(100)`. |
+| `backend/src/docs/swagger.js` | Ya estaba en mayúsculas. Añadido `ai_business_category` documentado como texto libre. |
+| `frontend/src/lib/types.ts` | `type LeadCategory = 'HOT'\|'WARM'\|'COLD'`, con `LEAD_CATEGORIES` (pares value/label) y `LEAD_CATEGORY_LABEL`. Añadido campo `ai_business_category`. |
+| `frontend/src/app/dashboard/leads/page.tsx` | **value ≠ display**: el `<select>` y `categoryColor` usan `HOT/WARM/COLD`; la UI muestra `Hot/Warm/Cold` vía `LEAD_CATEGORY_LABEL`. |
+| `backend/tests/leads.api.test.js` | Los 2 tests C-02 esperaban `'Hot'`/`'Cold'` (comportamiento viejo); actualizados al canónico. Añadido test: `?category=Hot` → **400**. |
+
+**Decisión sobre `'General'` — el diagnóstico de partida era incorrecto, verificado contra la DB:**
+- `ai_business_category` **no tiene default de columna** (`VARCHAR(100)`, nullable, sin `DEFAULT`).
+  `'General'` es el *fallback* de `parseAiResponse()` en `backend/src/lib/lead.js:99,109`.
+- **No es un enum de intención.** Es el **sector de negocio** que emite el LLM en texto libre.
+  Valores reales en `lead_log`: `QA`, `Sin especificar`, `Software y Tecnologia`, `Automatización`.
+- Por tanto **no se cerró a `Ventas/Soporte/Informacion/Otro`**: hacerlo habría rechazado todo lo
+  que n8n ya escribe, violando la regla "el backend acepta lo que n8n escribe; n8n intocable".
+  Se valida solo el ancho real de la columna (`max 100`). `'General'` se mantiene como fallback.
+- Si en el futuro se quiere una **intención** de verdad (`Ventas/Soporte/Informacion/Otro`), es una
+  **columna nueva**, no reutilizar ésta.
+
+Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas: nada que migrar.
+
+---
+
 **F18.1 — Normalización Billing Plans completada.**
 - `backend/src/services/marketplace.service.js`: fix lógica de planes — `price: 'pro'` ahora permitido para planes `growth` y `enterprise` (antes solo bloqueaba `starter` y mensaje decía "Actualiza a Pro" que no existe). Mensaje corregido a "Actualiza a Growth o Enterprise".
 - Verificado: Joi schema (`starter|growth|enterprise`), billing service PLANS, DB tenant plan `enterprise` consistentes.
@@ -28,6 +58,7 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 | Entregable `docs/SPRINT_CORE_COMPLETO.md` | ✅ Creado |
 | Backup script + doc fix | ✅ Cerrado |
 | F18.1 — Normalización Billing Plans | ✅ Cerrado |
+| F18.2 — Alineación enums de Lead | ✅ Cerrado |
 
 ## Estado que se pierde al cortar
 
@@ -44,15 +75,29 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 - **`backend/src/lib/lead.js` es la implementación de referencia** de los Code nodes
   `Sanitize & Validate` / `Parse AI Response` / `Is Hot?`. Si cambias uno, sincroniza el otro
   y **publica** el workflow. Ahora mismo están sincronizados.
-- `npm test` en `backend/` → **59 verdes** (11 auth + 48 lógica de leads).
+- `npm test` en `backend/` → **78 verdes**.
 - **El LLM del workflow es Groq** (`llama-3.3-70b-versatile`), no OpenAI: esa cuenta sigue sin
   saldo (429). El nodo lleva `User-Agent: curl/8.0.0` porque Cloudflare bloquea el de n8n/urllib.
 - Canal de Slack: `C0BJYN0QKPT` (`#nuevo-canal`), fijado literal en el nodo porque `$env` está
   vacío dentro del contenedor.
 - Credencial HubSpot nueva de tipo `hubspotAppToken` (la legacy `hubspotApi` no sirve para `pat-`).
-- `npm run lint` limpio. Config: `backend/eslint.config.js` (ESLint 9 flat).
+- `npm run lint`: **5 errores preexistentes** (`billing.routes.js` `handleWebhook` sin usar;
+  `voice.service.js` y `whatsapp.service.js` con `config` sin usar y `fetch` no definido).
+  No los introdujo F18.2 y quedan fuera de su alcance. Config: `backend/eslint.config.js`
+  (ESLint 9 flat).
 - CI en `.github/workflows/ci.yml`: 3 jobs (backend, frontend, secrets). **Nunca ha corrido
   en GitHub**: no se ha hecho push. `origin/main` sigue en `e2cadc3`.
+
+## Deuda futura registrada en F18.2
+
+- **Renombrar `ai_category` → `classification`**: el nombre no dice que es la clasificación
+  HOT/WARM/COLD y se confunde con `ai_business_category`. Requiere migración + tocar los Code
+  nodes de n8n y republicar el workflow. **No se hizo en F18.2** (alcance: solo alinear valores,
+  no renombrar columnas).
+- **`ai_business_category` es sector, no intención.** Si se necesita intención
+  (`Ventas/Soporte/Informacion/Otro`), crear columna nueva. Ver decisión en el bloque F18.2.
+- El fallback `'General'` vive duplicado en `lib/lead.js` (dos ramas de `parseAiResponse`) y en
+  `leads.service.create()`. Si cambia, cambiarlo en los tres sitios.
 
 ## Reglas vigentes
 

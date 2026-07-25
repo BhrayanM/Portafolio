@@ -37,7 +37,17 @@ const options = {
             phone: { type: 'string' },
             source: { type: 'string' },
             ai_score: { type: 'integer' },
-            ai_category: { type: 'string', enum: ['HOT', 'WARM', 'COLD'] },
+            ai_category: {
+              type: 'string',
+              enum: ['HOT', 'WARM', 'COLD'],
+              description: 'Clasificacion del lead. Enum cerrado, canonico en mayusculas.',
+            },
+            ai_business_category: {
+              type: 'string',
+              maxLength: 100,
+              description: 'Sector de negocio. Texto libre emitido por el LLM, no es un enum cerrado.',
+              example: 'Software y Tecnologia',
+            },
             status: { type: 'string' },
             created_at: { type: 'string', format: 'date-time' },
           },

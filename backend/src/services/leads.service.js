@@ -1,5 +1,8 @@
 const { pool } = require('../db');
 const { NotFoundError } = require('../utils/errors');
+// Fuente única del enum de clasificación: el mismo helper que usan los Code nodes
+// de n8n. Canónico = HOT/WARM/COLD en mayúsculas, tal y como n8n escribe en `leads`.
+const { normalizeCategory } = require('../lib/lead');
 
 class LeadsService {
   async list(tenantId, filters = {}) {
@@ -9,9 +12,8 @@ class LeadsService {
 
     if (filters.status) { query += ` AND status = $${idx++}`; params.push(filters.status); }
     if (filters.category) {
-      const normalized = filters.category.charAt(0).toUpperCase() + filters.category.slice(1).toLowerCase();
       query += ` AND ai_category = $${idx++}`;
-      params.push(normalized);
+      params.push(normalizeCategory(filters.category));
     }
     if (filters.search) { query += ` AND (email ILIKE $${idx} OR name ILIKE $${idx} OR company ILIKE $${idx})`; params.push(`%${filters.search}%`); idx++; }
 
@@ -38,9 +40,9 @@ class LeadsService {
       SELECT
         COUNT(*)::int AS total,
         COUNT(*) FILTER (WHERE status = 'new')::int AS new,
-        COUNT(*) FILTER (WHERE ai_category = 'Hot')::int AS hot,
-        COUNT(*) FILTER (WHERE ai_category = 'Warm')::int AS warm,
-        COUNT(*) FILTER (WHERE ai_category = 'Cold')::int AS cold,
+        COUNT(*) FILTER (WHERE ai_category = 'HOT')::int AS hot,
+        COUNT(*) FILTER (WHERE ai_category = 'WARM')::int AS warm,
+        COUNT(*) FILTER (WHERE ai_category = 'COLD')::int AS cold,
         ROUND(AVG(ai_score))::int AS avg_score,
         COUNT(*) FILTER (WHERE created_at >= CURRENT_DATE)::int AS today
       FROM leads WHERE tenant_id = $1
@@ -49,12 +51,13 @@ class LeadsService {
   }
 
   async create(tenantId, data) {
-    const { email, name, company, phone, message, source } = data;
+    const { email, name, company, phone, message, source, ai_business_category } = data;
     const result = await pool.query(
-      `INSERT INTO leads (tenant_id, email, name, company, phone, message, source, status, ai_category)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, 'new', 'Cold')
+      `INSERT INTO leads (tenant_id, email, name, company, phone, message, source, status, ai_category, ai_business_category)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'new', 'COLD', $8)
        RETURNING *`,
-      [tenantId, email.toLowerCase(), name || '', company || '', phone || '', message || '', source || 'api']
+      [tenantId, email.toLowerCase(), name || '', company || '', phone || '', message || '', source || 'api',
+        ai_business_category || 'General']
     );
     return result.rows[0];
   }

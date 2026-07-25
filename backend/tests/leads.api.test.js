@@ -50,7 +50,7 @@ beforeAll(() => {
           message: params[5],
           source: params[6],
           status: 'new',
-          ai_category: 'Cold',
+          ai_category: 'COLD',
           created_at: new Date().toISOString(),
         }],
       };
@@ -105,22 +105,29 @@ describe('GET /api/leads/stats', () => {
 });
 
 describe('GET /api/leads (list)', () => {
-  it('filtra por category=HOT normalizando a Hot (C-02)', async () => {
+  it('filtra por category=HOT conservando el canonico HOT (F18.2)', async () => {
     await request(app)
       .get('/api/leads?category=HOT')
       .set('Authorization', authHeader);
     const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
     expect(call).toBeDefined();
-    expect(call[1]).toContain('Hot');
+    expect(call[1]).toContain('HOT');
   });
 
-  it('filtra por category=COLD normalizando a Cold (C-02)', async () => {
+  it('filtra por category=COLD conservando el canonico COLD (F18.2)', async () => {
     await request(app)
       .get('/api/leads?category=COLD')
       .set('Authorization', authHeader);
     const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
     expect(call).toBeDefined();
-    expect(call[1]).toContain('Cold');
+    expect(call[1]).toContain('COLD');
+  });
+
+  it('rechaza 400 una categoria fuera del enum canonico (F18.2)', async () => {
+    const res = await request(app)
+      .get('/api/leads?category=Hot')
+      .set('Authorization', authHeader);
+    expect(res.status).toBe(400);
   });
 });
 
