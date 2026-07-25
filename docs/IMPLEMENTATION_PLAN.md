@@ -4,7 +4,7 @@
 > **Stack base:** n8n · Docker · PostgreSQL · Node.js · Next.js · OpenAI · Hetzner  
 > **Objetivo:** De automatizaciones IA aisladas → Plataforma multi-tenant SaaS  
 > **Total fases:** 14  
-> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 [DONE] · FASE 6 — En ejecución
+> **Estado actual:** FASE 0 [DONE] · FASE 1 [DONE] · FASE 2 [DONE] · FASE 3 [DONE] · FASE 4 [DONE] · FASE 5 [DONE] · FASE 6 [DONE] · FASE 7 [DONE] · FASE 8 — En ejecución
 
 ---
 
@@ -561,7 +561,7 @@ Usuario ──► Canal ──► n8n ──► Agent Handler ──► Tools
 
 ---
 
-## FASE 7 — Infraestructura Cloud [EN EJECUCIÓN]
+## FASE 7 — Infraestructura Cloud [DONE]
 
 ### Objetivo de negocio
 Pasar de localhost a producción real con HTTPS, dominio, CDN y backups automáticos.

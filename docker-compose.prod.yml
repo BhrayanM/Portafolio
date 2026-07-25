@@ -1,0 +1,84 @@
+services:
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/ssl:/etc/ssl:ro
+    depends_on:
+      - portafolio-api
+      - portafolio-frontend
+    networks:
+      - portafolio-net
+
+  portafolio-api:
+    build: ./backend
+    restart: always
+    env_file: .env
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - portafolio-net
+
+  portafolio-frontend:
+    build: ./frontend
+    restart: always
+    env_file: .env
+    networks:
+      - portafolio-net
+
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-n8n}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?error}
+      POSTGRES_DB: ${POSTGRES_DB:-n8n}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-n8n}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - portafolio-net
+
+  n8n:
+    image: n8nio/n8n:latest
+    restart: always
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_TYPE: postgresdb
+      DB_POSTGRESDB_HOST: postgres
+      DB_POSTGRESDB_PORT: 5432
+      DB_POSTGRESDB_USER: ${POSTGRES_USER:-n8n}
+      DB_POSTGRESDB_PASSWORD: ${POSTGRES_PASSWORD:?error}
+      DB_POSTGRESDB_DATABASE: ${POSTGRES_DB:-n8n}
+      N8N_HOST: n8n.portafolio.ai
+      N8N_PORT: 5678
+      N8N_PROTOCOL: https
+      WEBHOOK_URL: https://n8n.portafolio.ai
+      N8N_ENCRYPTION_KEY: ${N8N_ENCRYPTION_KEY:?error}
+      N8N_USER_FOLDER: /home/node/.n8n
+      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_MAX_AGE: 168
+    volumes:
+      - n8n_data:/home/node/.n8n
+      - ./n8n/workflows:/backup/workflows
+    networks:
+      - portafolio-net
+
+networks:
+  portafolio-net:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  n8n_data:
