@@ -23,6 +23,16 @@ const app = express();
 securityMiddleware(app);
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(morgan('dev'));
+
+// Stripe webhook necesita el body raw para verificar firma — debe ir ANTES de express.json()
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), async (req, res, next) => {
+  try {
+    await require('./controllers/billing.controller').handleWebhook(req, res);
+  } catch (error) {
+    next(error);
+  }
+});
+
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
 

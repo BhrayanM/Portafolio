@@ -10,6 +10,5 @@ const router = Router();
 router.get('/plans', getPlans);
 router.get('/subscription', authenticate, resolveTenant, getSubscription);
 router.post('/checkout', authenticate, resolveTenant, validate(createCheckoutSchema), createCheckout);
-router.post('/webhook', handleWebhook);
 
 module.exports = router;

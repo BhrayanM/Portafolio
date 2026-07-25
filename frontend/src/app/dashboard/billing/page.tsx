@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { billingApi } from '@/lib/api';
 import type { Subscription } from '@/lib/types';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, Loader2 } from 'lucide-react';
 
 const plans = [
   {
@@ -44,12 +44,23 @@ const statusColors: Record<string, string> = {
 export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
+  const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
 
   useEffect(() => {
     billingApi.subscription()
       .then(setSubscription)
       .catch(() => {})
       .finally(() => setLoading(false));
+  }, []);
+
+  const handleCheckout = useCallback(async (planId: string) => {
+    setCheckoutLoading(planId);
+    try {
+      const result = await billingApi.createCheckout(planId);
+      window.location.href = result.url;
+    } catch {
+      setCheckoutLoading(null);
+    }
   }, []);
 
   return (
@@ -81,43 +92,60 @@ export default function BillingPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {plans.map((plan) => (
-            <div
-              key={plan.id}
-              className={`bg-white rounded-xl border-2 p-6 flex flex-col ${plan.popular ? 'border-brand-500 relative' : 'border-gray-200'}`}
-            >
-              {plan.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-medium px-3 py-1 rounded-full">
-                  Más popular
-                </span>
-              )}
-              <h3 className="text-lg font-bold">{plan.name}</h3>
-              <p className="mt-2 mb-6">
-                <span className="text-3xl font-bold">${plan.price}</span>
-                <span className="text-gray-500 text-sm">/mes</span>
-              </p>
-              <ul className="space-y-2 flex-1">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
-                    <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
-                    {f}
-                  </li>
-                ))}
-              </ul>
-              <button
-                disabled
-                className="mt-6 w-full py-2.5 rounded-lg text-sm font-medium bg-gray-100 text-gray-400 cursor-not-allowed"
-                title="Checkout disponible en FASE 9"
+          {plans.map((plan) => {
+            const isCurrent = subscription?.plan === plan.id;
+            const isLoading = checkoutLoading === plan.id;
+            return (
+              <div
+                key={plan.id}
+                className={`bg-white rounded-xl border-2 p-6 flex flex-col ${plan.popular ? 'border-brand-500 relative' : 'border-gray-200'}`}
               >
-                {subscription?.plan === plan.id ? 'Plan actual' : 'Seleccionar'}
-              </button>
-            </div>
-          ))}
+                {plan.popular && (
+                  <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-brand-600 text-white text-xs font-medium px-3 py-1 rounded-full">
+                    Más popular
+                  </span>
+                )}
+                <h3 className="text-lg font-bold">{plan.name}</h3>
+                <p className="mt-2 mb-6">
+                  <span className="text-3xl font-bold">${plan.price}</span>
+                  <span className="text-gray-500 text-sm">/mes</span>
+                </p>
+                <ul className="space-y-2 flex-1">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-center gap-2 text-sm text-gray-600">
+                      <CheckCircle className="w-4 h-4 text-green-500 flex-shrink-0" />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => handleCheckout(plan.id)}
+                  disabled={isLoading || isCurrent}
+                  className={`mt-6 w-full py-2.5 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2 ${
+                    isCurrent
+                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                      : 'bg-brand-600 text-white hover:bg-brand-700 disabled:opacity-50'
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Redirigiendo...
+                    </>
+                  ) : isCurrent ? (
+                    'Plan actual'
+                  ) : (
+                    'Seleccionar'
+                  )}
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
 
       <p className="text-xs text-gray-400 text-center mt-4">
-        La integración de pagos estará disponible próximamente.
+        Los pagos se procesan de forma segura a través de Stripe.
       </p>
     </div>
   );

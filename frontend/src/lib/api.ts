@@ -50,6 +50,11 @@ export const leadsApi = {
 export const billingApi = {
   plans: () => apiFetch<BillingPlan[]>('/billing/plans'),
   subscription: () => apiFetch<Subscription>('/billing/subscription'),
+  createCheckout: (plan: string) =>
+    apiFetch<{ url: string; sessionId: string }>('/billing/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ plan }),
+    }),
 };
 
 export const settingsApi = {
