@@ -12,7 +12,7 @@ Leyenda: ✅ hecho y verificado · 🟡 existe pero sin verificar · ❌ pendien
 | Dominio y DNS | ❌ Pendiente |
 | Variables de entorno | 🟡 Parcial — 3 credenciales vacías |
 | Rotación de credenciales | ❌ Pendiente |
-| Backups de PostgreSQL | 🟡 Script escrito, **roto y sin probar** |
+| Backups de PostgreSQL | 🟡 Script corregido y restore probado; falta automatizar y sacarlo del host |
 | Monitoreo | 🟡 Configuración escrita, sin desplegar |
 | Logs | 🟡 Parcial — errores sí, aplicación no |
 | Seguridad del repositorio | ✅ Hecho |
@@ -27,7 +27,7 @@ tanto credenciales externas como toda la capa de operación.
 | Ítem | Estado | Evidencia / nota |
 |---|---|---|
 | Nginx como reverse proxy | 🟡 | Servicio `nginx` definido en `docker-compose.prod.yml`; nunca levantado |
-| Certificados TLS | ❌ | `docs/VALIDACION_RUNTIME.md` menciona certs self-signed en `certs/`, pero **el directorio no existe** |
+| Certificados TLS | ❌ | `certs/` no existe. `docker/nginx.conf` referencia `/etc/ssl/certs/fullchain.pem` y `/etc/ssl/private/privkey.pem`, sin proveedor. `VALIDACION_RUNTIME.md` corregido. |
 | Certificado de CA real (Let's Encrypt) | ❌ | Sin emitir |
 | Renovación automática | ❌ | Sin configurar |
 | Redirección HTTP → HTTPS | ❌ | Sin configurar |
@@ -84,17 +84,20 @@ y crear los tokens de Slack/HubSpot ya con el scope mínimo.
 
 | Ítem | Estado | Evidencia |
 |---|---|---|
-| Script de backup | 🟡 | `scripts/backup.sh` existe (pg_dump + retención 30 días) |
-| **El script apunta a un contenedor inexistente** | ❌ | Define `DB_CONTAINER="portafolio-postgres-1"`; el real es `portafolio-publico-postgres-1` → **el backup falla** |
-| Backup ejecutado alguna vez | ❌ | Sin evidencia de ejecución |
-| Restauración probada | ❌ | Un backup sin restauración probada no es un backup |
+| Script de backup | ✅ | `scripts/backup.sh` ejecutado correctamente (pg_dump + retención 30 días) |
+| Contenedor correcto | ✅ | **Corregido:** autodetecta el contenedor (override con `DB_CONTAINER`) |
+| Backup ejecutado | ✅ | `db_20260725_060025.sql.gz` (95 KB, 246 sentencias) |
+| Restauración probada | ✅ | Restaurado en base desechable: 0 errores, 123 tablas, `lead_log`=1, `error_log`=10 |
 | Programación automática (cron / timer) | ❌ | Solo manual |
 | Copia fuera del host | ❌ | Escribe en `./backups` local: un fallo de disco se lo lleva todo |
 | Cifrado de los backups | ❌ | Sin cifrar |
 | Retención verificada | 🟡 | Parametrizada (`RETENTION_DAYS=30`), nunca ejercitada |
 
-**Acción inmediata:** corregir `DB_CONTAINER` en `scripts/backup.sh`, ejecutarlo una vez y
-**probar la restauración** en una base desechable.
+**Hecho (BLOQUE A):** `DB_CONTAINER` ahora se autodetecta, backup ejecutado y restauración
+verificada. El respaldo de `.env` pasó a ser **opt-in** (`BACKUP_ENV=1`): antes se copiaba
+siempre en claro a `./backups`.
+
+**Acción siguiente:** programarlo (cron/timer), cifrarlo y replicarlo fuera del host.
 
 ## 6. Monitoreo
 
@@ -140,7 +143,7 @@ y crear los tokens de Slack/HubSpot ya con el scope mínimo.
 | Ítem | Nota |
 |---|---|
 | Stripe / billing | No forma parte del flujo de leads |
-| Tests automatizados | 0 tests escritos; Jest y Supertest instalados sin casos |
+| Tests automatizados | Ver BLOQUE C |
 | Rutas de frontend faltantes | `billing`, `invoices`, `usage`, `activity` sin implementar |
 
 ---

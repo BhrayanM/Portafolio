@@ -9,7 +9,7 @@ Fecha: 2026-07-25
 | PostgreSQL | ✅ Funcional | `docker compose ps postgres` → Up (healthy). Puerto 5432 mapeado. |
 | n8n | ✅ Funcional | `curl http://localhost:5678/healthz` → `{"status":"ok"}` |
 | Red Docker | ✅ Funcional | Red `portafolio-publico_portafolio-net` existe |
-| SSL Certs | ✅ Funcional | Certificados self-signed creados en `certs/` |
+| SSL Certs | ❌ No existen | **Corregido 2026-07-25:** el directorio `certs/` **no existe**. `docker/nginx.conf` espera `/etc/ssl/certs/fullchain.pem` y `/etc/ssl/private/privkey.pem`, que nadie provee. Nginx solo está definido en `docker-compose.prod.yml` y nunca se ha levantado. Ver `docs/PRODUCCION_CHECKLIST.md` §1. |
 | Puerto 5678 | ✅ Liberado | Contenedor externo `n8n` eliminado |
 
 ## FASE B - Base de Datos ✅ FUNCIONAL
