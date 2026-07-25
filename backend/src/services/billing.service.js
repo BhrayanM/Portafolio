@@ -1,5 +1,6 @@
 const { pool } = require('../db');
 const { NotFoundError } = require('../utils/errors');
+const { logger } = require('../utils/logger');
 
 let _stripe = null;
 function getStripe() {
@@ -61,7 +62,7 @@ class BillingService {
           [plan, session.subscription, tenantId]
         );
 
-        console.log(`Tenant ${tenantId} subscribed to ${plan}`);
+        logger.info('Tenant subscribed', { tenantId, plan });
         break;
       }
 

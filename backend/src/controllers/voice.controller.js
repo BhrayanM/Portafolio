@@ -1,4 +1,5 @@
 const voiceService = require('../services/voice.service');
+const { logger } = require('../utils/logger');
 
 const handleIncoming = async (req, res) => {
   try {
@@ -7,17 +8,15 @@ const handleIncoming = async (req, res) => {
       return res.status(400).json({ error: 'Payload no válido' });
     }
 
-    // Llamada entrante procesada via n8n webhook (/webhook/voice-receptionist)
-    console.log(`[Voice] Llamada de ${call.from}: ${call.callStatus}`);
+    logger.info('Voice incoming call', { from: call.from, status: call.callStatus });
 
-    // Twilio espera TwiML como respuesta
     res.set('Content-Type', 'text/xml');
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
 <Response>
   <Say voice="alice" language="es-MX">Bienvenido a Portafolio. Estamos procesando su llamada.</Say>
 </Response>`);
   } catch (error) {
-    console.error('[Voice] Error:', error.message);
+    logger.error('Voice error', { error: error.message });
     res.status(500).json({ error: error.message });
   }
 };
