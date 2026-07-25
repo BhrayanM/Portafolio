@@ -27,4 +27,13 @@ const stats = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, stats };
+const create = async (req, res, next) => {
+  try {
+    const lead = await leadsService.create(req.tenantId, req.body);
+    res.status(201).json(lead);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { list, getById, stats, create };
