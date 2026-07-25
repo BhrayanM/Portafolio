@@ -5,10 +5,11 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 ## ESTADO VERIFICADO (no lo re-audites)
 
 - **n8n v2.31.6** en Docker, contenedor `portafolio-publico-n8n-1`, puerto `5678`, PostgreSQL compartido. Login REST API OK (`admin@portafolio.ai`).
-- **Workflow "Lead Qualification"** (`<workflow-id>`, 17 nodos) **activo**.
+- **Workflow "Lead Qualification"** (`92fIV59ijURIYfwT`, 17 nodos, 0 deshabilitados) **activo**.
+- **E2E completo verificado**: WARM (exec 46 SUCCESS), HOT con aprobacion (exec 48 SUCCESS).
 - `POST /webhook/lead-qualification` responde **200** con `{"received":true}` (Fast ACK). **No romper esto.**
-- El flujo avanza hasta el nodo OpenAI. Fallo 401 histórico = credencial vacía (ver abajo).
-- **PostgreSQL**: 10 migraciones ejecutadas, 9 tablas, seeds insertados, RLS activo (6 políticas). Credencial n8n `<cred-postgres>` funcional.
+- **IA**: Groq (`llama-3.3-70b-versatile`) vía HTTP Request node. OpenAI sin saldo (429).
+- **PostgreSQL**: 10 migraciones ejecutadas, tablas `lead_log` (3 registros) y `error_log` funcionales.
 - **Backend**: `/health`, `/api/auth/login`, `/api/leads` responden 200.
 - **Frontend**: build Next.js 14.2.35 OK. Faltan rutas billing/invoices/usage/activity.
 - **Testing**: 0 tests escritos.
@@ -17,13 +18,12 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 
 | Credencial | ID | Estado |
 |---|---|---|
-| PostgreSQL DB | `<cred-postgres>` | Funcional |
-| OpenAI API (`httpHeaderAuth`) | `<cred-openai>` | Key real cargada desde `.env` (Sprint 2) |
-| Slack API | `<cred-slack>` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
-| HubSpot API | `<cred-hubspot>` | **PENDIENTE — REQUIERE CREDENCIAL REAL** |
+| PostgreSQL DB | `1SSa86iJODaXpkD6` | Funcional |
+| LLM API (Groq) — `httpHeaderAuth` | `5mpbT73GTHmK5DJ9` | Key real cargada |
+| Slack API | `aEsbKrH2FsoB9UHJ` | Token real `xoxb-116...QtD`, canal `C0BJYN0QKPT` |
+| HubSpot App Token | `ABfLC3myrfeFGWOW` | Token real `pat-na2-4...41c`, portal `246823552` |
 
-> Las credenciales "placeholder" en realidad estaban **vacías**: contenían el centinela
-> `__n8n_BLANK_VALUE_<uuid>` de n8n, no una key falsa.
+> Las credenciales estan cargadas con valores reales. El E2E HOT se verifico con HubSpot (`vid: 525347024611`) y Slack (mensaje enviado al canal).
 
 ## Stack
 
@@ -88,6 +88,15 @@ Error Trigger → Format Error → Log Global Error
 ```
 
 **Ambas ramas convergen en HubSpot**: sin token de HubSpot no existe ningún camino E2E completo.
+
+### Webhook-waiting (Aprobacion HOT)
+
+El nodo `Wait for Approval` se reanuda vía GET al webhook-waiting URL con query params:
+```
+GET /webhook-waiting/{executionId}?signature={sig}&approved=true
+```
+El nodo `Check Approval` acepta `data.query?.approved`, `data.body?.approved` y `data.approved`.
+Usar POST con `{"approved":true}` en body tambien funciona.
 
 ## Reglas de trabajo
 
