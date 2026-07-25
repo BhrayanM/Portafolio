@@ -21,7 +21,6 @@ const apiKeyLimiter = rateLimit({
   max: 60,
   standardHeaders: true,
   legacyHeaders: false,
-  keyGenerator: (req) => req.headers['x-api-key'] || req.ip,
   message: { error: { code: 'API_KEY_RATE_LIMIT', message: 'Límite de API Key excedido.' } },
 });
 
