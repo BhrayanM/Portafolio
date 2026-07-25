@@ -1,16 +1,17 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { apiFetch } from '@/lib/api';
+import { leadsApi } from '@/lib/api';
+import type { LeadStats } from '@/lib/types';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<LeadStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    apiFetch('/leads/stats')
+    leadsApi.stats()
       .then(setStats)
-      .catch(console.error)
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -39,6 +40,12 @@ export default function DashboardPage() {
               <p className="text-3xl font-bold mt-1">{card.value}</p>
             </div>
           ))}
+        </div>
+      )}
+
+      {stats && stats.total === 0 && (
+        <div className="mt-8 bg-white rounded-xl border border-gray-200 p-8 text-center">
+          <p className="text-gray-500">No hay leads registrados. Los leads aparecerán aquí cuando el workflow de n8n los procese.</p>
         </div>
       )}
     </div>

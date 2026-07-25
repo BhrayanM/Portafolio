@@ -1,24 +1,26 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { apiFetch } from '@/lib/api';
+import { authApi } from '@/lib/api';
+import type { User } from '@/lib/types';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
-    // No hay token que inspeccionar: la cookie es HttpOnly. La sesión se comprueba
-    // preguntando al backend, y un 401 significa "no autenticado".
-    apiFetch('/auth/me')
+    authApi.me()
       .then((data) => setUser(data.user))
       .catch(() => router.push('/login'))
       .finally(() => setLoading(false));
   }, [router]);
+
+  const toggleSidebar = useCallback(() => setSidebarOpen((v) => !v), []);
 
   if (loading) {
     return (
@@ -30,10 +32,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      <Sidebar />
-      <div className="flex-1 flex flex-col">
-        <Header user={user} />
-        <main className="flex-1 p-6">{children}</main>
+      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+      <div className="flex-1 flex flex-col min-w-0">
+        <Header user={user} onMenuToggle={toggleSidebar} />
+        <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );

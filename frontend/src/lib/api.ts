@@ -1,13 +1,8 @@
-/**
- * Cliente HTTP del panel.
- *
- * La sesion viaja en una cookie HttpOnly que emite el backend: el JWT ya no se guarda
- * en localStorage (donde cualquier XSS podia leerlo). Por eso todas las peticiones
- * necesitan `credentials: 'include'` y el backend debe permitir este origen en CORS.
- */
+import type { User, Lead, LeadStats, ApiKey, Subscription, BillingPlan, LeadLogEntry, ApiUsage } from './types';
+
 export const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
-export async function apiFetch(path: string, init: RequestInit = {}) {
+export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const res = await fetch(`${API}${path}`, {
     ...init,
     credentials: 'include',
@@ -23,7 +18,7 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
       const body = await res.json();
       message = body.error?.message || message;
     } catch {
-      /* respuesta sin cuerpo JSON */
+      /* sin cuerpo JSON */
     }
     const err = new Error(message) as Error & { status?: number };
     err.status = res.status;
@@ -33,4 +28,40 @@ export async function apiFetch(path: string, init: RequestInit = {}) {
   return res.json();
 }
 
-export const logout = () => apiFetch('/auth/logout', { method: 'POST' });
+export const authApi = {
+  login: (email: string, password: string) =>
+    apiFetch<{ user: User }>('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ email, password }),
+    }),
+  logout: () => apiFetch<{ ok: boolean }>('/auth/logout', { method: 'POST' }),
+  me: () => apiFetch<{ user: User }>('/auth/me'),
+};
+
+export const leadsApi = {
+  list: (params?: Record<string, string>) => {
+    const qs = params ? '?' + new URLSearchParams(params).toString() : '';
+    return apiFetch<Lead[]>(`/leads${qs}`);
+  },
+  stats: () => apiFetch<LeadStats>('/leads/stats'),
+  getById: (id: number) => apiFetch<Lead>(`/leads/${id}`),
+};
+
+export const billingApi = {
+  plans: () => apiFetch<BillingPlan[]>('/billing/plans'),
+  subscription: () => apiFetch<Subscription>('/billing/subscription'),
+};
+
+export const settingsApi = {
+  apiKeys: () => apiFetch<ApiKey[]>('/keys'),
+};
+
+export const activityApi = {
+  list: () => apiFetch<LeadLogEntry[]>('/leads/activity'),
+};
+
+export const usageApi = {
+  get: () => apiFetch<ApiUsage>('/usage'),
+};
+
+export const logout = () => authApi.logout();
