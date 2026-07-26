@@ -1,0 +1,63 @@
+---
+name: Security Scan
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [20]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Audit backend dependencies
+        working-directory: backend
+        run: npm audit
+        continue-on-error: true
+
+      - name: Audit frontend dependencies
+        working-directory: frontend
+        run: npm audit
+        continue-on-error: true
+
+      - name: Check for secrets in files
+        run: |
+          echo "::notice::Checking for potential secret patterns..."
+          if grep -rniE \
+            '(sk-[a-zA-Z0-9]{20,}|ghp_[a-zA-Z0-9]{36,})' \
+            --include='*.{js,ts,json,yaml,yml,md,txt,env}' \
+            --exclude-dir=node_modules --exclude-dir=.git . \
+            2>/dev/null; then
+            echo "::warning::Potential secrets found in repository!"
+            exit 1
+          fi
+          if grep -rniE \
+            '-----BEGIN (RSA |EC )?PRIVATE KEY-----' \
+            --include='*.{js,ts,json,yaml,yml,md,txt,env}' \
+            --exclude-dir=node_modules --exclude-dir=.git . \
+            2>/dev/null; then
+            echo "::warning::Private key file detected!"
+            exit 1
+          else
+            echo "::notice::No obvious secrets detected."
+          fi
+            echo "::warning::Potential secrets found in repository!"
+            exit 1
+          else
+            echo "::notice::No obvious secrets detected."
+          fi

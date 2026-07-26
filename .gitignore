@@ -63,6 +63,7 @@ executions/
 credentials*.json
 flows/
 workflows/
+!.github/workflows/
 
 # ── Bases de datos, dumps, backups ───────────────────────────
 *.sqlite
