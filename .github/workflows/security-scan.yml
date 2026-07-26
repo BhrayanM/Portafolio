@@ -56,8 +56,3 @@ jobs:
           else
             echo "::notice::No obvious secrets detected."
           fi
-            echo "::warning::Potential secrets found in repository!"
-            exit 1
-          else
-            echo "::notice::No obvious secrets detected."
-          fi
