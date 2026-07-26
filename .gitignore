@@ -9,9 +9,6 @@ _private/
 private/
 personal/
 
-# ── Config pública del IDE (NUNCA se sube) ──────────────────
-opencode.json
-
 # ── Secretos y credenciales ──────────────────────────────────
 .env
 .env.*

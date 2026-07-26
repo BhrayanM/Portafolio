@@ -1,0 +1,80 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "username": "BhrayanM",
+
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "enabled": true,
+      "description": "Lets the agent browse and read files in the project directory."
+    },
+    "fetch": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-fetch"],
+      "enabled": true,
+      "description": "Fetches web content. Useful for reading GitHub issues, PRs, and documentation."
+    },
+    "github": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-github"],
+      "enabled": false,
+      "description": "GitHub API integration. Enable by setting GITHUB_TOKEN environment variable. Token: gh auth token"
+    },
+    "playwright": {
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": false,
+      "description": "Browser automation. Enable if frontend testing is needed. Requires: npx playwright install chromium"
+    }
+  },
+
+  "agent": {
+    "sanitize": {
+      "description": "Scans staged files for secrets, credentials, and private info before commit. Use before every git commit on this public repo.",
+      "mode": "subagent",
+      "permission": { "read": "allow", "bash": "allow", "edit": "deny" },
+      "prompt": "You are a security auditor for a public GitHub portfolio repository.\n\nScan all staged files for:\n1. Real API keys, tokens, or secrets (sk-*, ghp_*, AKIA*, xox*)\n2. .env files or credential blocks\n3. Private URLs, webhook URLs, IP addresses, domain names\n4. Client names, real company names, personal data\n5. n8n credential IDs or exported credential blocks\n6. Internal server paths (C:\\, /home/, etc.)\n7. Database connection strings with credentials\n\nReport any issues found. Do NOT modify files — only report."
+    },
+    "docs-review": {
+      "description": "Reviews documentation for quality, completeness, and adherence to portfolio standards.",
+      "mode": "subagent",
+      "permission": { "read": "allow", "edit": "deny" },
+      "prompt": "You are a technical documentation reviewer for an AI automation portfolio.\n\nReview the provided document for:\n1. Professional language — use 'production-ready', 'enterprise automation', 'event-driven', not 'simple' or 'basic'\n2. All image paths resolve to existing files\n3. Badges use img.shields.io only\n4. JSON examples use placeholder data (example.com, Jane Smith, etc.)\n5. No internal prompts, system prompts, or business rules exposed\n6. Structure includes: Overview, Architecture, Workflow, Stack, Security, Impact\n\nReport issues found."
+    },
+    "n8n-example": {
+      "description": "Creates sanitized n8n workflow examples for the projects/examples/ directory.",
+      "mode": "subagent",
+      "permission": { "read": "allow", "bash": "allow", "edit": "ask" },
+      "prompt": "You are an n8n workflow designer creating educational examples for a public portfolio.\n\nRules:\n1. No credentials blocks ('credentials': { ... })\n2. No real webhook URLs or API endpoints — use $env.VAR placeholders\n3. No production node IDs or workflow IDs — use descriptive IDs\n4. Use placeholders for all environment-dependent values\n5. Node names must be generic and descriptive\n6. Prompts must be educational, not production-ready\n7. Include comments stating these are educational references\n8. Use standard n8n node types (n8n-nodes-base.*)\n\nOutput complete, valid JSON workflows that demonstrate patterns without revealing implementation."
+    }
+  },
+
+  "references": {
+    "docs": {
+      "path": "docs",
+      "description": "Technical documentation: deployment guide, engineering notes, architecture patterns."
+    },
+    "patterns": {
+      "path": "docs/patterns",
+      "description": "Reusable automation pattern: Webhook → AI → CRM → Notification."
+    },
+    "examples": {
+      "path": "projects/examples",
+      "description": "Sanitized n8n workflow examples (educational reference JSON files)."
+    }
+  },
+
+  "permission": {
+    "bash": {
+      "git *": "allow",
+      "npm *": "allow",
+      "npx *": "allow",
+      "docker *": "allow",
+      "scoop *": "allow",
+      "*": "ask"
+    },
+    "edit": "ask",
+    "external_directory": { "*": "deny" }
+  }
+}
