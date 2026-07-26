@@ -1,76 +1,121 @@
 -- ═════════════════════════════════════════════════════════════
---  BASE DE DATOS DURO — F19(c) PARTE 2: Usuarios de Base de Datos Seguros
--- Puede ejecutarse después de la migración 010 (RLS activo) para reforzar la seguridad
+--  F19(c) PARTE 2 — Roles de base de datos con privilegio mínimo
+--  Requiere: 001–011 aplicadas.
+--  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 
--- 1. USUARIOS DE LA BASE DE DATOS — service roles sin acceso general a la raíz
--- Usuarios con privilegios mínimos necesarios para el funcionamiento y la migración
--- Rutas externas de CRUD de controlan acceden a través de la conexión de pool pg del backend
+BEGIN;
+
+-- ─────────────────────────────────────────────────────────────
+-- 1. ROLES DE SERVICIO
+-- ─────────────────────────────────────────────────────────────
+--
+--   app    lectura/escritura sobre el esquema de la aplicación. Destinado al
+--          pool de conexiones del backend.
+--   app_admin  operaciones por lotes y verificación. Mismo alcance de datos,
+--          separado para poder auditar y revocar de forma independiente.
+--
+-- F21.3 · dos cambios respecto de la versión original:
+--
+--   a) Los roles se creaban con LOGIN y una contraseña literal escrita en el
+--      fichero ('changeme_service_credentials_change_in_prod'). Este es un
+--      repositorio público: un rol con LOGIN y credencial conocida es una
+--      puerta abierta, no un endurecimiento. Se crean NOLOGIN. Las
+--      credenciales se asignan en el despliegue, fuera de git:
+--
+--          ALTER ROLE app       LOGIN PASSWORD '<generada>';
+--          ALTER ROLE app_admin LOGIN PASSWORD '<generada>';
+--
+--      Los GRANT quedan preparados: habilitar el acceso es una sola sentencia.
+--
+--   b) El rol se llamaba `admin`. Es un nombre genérico que colisiona
+--      conceptualmente con la cuenta `admin` de la aplicación (tabla users) y
+--      con convenciones de otras herramientas sobre el mismo clúster. Pasa a
+--      `app_admin`, que dice a qué pertenece.
 
 DO $$
-DECLARE
-  app_user VARCHAR := 'app';
-  admin_user VARCHAR := 'admin';
-  postgres_user VARCHAR := current_user;
 BEGIN
-  -- Si app_user no existe, créalo con privilegios limitados
-  IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = app_user) THEN
-    EXECUTE format('CREATE ROLE %I WITH LOGIN PASSWORD ''%s''', app_user, 'changeme_service_credentials_change_in_prod');
-    RAISE NOTICE 'Creado rol %', app_user;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app') THEN
+    CREATE ROLE app NOLOGIN;
+    RAISE NOTICE 'Creado rol app (NOLOGIN)';
   END IF;
 
-  -- Si admin_user no existe, créalo con privilegios limitados
-  IF NOT EXISTS (SELECT 1 FROM pg_user WHERE usename = admin_user) THEN
-    EXECUTE format('CREATE ROLE %I WITH LOGIN PASSWORD ''%s''', admin_user, 'changeme_admin_credentials_change_in_prod');
-    RAISE NOTICE 'Creado rol %', admin_user;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_admin') THEN
+    CREATE ROLE app_admin NOLOGIN;
+    RAISE NOTICE 'Creado rol app_admin (NOLOGIN)';
   END IF;
-
-  -- Los privilegios son intencionalmente limitados: solo conexiones para las bases de datos necesarias
-  EXECUTE format('GRANT CONNECT ON DATABASE %I TO %I', current_database(), app_user);
-  EXECUTE format('GRANT CONNECT ON DATABASE %I TO %I', current_database(), admin_user);
 END $$;
 
--- 2. PRIVILEGIOS — ROTACIÓN de clave, todo mínimo por necesidad
--- El backend (+ scripts de migración) se conecta con las credenciales de ADMIN que ya existen,
--- por lo que los privilegios de ADMIN deben incluir EXECUTE para las funciones y para set_config,
--- porque son la única manera legitima de establecer app.tenant_id durante la migración o runtime.
+-- CONNECT no admite el formato %I sobre current_database() en SQL plano.
+DO $$
+BEGIN
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO app',       current_database());
+  EXECUTE format('GRANT CONNECT ON DATABASE %I TO app_admin', current_database());
+END $$;
 
-GRANT USAGE ON SCHEMA public TO app, admin;
-GRANT SELECT ON ALL TABLES IN SCHEMA public TO app;
-GRANT INSERT,UPDATE,DELETE ON ALL TABLES IN SCHEMA public TO app;
-GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO app, admin;
+-- ─────────────────────────────────────────────────────────────
+-- 2. PRIVILEGIOS SOBRE EL ESQUEMA
+-- ─────────────────────────────────────────────────────────────
 
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO app;
-ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT INSERT,UPDATE,DELETE ON TABLES TO app;
+GRANT USAGE ON SCHEMA public TO app, app_admin;
 
--- 3. RETRACCION de accesos innecesarios (similar a un RAISE FAIL):
--- Nodo pg_rewind usaría una conexión con los valores por defecto; aprisionar la aplicacion
--- con NETWORK como queremos.
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA public TO app;
+GRANT USAGE, SELECT                  ON ALL SEQUENCES IN SCHEMA public TO app;
+GRANT EXECUTE                        ON ALL FUNCTIONS IN SCHEMA public TO app, app_admin;
 
-REVOKE ALL ON ALL TABLES IN SCHEMA public FROM PUBLIC;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES    IN SCHEMA public TO app_admin;
+GRANT USAGE, SELECT                  ON ALL SEQUENCES IN SCHEMA public TO app_admin;
+
+-- Las tablas creadas después de esta migración heredan los mismos permisos.
+-- Sin esto, cada migración futura exigiría un GRANT manual.
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app, app_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT USAGE, SELECT ON SEQUENCES TO app, app_admin;
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO app, app_admin;
+
+-- ─────────────────────────────────────────────────────────────
+-- 3. RETIRADA DE PRIVILEGIOS IMPLÍCITOS
+-- ─────────────────────────────────────────────────────────────
+-- PostgreSQL concede EXECUTE sobre funciones a PUBLIC por defecto. Cualquier
+-- rol con conexión podría invocar set_tenant_id() y fijar app.tenant_id a un
+-- tenant ajeno, que es justo lo que RLS debe impedir.
+
+REVOKE ALL ON ALL TABLES    IN SCHEMA public FROM PUBLIC;
 REVOKE ALL ON ALL FUNCTIONS IN SCHEMA public FROM PUBLIC;
 
--- 4. SEGURIDAD: la autorización del superusuario como funciona (performante en local)
--- El backend se ejecuta como app_user. Admin para escrituras por lotes/verificación del sistema,
--- owner como mismo: string \\"jwt_secret, jwt_signer&#93;", solo backend escribe del root.
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
+GRANT  USAGE ON SCHEMA public TO app, app_admin;
 
--- Nota: Como no puedo cambiar el owner, configuro escenarios donde root (postgres) tiene más privilegios
--- de los que necesita, minimizando el daño potencial si la contraseña se ve en algún lugar,
--- porque el agente solo necesita ejecutarse como un servicio con DB_DATA.
-
-REVOKE ALL PRIVILEGES ON DATABASE postgres FROM pg_monitor;
-REVOKE ALL PRIVILEGES ON DATABASE postgres FROM PUBLIC;
-
--- 5. LOGGING DE AUTORIZACIÓN (si está habilitado)
-ALTER SYSTEM SET log_connections = on;
-ALTER SYSTEM SET log_disconnections = on;
-ALTER SYSTEM SET log_line_prefix = '%t [%p]: [%l-1] user=%u, db=%d, app=%a, client=%h, query=%q';
-
--- 6. PROTECCIÓN DE MASTER: sin vista general, roles limitados
-GRANT USAGE ON SCHEMA pg_catalog, pg_temp TO PUBLIC;
--- EXCLUIR pg_hba.conf si existe (no puede ser editado aquí)
-
--- 7. IMPORTANTE: nunca ALTER ROLE a pwd que el backend (config de app) no conoce.
--- 'app_user' es el propietario del pool de conexiones pg y está monitoreado/contenido por app service.
+-- ─────────────────────────────────────────────────────────────
+-- 4. NOTAS DE REPARACIÓN (F21.3)
+-- ─────────────────────────────────────────────────────────────
+--
+-- Retirado · GRANT USAGE ON SCHEMA pg_catalog, pg_temp TO PUBLIC
+--
+--   Causa del fallo original: «schema "pg_temp" does not exist». `pg_temp` no
+--   es un esquema real sino un alias de sesión al esquema temporal, y no se
+--   puede referenciar en un GRANT. Además la sentencia era un no-op: USAGE
+--   sobre pg_catalog ya está concedido a PUBLIC por defecto.
+--
+-- Retirado · REVOKE ALL PRIVILEGES ON DATABASE postgres FROM pg_monitor
+--            REVOKE ALL PRIVILEGES ON DATABASE postgres FROM PUBLIC
+--
+--   Operaban sobre la base `postgres`, no sobre la de la aplicación. Una
+--   migración no debe modificar permisos de otra base de datos del clúster.
+--
+-- Movido · ALTER SYSTEM SET log_connections / log_disconnections /
+--          log_line_prefix
+--
+--   ALTER SYSTEM escribe en postgresql.auto.conf: afecta a TODO el clúster,
+--   exige superusuario y requiere reload para surtir efecto. No pertenece a
+--   una migración de esquema. Va en la configuración del servidor; en el
+--   compose, como `command: postgres -c log_connections=on ...`.
+--
+-- Nota · el backend se conecta hoy con POSTGRES_USER (propietario del
+--        esquema), no con `app`. Estos roles quedan preparados pero sin uso.
+--        Migrar el backend a `app` es lo que convierte esta migración en una
+--        reducción real de privilegios; hasta entonces es andamiaje.
 
 COMMIT;
