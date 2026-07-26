@@ -58,11 +58,21 @@ Estado de las credenciales: cargadas con valores reales en n8n.
 
 ## Repo PÚBLICO — qué nunca se commitea
 
-**Nunca a git:** exports de workflows n8n (`.json`), grafo real / Code nodes, prompts de producción, tokens, URLs de webhook con host no local, cadenas de conexión Postgres, PII.
+**Nunca a git:** exports de workflows n8n (.json), grafo real / Code nodes, prompts de producción, tokens, URLs de webhook con host no local, cadenas de conexión Postgres, PII.
 
 - `.env` en `.gitignore`.
 - `.git/hooks/pre-commit` activo (barrido de secretos).
 - IDs de credenciales n8n se documentan en CLAUDE.md pero se redactan en `docs/`.
+
+---
+## Segundo Cerebro - Sincronizado
+
+- Error 401 webhook-waiting -> usar cookie de login
+- Símbolos extraños ◇? (UTF-16) -> convertir a UTF-8 sin BOM
+- Error token '&&' en PowerShell -> usar ; o comandos separados
+- Error psql extra command-line argument WHERE ignored -> bash -c con comillas simples
+- Cada nuevo error debe duplicarse en `C:\Segundo-Cerebro\09_Errores-Soluciones\`
+- Leemos `C:\Segundo-Cerebro\CLAUDE.md` como contexto global
 
 ## n8n 2.x: publicar el borrador (CRÍTICO)
 
