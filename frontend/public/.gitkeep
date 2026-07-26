@@ -1,0 +1,6 @@
+# Next.js sirve este directorio como raiz de activos estaticos.
+#
+# F21.2: el Dockerfile hace `COPY --from=builder /app/public ./public` y el
+# directorio no existia en el arbol, asi que el build de la imagen fallaba
+# ("/app/public": not found). Git no versiona directorios vacios: este fichero
+# lo mantiene presente en cualquier clon.
