@@ -6,6 +6,44 @@ Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
 ## Último bloque cerrado
 
+**F18.4 — Redis verificado y cerrado con alcance vacío. No se cableó nada.**
+
+Decisión: **NO cablear Redis** (anti-sobreingeniería). Está completo como scaffolding, pero
+**no tiene un solo consumidor**, así que integrarlo hoy no cambiaría nada en runtime.
+
+| Capa | Estado verificado |
+|---|---|
+| `backend/src/services/cache.service.js` | Implementado completo (`get`/`set`/`del`/`increment`), con degradación elegante: devuelve `null`/no-op si Redis está deshabilitado o la conexión falla |
+| **Consumidores** | **Cero.** `grep` en `backend/src` y `backend/tests`: nadie lo requiere |
+| `backend/src/config/index.js:35-40` | Bloque `redis` leído de env, sin hardcodear |
+| `ioredis` | Declarado en `backend/package.json` |
+| `docker-compose.yml:51` | Servicio `redis:7-alpine` con `--requirepass` |
+| `REDIS_ENABLED` en `.env` real | **No existe** → `undefined === 'true'` → `false` |
+| Contenedor Redis | **No corriendo** (solo n8n + postgres) |
+
+**No hay nada roto que arreglar**: al no llamarlo nadie, encender Redis no altera el runtime.
+El bloque F18.4 tal y como estaba definido ("integrar solo lo que el código YA necesita")
+tiene alcance vacío. Cero cambios de código en este bloque.
+
+### Deuda futura (F18.4)
+
+- **Cablear Redis como store de `express-rate-limit` cuando se escale a varias réplicas.**
+  Hoy `backend/src/middleware/rateLimit.js` usa el store **en memoria** por defecto en sus 3
+  limitadores: los contadores se pierden en cada reinicio y no se comparten entre instancias.
+  Con un solo contenedor de API esto es correcto; con réplicas, no. Requiere `rate-limit-redis`
+  y fallback a memoria si Redis no responde.
+- Alternativa si nunca se escala: **retirar** Redis del proyecto (`cache.service.js`, `ioredis`,
+  servicio de compose y bloque de config) por ser código muerto. Decisión aplazada.
+
+### Hallazgo derivado, entregado a F19
+
+**Falta `app.set('trust proxy', ...)` en Express.** `docker/nginx.conf` reenvía `X-Forwarded-For`,
+pero Express no confía en el proxy: detrás de nginx **los rate limiters cuentan por la IP del
+contenedor nginx**, no la del cliente, así que un solo abusador agota el cupo global de todos.
+Bug real, solo visible en la topología con nginx delante. → **Se resuelve en F18.5**.
+
+---
+
 **F18.3 — Limpieza de lint backend completada.** `npm run lint` sale **limpio** (antes: 5 errores).
 
 | Archivo | Qué se quitó / cambió |
@@ -87,6 +125,7 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | F18.1 — Normalización Billing Plans | ✅ Cerrado |
 | F18.2 — Alineación enums de Lead | ✅ Cerrado |
 | F18.3 — Limpieza lint backend | ✅ Cerrado |
+| F18.4 — Redis (alcance vacío, no cableado) | ✅ Cerrado |
 
 ## Estado que se pierde al cortar
 
