@@ -1,5 +1,16 @@
 # F20 — Imagenes pineadas a patch exacto (ver nota en docker-compose.yml).
 # Cada pin coincide con lo que el tag flotante resolvia: no hay salto de version.
+
+# F22 R-01 — Nombre de proyecto EXPLICITO. Sin esta linea, compose deriva el nombre
+# del directorio y sale `portafolio-publico`: el MISMO que docker-compose.yml. Como
+# ademas comparten los nombres de servicio `postgres` y `n8n` y los volumenes
+# `postgres_data` / `n8n_data`, un `up` de este fichero no levantaba un stack
+# paralelo: RECREABA los contenedores de desarrollo con configuracion de produccion
+# (N8N_HOST=n8n.portafolio.ai, N8N_PROTOCOL=https, WEBHOOK_URL=https://...), y con
+# ello rompia el `POST /webhook/lead-qualification` en localhost, que CLAUDE.md marca
+# como intocable. Con nombre propio, los dos stacks quedan aislados.
+name: portafolio-prod
+
 services:
   nginx:
     image: nginx:1.27.5-alpine

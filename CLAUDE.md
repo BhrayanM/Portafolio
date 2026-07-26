@@ -18,8 +18,16 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
   (`/etc/nginx/ssl`), `frontend/src/lib/api.ts` reparado (no compilaba desde F19d).
   Requisitos previos de despliegue en `docs/FASE20_DESPLIEGUE.md`.
 - **F21 cerrada — Release Candidate APTO CON CONDICIONES**. Auditoría integral F0→F20, 0
-  bloqueantes. Informe en `docs/FASE21_AUDITORIA_FINAL.md`; checklist de release en `HANDOFF.md`.
-  Pendiente crítico: **el CI nunca ha corrido** (57 commits sin pushear, `origin/main` en `e2cadc3`).
+  bloqueantes. Informe en `docs/FASE21_AUDITORIA_FINAL.md`.
+- **Cierre RC → release: 🔴 BLOQUEADO el push.** Ver `docs/RELEASE_CHECKLIST.md`. Dos passwords en
+  claro entraron en 4 commits locales (`4779634`, `e0a9c99`, `cb543ee`, `6c5ab82`). **Aún no
+  publicadas** (`origin/main` da 0). Redactadas en el árbol, pero el historial las conserva: hay que
+  **rotar las credenciales** (recomendado) o reescribir el historial antes de subir.
+- **R-05**: los contenedores en ejecución exponen n8n y postgres en `0.0.0.0`, no en `127.0.0.1`
+  como declara el compose. Recrear con `docker compose up -d` (también aplica el pinning de F20).
+- **R-06**: `.github/workflows/ci.yml` **nunca estuvo en git** — la regla `workflows/` del
+  `.gitignore` no estaba anclada y se tragaba `.github/workflows/`. Corregida a `/n8n/workflows/`;
+  los exports de n8n siguen protegidos. El CI no es que no se hubiera ejecutado: no existía.
 - **Stripe**: checkout funcional con test key. Webhook raw body fix aplicado.
 - **WhatsApp/Voice**: scaffolding backend listo (requiere credenciales externas).
 - **Marketplace**: catálogo + instalación persistente.

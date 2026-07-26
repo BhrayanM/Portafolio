@@ -8,7 +8,7 @@
 const request = require('supertest');
 const bcrypt = require('bcrypt');
 
-const PASSWORD = '<ADMIN_SEED_PASSWORD>';
+const PASSWORD = 'fixture-password-no-real';
 let PASSWORD_HASH;
 
 const USER = {

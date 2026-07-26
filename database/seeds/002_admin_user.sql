@@ -1,5 +1,5 @@
 -- Seed: Admin User
--- Password: <ADMIN_SEED_PASSWORD> (hash generado con bcrypt)
+-- SOLO DESARROLLO. El hash corresponde a una password debil y conocida.
 -- IMPORTANTE: Cambiar después del primer login
 INSERT INTO users (tenant_id, email, password_hash, name, role)
 VALUES (

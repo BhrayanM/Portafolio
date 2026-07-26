@@ -62,10 +62,16 @@ executions/
 *.credentials.json
 credentials*.json
 flows/
-workflows/
 # Los exports de workflows n8n NO se versionan aqui: este repo es publico y
 # SECURITY.md los prohibe (grafo real, Code nodes, prompts, credential IDs).
 # Se respaldan fuera del repo. Reforzado por .git/hooks/pre-commit.
+#
+# F22 R-06: esta regla era `workflows/`, SIN anclar. Un patron sin `/` inicial
+# casa con cualquier directorio de ese nombre a cualquier profundidad, asi que
+# tambien se tragaba `.github/workflows/` y **ci.yml nunca estuvo en git**: el CI
+# no es que no se hubiera ejecutado por falta de push, es que no existia en
+# GitHub. Anclado al directorio de n8n, que es lo que se queria proteger.
+/n8n/workflows/
 
 # ── Bases de datos, dumps, backups ───────────────────────────
 *.sqlite

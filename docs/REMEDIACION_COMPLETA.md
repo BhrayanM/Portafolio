@@ -101,7 +101,7 @@ Se ejecutó remediación sobre un proyecto SaaS generado por IA que contenía 13
 | `backend/src/middleware/rateLimit.js` | Removido keyGenerator problemático |
 | `database/migrations/006_create_settings.sql` | `settings` → `tenant_settings` |
 | `database/migrations/010_enable_rls.sql` | `settings` → `tenant_settings` |
-| `database/seeds/002_admin_user.sql` | Hash bcrypt real para <ADMIN_SEED_PASSWORD> |
+| `database/seeds/002_admin_user.sql` | Hash bcrypt real para `<ADMIN_SEED_PASSWORD>` |
 
 ---
 

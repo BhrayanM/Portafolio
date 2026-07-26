@@ -1,8 +1,80 @@
 # HANDOFF — estado para retomar sin repetir
 
-**Última actualización:** 2026-07-26 (cierre F21 · Release Candidate) · Rama `remediacion/v2`
+**Última actualización:** 2026-07-26 (cierre RC → release: **BLOQUEADO**) · Rama `remediacion/v2`
 
 Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
+
+# CIERRE RC → RELEASE: 🔴 BLOQUEADO (push)
+
+2026-07-26. Checklist completo en **`docs/RELEASE_CHECKLIST.md`**.
+Todo verde salvo **un bloqueante**: no se puede hacer push.
+
+## El bloqueante · R-03 — Dos passwords en claro en el historial local
+
+Al preparar el push se barrieron las **27 683 líneas añadidas** por los 58 commits pendientes. Los 8
+patrones de tokens con prefijo (`sk-`, `xox`, `pat-`, `ghp_`, `AKIA`, claves privadas, cadenas
+Postgres, credenciales n8n) salieron **limpios**. Apareció lo que ningún patrón buscaba: **dos
+contraseñas en claro** en 7 ficheros versionados — la del **owner de n8n** (que en producción se
+publica en `n8n.portafolio.ai`) y la del **admin sembrado por `002_admin_user.sql`**.
+
+**Todavía no hay exposición**: `git log -S` sobre `origin/main` da **0** para ambas. Se ha llegado a
+tiempo. Por eso es un bloqueo, no un incidente.
+
+**Redactarlas no basta.** Ya están redactadas en el árbol (R-04), pero entraron en 4 commits
+pendientes (`4779634`, `e0a9c99`, `cb543ee`, `6c5ab82`): un push los publica con su contenido
+original. Hay que elegir —**es decisión humana**—:
+
+- **Vía A · rotar las credenciales** (recomendada): cambiar la password del owner en n8n y regenerar
+  el hash del seed. Lo que se publique queda obsoleto. Barata y no toca el historial.
+- **Vía B · reescribir el historial** con `git filter-repo`. Reescribe 58 commits, cambian todos los
+  SHA. Solo compensa si molesta que las passwords antiguas queden legibles.
+
+## Correcciones aplicadas
+
+| ID | Hallazgo | Corrección |
+|---|---|---|
+| R-01 🔴 | `docker-compose.prod.yml` **secuestraba el stack de desarrollo**: mismo nombre de proyecto derivado del directorio, mismos servicios `postgres`/`n8n` y mismos volúmenes. Un `up` de prod recreaba los contenedores de dev con config de producción y **rompía el webhook en localhost** | `name: portafolio-prod`. Aislamiento verificado |
+| R-06 🔴 | **`ci.yml` nunca estuvo en git.** La regla `workflows/` del `.gitignore` —para los exports de n8n— no estaba anclada y casaba también con `.github/workflows/`. F21 dijo «el CI nunca ha corrido» y lo achacó a la falta de push: en realidad **pushear tampoco lo habría hecho correr**, porque el fichero no existe en el remoto | Regla anclada a `/n8n/workflows/`. Verificado: los 4 exports de n8n siguen ignorados, `ci.yml` ya no |
+| R-02 | El barrido de secretos del CI solo miraba tokens con prefijo: **habría dejado publicar las passwords** | Patrón nuevo, 0 falsos positivos |
+| R-04 | Las dos credenciales en 7 ficheros | Redactadas a `<N8N_ADMIN_PASSWORD>` / `<ADMIN_SEED_PASSWORD>`; fixture del test desacoplado. 98/98 verdes |
+
+## Condiciones de F21 que resultaron NO bloquear
+
+- **Git**: `origin` configurado, Git Credential Manager activo, lectura del remoto OK.
+- **CI**: los 3 jobs pasarían — lint, 98/98, `tsc --noEmit` exit 0, build, barrido de secretos.
+  Pero el workflow **no estaba versionado**: ver R-06, que reescribe el diagnóstico de A-18.
+- **F20-3 (mount SSL)**: ✅ **verificado en contenedor real** — ambos certs legibles en
+  `/etc/nginx/ssl/` y bundle de CAs intacto (299 entradas).
+- **A-04 (upstream n8n)**: ✅ mecanismo confirmado en contenedor real —
+  `[emerg] host not found in upstream` aborta el arranque. El fix era correcto.
+- **n8n**: versión **2.31.6**, `healthz` ok, y `POST /webhook/lead-qualification` responde
+  **200 `{"received":true}`**. Workflow activo, nada modificado.
+
+## R-05 🟠 — Los contenedores vivos no son los que declaran los compose
+
+Solo visible con el demonio arrancado. Se crearon con una versión anterior de `docker-compose.yml`:
+
+| | Compose declara | En ejecución |
+|---|---|---|
+| n8n / postgres | `127.0.0.1:5678` / `127.0.0.1:5432` | **`0.0.0.0`** en ambos |
+| Imágenes | `n8n:2.31.6` · `postgres:15.18-alpine` | `n8n:latest` · `postgres:15-alpine` |
+
+**La UI de n8n y PostgreSQL están publicados en todas las interfaces**, no en loopback. El compose ya
+es correcto desde hace fases; falta **recrear los contenedores** (`docker compose up -d`), lo que de
+paso aplica el pinning de F20-2. No se hizo aquí a propósito: recrea n8n, y eso es decisión
+explícita. Los datos están en el volumen, el workflow no se pierde.
+
+*(La versión en ejecución sí es 2.31.6: el tag `latest` resolvió a la correcta.)*
+
+## Estado del demonio Docker
+
+Se arrancó Docker Desktop para poder cerrar las áreas 3 y 4 — estaba parado y era lo que impedía
+verificar nada de runtime en F21. Los contenedores de dev volvieron solos (`restart: always`).
+**No se levantó el stack de producción**: el clasificador de permisos bloqueó `up --build`, así que
+la validación se hizo con contenedores efímeros (`docker run --rm`), que dieron los dos resultados
+de arriba. No quedaron residuos.
+
+---
 
 # FASE 21 COMPLETADA — Release Candidate: APTO CON CONDICIONES
 
