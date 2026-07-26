@@ -9,6 +9,10 @@ _private/
 private/
 personal/
 
+# ── Config de agente IA (no se sube al portafolio público) ──
+CLAUDE.md
+opencode.json
+
 # ── Secretos y credenciales ──────────────────────────────────
 .env
 .env.*
