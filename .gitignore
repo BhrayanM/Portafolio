@@ -12,6 +12,39 @@ personal/
 # ── Config pública del IDE (NUNCA se sube) ──────────────────
 opencode.json
 
+# ── Contexto de agente IA y bitácora interna (repo público) ──
+# F21.2: CLAUDE.md, AGENTS.md y HANDOFF.md llevaban IDs reales de
+# credenciales n8n, el portal de HubSpot y rutas de workspace privado.
+# SECURITY.md los prohíbe. Se conservan en local, fuera de git.
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+PROGRESO.md
+PROJECT_STATUS.md
+DECISIONS.md
+CHANGELOG_AI.md
+
+# ── Documentación interna de proceso (no es material de portfolio) ──
+# Auditorías, planes de remediación, reportes de fase y bitácoras.
+# `docs/fase-*/` incluye prompts de producción: SECURITY.md regla 5.
+docs/AUDITORIA_*.md
+docs/CIERRE_FASE.md
+docs/FASE19_*.md
+docs/FASE20_*.md
+docs/FASE21_*.md
+docs/HANDOFF.md
+docs/IMPLEMENTATION_PLAN.md
+docs/LECCIONES_APRENDIDAS.md
+docs/LOG_AUTONOMO.md
+docs/PLAN_REMEDIACION.md
+docs/PRODUCCION_CHECKLIST.md
+docs/RELEASE_CHECKLIST.md
+docs/REMEDIACION_COMPLETA.md
+docs/REPORTE_FASE_*.md
+docs/SPRINT*.md
+docs/VALIDACION_RUNTIME.md
+docs/fase-*/
+
 # ── Secretos y credenciales ──────────────────────────────────
 .env
 .env.*
