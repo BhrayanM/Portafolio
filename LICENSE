@@ -1,0 +1,105 @@
+ALL RIGHTS RESERVED
+Copyright (c) 2026 Bhrayan Márquez — AI Automation Engineer
+
+===============================================================================
+1. ALCANCE / SCOPE
+===============================================================================
+
+Este repositorio es un PORTAFOLIO TÉCNICO. Contiene documentación de
+arquitectura, diagramas conceptuales, infografías y fragmentos de código
+ilustrativos (no funcionales de extremo a extremo).
+
+This repository is a TECHNICAL PORTFOLIO. It contains architecture
+documentation, conceptual diagrams, infographics and illustrative
+(non end-to-end functional) code snippets.
+
+NO es software de código abierto. NO es una plantilla. NO es un producto
+descargable.
+
+It is NOT open source software. It is NOT a template. It is NOT a
+downloadable product.
+
+===============================================================================
+2. DERECHOS RESERVADOS / RESERVED RIGHTS
+===============================================================================
+
+Todos los derechos sobre el contenido de este repositorio —incluyendo textos,
+diagramas, infografías, nombres de sistemas, decisiones de diseño documentadas
+y fragmentos de código— están reservados por el autor.
+
+All rights over the contents of this repository — including text, diagrams,
+infographics, system names, documented design decisions and code snippets —
+are reserved by the author.
+
+Queda EXPRESAMENTE PROHIBIDO, sin autorización previa y por escrito del autor:
+
+The following are EXPRESSLY PROHIBITED without prior written authorization:
+
+  a) Copiar, reproducir o redistribuir el contenido, total o parcialmente.
+     Copying, reproducing or redistributing the content, in whole or in part.
+
+  b) Crear obras derivadas, adaptaciones o traducciones.
+     Creating derivative works, adaptations or translations.
+
+  c) Usar el contenido con fines comerciales, incluyendo su presentación
+     ante clientes propios o de terceros.
+     Commercial use, including presenting it to your own or third-party clients.
+
+  d) Reconstruir, replicar o comercializar los sistemas descritos, o cualquier
+     parte de su lógica, a partir de esta documentación.
+     Rebuilding, replicating or commercializing the described systems, or any
+     part of their logic, from this documentation.
+
+  e) Usar el contenido para entrenar, afinar o evaluar modelos de aprendizaje
+     automático, o para alimentar sistemas de generación automática.
+     Using the content to train, fine-tune or evaluate machine learning models,
+     or to feed automated generation systems.
+
+===============================================================================
+3. LO QUE SÍ SE PERMITE / PERMITTED USE
+===============================================================================
+
+  - Ver y leer el repositorio con fines de evaluación profesional
+    (reclutamiento, due diligence técnico, evaluación de proveedor).
+    Viewing and reading for professional evaluation purposes.
+
+  - Enlazar públicamente a este repositorio con atribución al autor.
+    Publicly linking to this repository with attribution to the author.
+
+===============================================================================
+4. PROPIEDAD DEL MÉTODO / METHOD OWNERSHIP
+===============================================================================
+
+Las implementaciones reales de los sistemas descritos —incluyendo los grafos de
+workflow, los prompts de producción, las heurísticas de puntuación, las reglas
+de saneamiento de entradas y los parámetros operativos— NO forman parte de este
+repositorio y permanecen como propiedad y know-how privado del autor.
+
+The actual implementations of the described systems — including workflow
+graphs, production prompts, scoring heuristics, input sanitization rules and
+operational parameters — are NOT part of this repository and remain the private
+property and know-how of the author.
+
+La ausencia de esos artefactos es deliberada.
+Their absence is deliberate.
+
+===============================================================================
+5. SIN GARANTÍA / NO WARRANTY
+===============================================================================
+
+EL CONTENIDO SE PROPORCIONA "TAL CUAL", SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+IMPLÍCITA. EL AUTOR NO SERÁ RESPONSABLE POR NINGÚN DAÑO DERIVADO DEL USO DE
+ESTE CONTENIDO.
+
+THE CONTENT IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED. THE AUTHOR SHALL NOT BE LIABLE FOR ANY DAMAGES ARISING FROM THE USE OF
+THIS CONTENT.
+
+===============================================================================
+6. LICENCIAS COMERCIALES / COMMERCIAL LICENSING
+===============================================================================
+
+¿Necesitas uno de estos sistemas implementado para tu empresa?
+Need one of these systems implemented for your company?
+
+  bhrayan.automation@gmail.com
