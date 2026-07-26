@@ -1,0 +1,25 @@
+{
+  "message_id": "wamid_example_001",
+  "timestamp": "2026-07-26T04:30:00Z",
+  "from": "+1-555-0123",
+  "channel": "whatsapp",
+  "message_type": "text",
+  "body": "Hi, can you tell me when my order #12345 will arrive?",
+  "context": {
+    "conversation_id": "conv_example_001",
+    "previous_messages": [
+      {
+        "role": "customer",
+        "message": "I have a question about my order",
+        "timestamp": "2026-07-26T04:28:00Z"
+      },
+      {
+        "role": "agent",
+        "message": "Of course! Please share your order number and I'll look it up.",
+        "timestamp": "2026-07-26T04:28:30Z"
+      }
+    ]
+  },
+  "dedup_result": "new_message",
+  "matched_faq": false
+}

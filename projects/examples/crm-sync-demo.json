@@ -1,0 +1,144 @@
+{
+  "name": "CRM Sync Demo",
+  "nodes": [
+    {
+      "id": "cron-trigger",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [0, 300],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 1
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "webhook-manual",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 500],
+      "parameters": {
+        "path": "crm-sync-trigger",
+        "options": {
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        }
+      }
+    },
+    {
+      "id": "fetch-contacts",
+      "name": "Fetch Contacts (Source)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [300, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.SOURCE_API_URL }}/contacts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.SOURCE_API_TOKEN }}" }
+          ]
+        },
+        "queryParameters": {
+          "parameters": [
+            { "name": "updatedSince", "value": "={{ $env.LAST_SYNC_TIMESTAMP }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "transform-code",
+      "name": "Transform Fields",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300],
+      "parameters": {
+        "language": "javascript",
+        "code": "// Field mapping transformation\nconst mapped = [];\nfor (const contact of $input.all()) {\n  mapped.push({\n    email: contact.json.email,\n    firstName: contact.json.first_name || contact.json.givenName,\n    lastName: contact.json.last_name || contact.json.surname,\n    phone: contact.json.phone || contact.json.telephone,\n    company: contact.json.company || contact.json.organization,\n    lastModified: new Date().toISOString()\n  });\n}\nreturn mapped;\n"
+      }
+    },
+    {
+      "id": "upsert-destination",
+      "name": "Upsert Contacts (Destination)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [900, 300],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DESTINATION_API_URL }}/contacts/batch",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.DESTINATION_API_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "contacts", "value": "={{ $json }}" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "log-sync",
+      "name": "Log Sync Result",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1200, 300],
+      "parameters": {
+        "language": "javascript",
+        "code": "// Log sync statistics\nconst response = $input.first().json;\nreturn [{\n  syncTimestamp: new Date().toISOString(),\n  contactsSynced: response.synced || response.upserted?.length || 0,\n  contactsFailed: response.failed?.length || 0,\n  status: response.success ? 'completed' : 'partial'\n}];\n"
+      }
+    },
+    {
+      "id": "notify-slack",
+      "name": "Notify Summary",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1500, 300],
+      "parameters": {
+        "channel": "{{ $env.SLACK_SYNC_CHANNEL }}",
+        "text": "={{ '🔄 *CRM Sync Complete*\nSynced: ' + $json.contactsSynced + ' contacts\nFailed: ' + $json.contactsFailed + '\nStatus: ' + $json.status }}",
+        "otherOptions": {
+          "icon_emoji": ":arrows_counterclockwise:"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [[ { "node": "Fetch Contacts (Source)", "type": "main", "index": 0 } ]]
+    },
+    "Schedule": {
+      "main": [[ { "node": "Fetch Contacts (Source)", "type": "main", "index": 0 } ]]
+    },
+    "Fetch Contacts (Source)": {
+      "main": [[ { "node": "Transform Fields", "type": "main", "index": 0 } ]]
+    },
+    "Transform Fields": {
+      "main": [[ { "node": "Upsert Contacts (Destination)", "type": "main", "index": 0 } ]]
+    },
+    "Upsert Contacts (Destination)": {
+      "main": [[ { "node": "Log Sync Result", "type": "main", "index": 0 } ]]
+    },
+    "Log Sync Result": {
+      "main": [[ { "node": "Notify Summary", "type": "main", "index": 0 } ]]
+    }
+  },
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true
+  }
+}

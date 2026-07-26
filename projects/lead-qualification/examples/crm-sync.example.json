@@ -1,0 +1,21 @@
+{
+  "operation": "upsert",
+  "target": "hubspot",
+  "contact": {
+    "email": "contact@example.com",
+    "first_name": "Jane",
+    "last_name": "Smith",
+    "company": "Acme Corp",
+    "phone": "+1-555-0123",
+    "lead_score": 82,
+    "lead_status": "hot",
+    "source": "website",
+    "owner": "sales_team"
+  },
+  "sync_result": {
+    "id": "contact_789xyz",
+    "status": "created",
+    "previous_status": null
+  },
+  "sync_timestamp": "2026-07-26T04:31:00Z"
+}

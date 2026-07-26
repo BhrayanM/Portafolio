@@ -1,0 +1,17 @@
+{
+  "lead_id": "lq_example_001",
+  "score": 82,
+  "temperature": "hot",
+  "category": "sales",
+  "rationale": "Enterprise company with clear budget indication and decision-maker role",
+  "confidence": 0.91,
+  "suggested_action": "approval_required",
+  "enriched_fields": {
+    "industry": "technology",
+    "employee_count": 250,
+    "estimated_budget": "50k-100k"
+  },
+  "scoring_timestamp": "2026-07-26T04:30:00Z",
+  "model": "gpt-4o-mini",
+  "response_format": "structured_json"
+}
