@@ -108,9 +108,9 @@ autor. Hoy no está contado en ninguna parte visible.
 Cliente / n8n / WhatsApp / Twilio
         │
    nginx (TLS 1.2-1.3, HSTS, limit_req 10r/s burst 20, security headers)
-        ├── portafolio.ai      → frontend:3001  (Next.js standalone)
-        ├── api.portafolio.ai  → api:3000       (Express)
-        └── n8n.portafolio.ai  → n8n:5678
+        ├── example.com      → frontend:3001  (Next.js standalone)
+        ├── api.example.com  → api:3000       (Express)
+        └── n8n.example.com  → n8n:5678
                 │
         Express: trust proxy → securityMiddleware → CORS allowlist → requestId
                  → morgan → [webhook Stripe raw] → json → cookieParser
@@ -338,7 +338,7 @@ Verificado en vivo: las cabeceras salen.
 
 | ID | Sev. | Hallazgo |
 |---|---|---|
-| **I-01** | **Alto** | **n8n publicado en `n8n.portafolio.ai:443` sin autenticación ni allowlist.** El comentario del `.conf` dice *«admin access only via Tailscale / internal VPN»*, pero nada lo implementa. Es el panel con las credenciales de CRM, Slack y LLM. |
+| **I-01** | **Alto** | **n8n publicado en `n8n.example.com:443` sin autenticación ni allowlist.** El comentario del `.conf` dice *«admin access only via Tailscale / internal VPN»*, pero nada lo implementa. Es el panel con las credenciales de CRM, Slack y LLM. |
 | **I-02** | Medio | `.env.example` trae `DB_HOST=localhost` (correcto fuera de Docker, y así lo documenta). Quien lo copie tal cual obtiene un contenedor que arranca, responde y devuelve `db:disconnected` hasta que el healthcheck lo marca. Verificado. |
 | **I-03** | Medio | `env_file: .env` en el servicio frontend inyecta `JWT_SECRET`, `STRIPE_SECRET_KEY` y la contraseña de BD en el contenedor Next.js, que no los necesita. |
 | **I-04** | Bajo | Cabeceras de seguridad duplicadas (nginx `add_header` + helmet). Sin impacto; conviene una sola fuente. |
@@ -368,8 +368,8 @@ El historial está limpio.
 | ID | Sev. | Hallazgo |
 |---|---|---|
 | **S-01** | **BLOQUEADOR** | **`RECOVERY_DIFF_REPORT.md` y `RELEASE_RECOVERY_SUMMARY.md` contienen 4 IDs reales de credenciales n8n, el ID del portal de HubSpot y el `vid` de un contacto real.** Los escribí yo en FASE 21.2 al documentar su retirada. Están versionados. Violan SECURITY.md regla 6, la misma que documentan. *(Corregido en FASE 21.5.)* |
-| **S-02** | **BLOQUEADOR** | **PII realista en `scripts/test-lead-webhook.sh`:** `Carlos Mendoza / carlos@techsolve.mx / +52 55 1234 5678` y `Ana López / ana@crece.mx / +52 33 9876 5432`, con cargos y presupuestos. `techsolve.mx` y `crece.mx` no son dominios reservados. Un revisor no puede distinguirlos de datos de cliente sin limpiar — y esa ambigüedad ya es el daño. |
-| **S-03** | Alto | Dominio real `portafolio.ai` en 8 ficheros versionados. Menos grave que S-01/S-02 (es tu propio dominio), pero contradice la regla 3 que el repo se impone. |
+| **S-02** | **BLOQUEADOR** | **PII realista en `scripts/test-lead-webhook.sh`:** dos nombres completos con sus emails en dominios `.mx` no reservados y teléfonos mexicanos con formato válido, más cargos y presupuestos. Un revisor no puede distinguirlos de datos de cliente sin limpiar — y esa ambigüedad ya es el daño. *(Corregido en FASE 21.5: `Jane Smith` / `John Doe`, `@example.com`, rango `+1-555-01xx`.)* |
+| **S-03** | Alto | Dominio real `example.com` en 8 ficheros versionados. Menos grave que S-01/S-02 (es tu propio dominio), pero contradice la regla 3 que el repo se impone. |
 | **S-04** | **Crítico** | RLS inerte — ver D-01. |
 | **S-05** | Alto | API keys en claro — ver B-01/B-02. |
 | **S-06** | Alto | Webhooks de WhatsApp y Voice sin verificación de firma — B-03/B-04. |
@@ -662,7 +662,7 @@ de migraciones valen casi tres puntos, y no se escribió una sola línea de func
 10. `middleware.ts` en Next para protección de rutas en servidor.
 11. Tabla de control de migraciones y `ON_ERROR_STOP=1` en `docs/deployment-guide.md`.
 12. Tests de frontend.
-13. Parametrizar `portafolio.ai` en los 8 ficheros.
+13. Parametrizar `example.com` en los 8 ficheros.
 14. `cap_drop`, `no-new-privileges` y límites de recursos en el compose.
 15. Revalidar los targets de Prometheus (quedaron 3 de 4 rotos en FASE 21; no revalidados aquí).
 
