@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 700" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="700" fill="url(#bg)" rx="12"/>
+
+  <text x="450" y="32" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="700">Bilingual Voice Receptionist — AI Agent Architecture</text>
+  <line x1="180" y1="42" x2="720" y2="42" stroke="#334155" stroke-width="1"/>
+
+  <!-- Step 1: Incoming Call -->
+  <rect x="350" y="62" width="200" height="46" rx="23" fill="#1e3a5f" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="82" text-anchor="middle" fill="#60a5fa" font-size="12" font-weight="600">📞 Incoming Call</text>
+  <text x="450" y="98" text-anchor="middle" fill="#64748b" font-size="9">Twilio Voice Webhook</text>
+  <line x1="450" y1="108" x2="450" y2="130" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 2: Voice Webhook -->
+  <rect x="350" y="135" width="200" height="46" rx="8" fill="#1a3b2a" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="155" text-anchor="middle" fill="#6ee7b7" font-size="12" font-weight="600">Voice Webhook</text>
+  <text x="450" y="171" text-anchor="middle" fill="#64748b" font-size="9">Fast-ACK · Parse payload</text>
+  <line x1="450" y1="181" x2="450" y2="203" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 3: Language Detection -->
+  <rect x="300" y="208" width="300" height="46" rx="8" fill="#2e1052" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="228" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="600">🌐 Language Detection</text>
+  <text x="450" y="244" text-anchor="middle" fill="#64748b" font-size="9">EN / ES detection · Locale routing · Format localization</text>
+
+  <!-- Branch: EN / ES -->
+  <line x1="450" y1="254" x2="450" y2="270" stroke="#475569" stroke-width="2"/>
+  <line x1="300" y1="270" x2="600" y2="270" stroke="#475569" stroke-width="2"/>
+  <line x1="300" y1="270" x2="300" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="600" y1="270" x2="600" y2="285" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- EN Context -->
+  <rect x="210" y="290" width="180" height="40" rx="6" fill="#1e3a5f" stroke="#2563eb" stroke-width="1"/>
+  <text x="300" y="308" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">🇺🇸 English Context</text>
+  <text x="300" y="323" text-anchor="middle" fill="#64748b" font-size="9">EN date/number formats</text>
+
+  <!-- ES Context -->
+  <rect x="510" y="290" width="180" height="40" rx="6" fill="#1a3b2a" stroke="#059669" stroke-width="1"/>
+  <text x="600" y="308" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="600">🇪🇸 Spanish Context</text>
+  <text x="600" y="323" text-anchor="middle" fill="#64748b" font-size="9">ES date/number formats</text>
+
+  <!-- Merge back -->
+  <line x1="300" y1="330" x2="300" y2="345" stroke="#475569" stroke-width="2"/>
+  <line x1="600" y1="330" x2="600" y2="345" stroke="#475569" stroke-width="2"/>
+  <line x1="300" y1="345" x2="600" y2="345" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="345" x2="450" y2="358" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 4: Validation & Rules Engine -->
+  <rect x="300" y="363" width="300" height="46" rx="8" fill="#3b2000" stroke="#ea580c" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="383" text-anchor="middle" fill="#fdba74" font-size="12" font-weight="600">Validation &amp; Rules Engine</text>
+  <text x="450" y="399" text-anchor="middle" fill="#64748b" font-size="9">Intent recognition · Entity extraction · Deterministic routing</text>
+  <line x1="450" y1="409" x2="450" y2="426" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 5: Tool Router -->
+  <rect x="300" y="431" width="300" height="46" rx="8" fill="#2e1052" stroke="#8b5cf6" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="451" text-anchor="middle" fill="#ddd6fe" font-size="12" font-weight="600">🔀 Tool Router</text>
+  <text x="450" y="467" text-anchor="middle" fill="#64748b" font-size="9">Intent → Tool mapping · Deterministic dispatch</text>
+
+  <!-- Tool branches -->
+  <line x1="450" y1="477" x2="450" y2="490" stroke="#475569" stroke-width="2"/>
+  <line x1="90" y1="490" x2="810" y2="490" stroke="#475569" stroke-width="2"/>
+  <line x1="90" y1="490" x2="90" y2="508" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="230" y1="490" x2="230" y2="508" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="370" y1="490" x2="370" y2="508" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="530" y1="490" x2="530" y2="508" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="670" y1="490" x2="670" y2="508" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Calendar Tools -->
+  <rect x="30" y="513" width="130" height="38" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="95" y="530" text-anchor="middle" fill="#60a5fa" font-size="10" font-weight="600">Check Availability</text>
+  <text x="95" y="544" text-anchor="middle" fill="#64748b" font-size="8">Calendar API</text>
+
+  <rect x="170" y="513" width="130" height="38" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="235" y="530" text-anchor="middle" fill="#fbbf24" font-size="10" font-weight="600">Create Booking</text>
+  <text x="235" y="544" text-anchor="middle" fill="#64748b" font-size="8">Calendar API</text>
+
+  <rect x="310" y="513" width="130" height="38" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="375" y="530" text-anchor="middle" fill="#34d399" font-size="10" font-weight="600">Lookup / Cancel</text>
+  <text x="375" y="544" text-anchor="middle" fill="#64748b" font-size="8">Calendar API</text>
+
+  <!-- Commerce tool -->
+  <rect x="450" y="513" width="130" height="38" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="515" y="530" text-anchor="middle" fill="#f472b6" font-size="10" font-weight="600">Order Lookup</text>
+  <text x="515" y="544" text-anchor="middle" fill="#64748b" font-size="8">Shopify API</text>
+
+  <!-- Human handoff -->
+  <rect x="590" y="513" width="140" height="38" rx="6" fill="#3b1a1a" stroke="#dc2626" stroke-width="1"/>
+  <text x="660" y="530" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="600">Escalate Human</text>
+  <text x="660" y="544" text-anchor="middle" fill="#64748b" font-size="8">Handoff protocol</text>
+
+  <!-- Merge to response -->
+  <line x1="95" y1="551" x2="95" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="235" y1="551" x2="235" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="375" y1="551" x2="375" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="515" y1="551" x2="515" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="660" y1="551" x2="660" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="95" y1="570" x2="660" y2="570" stroke="#475569" stroke-width="2"/>
+  <line x1="375" y1="570" x2="375" y2="585" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- Step 6: Response -->
+  <rect x="250" y="590" width="250" height="44" rx="8" fill="#1a2e4a" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="375" y="610" text-anchor="middle" fill="#93c5fd" font-size="12" font-weight="600">🗣️ Voice Response</text>
+  <text x="375" y="625" text-anchor="middle" fill="#64748b" font-size="9">In detected language · TTS</text>
+
+  <rect x="520" y="590" width="180" height="44" rx="8" fill="#1a3b2a" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="610" y="610" text-anchor="middle" fill="#6ee7b7" font-size="12" font-weight="600">🔔 Confirmation</text>
+  <text x="610" y="625" text-anchor="middle" fill="#64748b" font-size="9">WhatsApp / Email</text>
+
+  <!-- Error workflow -->
+  <rect x="30" y="652" width="180" height="28" rx="4" fill="#1e293b" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="120" y="670" text-anchor="middle" fill="#fca5a5" font-size="9">Error Workflow (global)</text>
+  <line x1="120" y1="652" x2="120" y2="620" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+  <line x1="120" y1="620" x2="370" y2="620" stroke="#dc2626" stroke-width="1" stroke-dasharray="3,2"/>
+  <polygon points="368,617 376,620 368,623" fill="#dc2626"/>
+
+  <rect x="700" y="652" width="170" height="28" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1" stroke-dasharray="3,2"/>
+  <text x="785" y="670" text-anchor="middle" fill="#64748b" font-size="9">PostgreSQL Interaction Log</text>
+  <line x1="785" y1="652" x2="785" y2="634" stroke="#334155" stroke-width="1" stroke-dasharray="3,2"/>
+</svg>

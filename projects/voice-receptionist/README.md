@@ -1,254 +1,135 @@
 <div align="center">
 
-# Bilingual Voice Receptionist (EN / ES)
+# Bilingual AI Voice Receptionist (EN / ES)
 
-**Recepcionista de voz 24/7 que detecta idioma, entiende intención y gestiona el calendario.**
+**24/7 conversational voice agent with language detection, calendar management, and commerce integration.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](#)
 [![Voice AI](https://img.shields.io/badge/Voice_AI-6f42c1?style=flat-square&logo=audiomack&logoColor=white)](#)
-[![Calendar](https://img.shields.io/badge/Calendar_API-4285F4?style=flat-square&logo=googlecalendar&logoColor=white)](#)
+[![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=flat-square&logo=twilio&logoColor=white)](#)
+[![Calendar API](https://img.shields.io/badge/Calendar_API-4285F4?style=flat-square&logo=googlecalendar&logoColor=white)](#)
 [![Shopify](https://img.shields.io/badge/Shopify-7AB55C?style=flat-square&logo=shopify&logoColor=white)](#)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](#)
-
-[![Estado](https://img.shields.io/badge/estado-demostración-2ea44f?style=flat-square)](#)
-[![Bilingüe](https://img.shields.io/badge/EN%20%2F%20ES-nativo-0aa?style=flat-square)](#)
-[![Latencia](https://img.shields.io/badge/diseñado_para-baja_latencia-orange?style=flat-square)](#)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](#)
 
 </div>
 
-![Arquitectura del Bilingual Voice Receptionist](../../assets/voice-receptionist-architecture.png)
+---
+
+## 1. Overview
+
+The Bilingual Voice Receptionist is an **AI-powered conversational voice agent** that handles inbound calls 24/7 in English and Spanish. It detects the caller's language in real time, validates intent through a deterministic rules engine, routes to the appropriate tool (calendar management, order lookup, or human escalation), and responds with natural speech in the caller's detected language.
+
+### Problem
+
+Businesses with mixed EN/ES customer bases face two simultaneous losses: unanswered calls outside business hours, and language mismatches that alienate half their client base. A traditional IVR solves neither — callers hang up before reaching a human.
+
+### Solution
+
+An AI voice agent that combines **real-time language detection**, **deterministic intent validation**, **bounded tool execution with latency budgets**, and **persistent interaction logging** — all within a containerized, observable architecture.
+
+### Enterprise Value
+
+- **24/7 coverage** — No missed calls, no after-hours gaps
+- **Native bilingual experience** — Each caller served in their own language
+- **Full calendar lifecycle** — Book, look up, cancel, and reschedule without human intervention
+- **Reduced operational overhead** — Routine inquiries handled autonomously
 
 ---
 
-## El problema
+## 2. Architecture Diagram
 
-Un negocio con base de clientes mixta EN/ES recibe llamadas fuera de horario. Dos pérdidas
-simultáneas:
+![Voice Agent Bilingual Architecture](voice-agent-bilingual-architecture.svg)
 
-- **La llamada perdida** — nadie contesta a las 20:00, y la llamada no vuelve.
-- **El idioma equivocado** — atender solo en un idioma convierte a media base de clientes
-  en clientes de segunda.
-
-Un contestador automático no resuelve ninguna de las dos: el cliente cuelga.
+*End-to-end architecture: incoming call → Twilio webhook → language detection → validation rules engine → deterministic tool router → calendar/shopify actions → spoken response with written confirmation.*
 
 ---
 
-## La solución en una frase
+## 3. Technical Workflow
 
-Un agente de voz que **detecta el idioma en la propia llamada**, **valida la intención con
-reglas deterministas**, **enruta a la herramienta correcta** y **gestiona el calendario de
-punta a punta** — con escalado a humano cuando hace falta.
+### Stage 1: Inbound Call & Voice Webhook
+An incoming call hits the Twilio voice webhook. The system responds with an immediate ACK to prevent provider timeouts, then parses the call metadata and audio stream.
 
----
+### Stage 2: Language Detection
+The caller's language is detected within the call context — not inferred from phone number or region. English and Spanish contexts are maintained independently, including locale-specific date, time, and number formatting.
 
-## Arquitectura conceptual
+**Critical detail:** Date localization is applied to both spoken output and written confirmations. *"El tres de abril"* and *"April third"* are different utterances that produce different calendar entries.
 
-```mermaid
-flowchart TD
-    A["📞 Llamada entrante"] --> B["🎙️ Voice Webhook"]
-    B --> C["🌐 Detección de idioma<br/><i>EN / ES</i>"]
-    C --> D["✅ Validación<br/>y motor de reglas<br/><i>intención + entidades</i>"]
-    D --> E{"¿Intención<br/>reconocida?"}
-    E -- No --> E1["Re-preguntar acotado<br/>· tras N intentos → humano"]
-    E -- Sí --> F{"🔀 Tool Router"}
+### Stage 3: Validation & Rules Engine
+A deterministic rules engine extracts intent and entities from the caller's request before any AI processing occurs. This ensures fast, cheap routing for well-defined queries while reserving LLM inference for ambiguous cases.
 
-    F -- "Disponibilidad" --> G["📆 Consultar huecos"]
-    F -- "Agendar" --> H["📆 Crear cita"]
-    F -- "Consultar cita" --> I["📆 Buscar cita"]
-    F -- "Cancelar" --> J["📆 Cancelar"]
-    F -- "Reagendar" --> K["📆 Reagendar"]
-    F -- "Pedido" --> L["🛒 Consulta de pedido<br/><i>Shopify</i>"]
-    F -- "Fuera de alcance" --> M["🙋 Escalar a humano"]
+### Stage 4: Tool Router
+The router dispatches to purpose-built tools based on recognized intent:
 
-    G --> N["🗣️ Respuesta hablada<br/><i>en el idioma detectado</i>"]
-    H --> N
-    I --> N
-    J --> N
-    K --> N
-    L --> N
+| Intent | Tool | API |
+|--------|------|-----|
+| Availability check | Calendar query | Calendar API |
+| Create booking | Calendar write | Calendar API |
+| Lookup appointment | Calendar read | Calendar API |
+| Cancel appointment | Calendar delete | Calendar API |
+| Reschedule | Calendar atomic swap | Calendar API |
+| Order inquiry | Order lookup | Shopify API |
+| Out of scope | Human escalation | Handoff protocol |
 
-    H --> O["🔔 Confirmación<br/>por WhatsApp / email"]
-    K --> O
-    J --> O
-
-    N --> P[("🗄️ Registro de<br/>la interacción")]
-    M --> P
-
-    Q["🚨 Error Workflow global"] -.captura fallos.-> R[("Tabla de errores<br/>en PostgreSQL")]
-
-    style C fill:#0F9D58,color:#fff
-    style D fill:#e07b00,color:#fff
-    style F fill:#412991,color:#fff
-    style M fill:#e07b00,color:#fff
-    style P fill:#4169E1,color:#fff
-    style Q fill:#8b1a1a,color:#fff
-    style R fill:#8b1a1a,color:#fff
-```
+### Stage 5: Voice Response & Confirmation
+The agent responds in the caller's detected language using text-to-speech. Written confirmations (WhatsApp or email) are sent in the same language with correctly localized dates and amounts.
 
 ---
 
-## Lo que hace difícil un agente de voz
+## 4. Technology Stack
 
-### 1. La latencia no se negocia
-
-En chat, dos segundos de espera son aceptables. En voz, dos segundos de silencio hacen que
-la persona diga *"¿hola?"* — y ahí la conversación ya se rompió.
-
-Consecuencias de diseño:
-
-| Restricción | Cómo se aborda |
-|---|---|
-| Cada herramienta debe caber en el presupuesto de tiempo de la llamada | Herramientas de un solo propósito, sin encadenamientos largos |
-| Ninguna herramienta puede colgar la conversación | Límite de tiempo por herramienta con degradación a respuesta genérica |
-| El router no puede añadir latencia propia | Enrutamiento determinista por reglas, no una segunda pasada por el modelo |
-| No hay tiempo para reintentos silenciosos | El fallo se convierte en una frase útil, no en un silencio |
-
-**Decisión clave:** el motor de reglas resuelve lo determinista *antes* de involucrar al
-modelo para lo ambiguo. Lo barato y rápido primero.
-
-### 2. Bilingüe de verdad, no traducido
-
-El idioma se detecta **dentro de la llamada** y toda la conversación —incluidas las
-confirmaciones posteriores— ocurre en ese idioma.
-
-```mermaid
-flowchart LR
-    A["🎙️ Entrada<br/>de voz"] --> B{"Detección<br/>de idioma"}
-    B -- "🇺🇸 EN" --> C["Contexto EN<br/>· formatos de fecha/hora EN<br/>· confirmaciones EN"]
-    B -- "🇪🇸 ES" --> D["Contexto ES<br/>· formatos de fecha/hora ES<br/>· confirmaciones ES"]
-    C --> E["Mismas herramientas<br/>· misma lógica de negocio"]
-    D --> E
-    E --> F["Respuesta hablada<br/>en el idioma del cliente"]
-
-    style C fill:#1f4e8c,color:#fff
-    style D fill:#1a6b2a,color:#fff
-    style E fill:#412991,color:#fff
-```
-
-**Detalle que casi siempre se rompe:** las fechas. *"El tres de abril"* y *"April third"* no
-se dicen igual, y una cita confirmada con el formato equivocado es una cita a la que el
-cliente no va a llegar. La localización se aplica a la **salida hablada** y a la
-**confirmación escrita**, no solo al idioma del texto.
-
-### 3. Validación antes que generación
-
-Una cita mal agendada es peor que una cita no agendada: ocupa un hueco real y genera una
-ausencia.
-
-Por eso el motor de reglas valida **antes** de escribir en el calendario: que la fecha
-exista, que caiga en horario de atención, que el hueco siga libre, que la intención esté
-confirmada. Solo entonces se ejecuta la escritura.
+| Technology | Role |
+|------------|------|
+| **n8n** | Workflow orchestration and tool coordination |
+| **Twilio** | Voice telephony and WhatsApp messaging |
+| **OpenAI API** | Intent classification and ambiguous query resolution |
+| **Calendar API** | Availability, booking, and appointment management |
+| **Shopify API** | Commerce order lookup and status inquiries |
+| **PostgreSQL** | Interaction logging and error persistence |
+| **Docker / Docker Compose** | Containerized deployment |
+| **Prometheus / Grafana** | Call metrics and system observability |
 
 ---
 
-## Motor de calendario
+## 5. Key Engineering Concepts
 
-Cubre el ciclo completo, no solo el caso feliz de "agendar":
-
-| Operación | Qué resuelve |
-|---|---|
-| **Disponibilidad** | *"¿Tienen algo el jueves por la tarde?"* |
-| **Crear** | Agenda con validación previa de que el hueco sigue libre |
-| **Buscar** | *"¿A qué hora era mi cita?"* — sin pasar por una persona |
-| **Cancelar** | Libera el hueco de inmediato en vez de generar una ausencia |
-| **Reagendar** | Cancela y crea de forma atómica, sin dejar la cita en limbo |
-| **Escalar** | Cuando el caso no cabe en ninguna de las anteriores |
-
-**Por qué el ciclo completo importa comercialmente:** un agente que solo agenda deja el
-trabajo aburrido —cancelaciones y cambios— a una persona. Y ese trabajo aburrido es
-justamente el que consume más tiempo del equipo.
-
-La cancelación y el reagendado son, además, los que más valor devuelven: **un hueco liberado
-a tiempo se puede volver a vender.**
+- **Real-time language detection** — Language identified per-call, not by number or region
+- **Deterministic routing** — Intent-to-tool mapping in code, not in the model
+- **Latency budgeting** — Each tool has a bounded execution window suited to voice UX
+- **Graceful degradation** — Tool timeout produces a spoken fallback, never silence
+- **Atomic calendar operations** — Rescheduling is a single atomic operation, not cancel-then-create
+- **Persistent state** — Interaction logs and error records survive container restarts
+- **Human escalation protocol** — Handoff pauses automation on that thread to prevent dual responses
 
 ---
 
-## Integración con comercio
+## 6. Security Practices
 
-Además del calendario, el router puede resolver **consultas de pedido** contra la tienda.
-El cliente que llama para preguntar por su pedido no necesita hablar con nadie.
-
-La confirmación de cita se envía por **WhatsApp o email**, en el idioma detectado — el
-cliente cuelga y ya tiene el comprobante escrito.
-
----
-
-## Decisiones de ingeniería
-
-| Decisión | Alternativa descartada | Razón |
-|---|---|---|
-| Motor de reglas antes del modelo | Todo resuelto por el modelo | Lo determinista es más rápido, más barato y auditable. El modelo se reserva para lo ambiguo. |
-| Router determinista | Router basado en modelo | Añadir una pasada de modelo para enrutar cuesta latencia que la voz no tiene |
-| Validar antes de escribir en calendario | Escribir y corregir después | Una cita errónea ocupa un hueco real y genera una ausencia |
-| Herramientas de propósito único | Herramientas compuestas | Cada llamada cabe en el presupuesto de tiempo; el fallo se aísla |
-| Detección de idioma en la llamada | Idioma fijo por número o por región | La misma línea atiende a ambos públicos sin fragmentar la operación |
-| Localización en salida y confirmación | Traducir solo el texto | Fechas y horas mal localizadas producen ausencias |
-| Reagendar como operación atómica | Cancelar y crear por separado | Evita el estado intermedio donde el cliente se queda sin cita |
-| Escalado tras N intentos fallidos | Insistir indefinidamente | Un bucle de re-preguntas es la peor experiencia posible en voz |
-
-📄 Contexto adicional en el [registro de ADRs](../../docs/adr/README.md).
+- No credentials, API keys, or phone numbers stored in workflow exports
+- All secrets configured through environment variables
+- Input validation before any processing — injection defense at the edge
+- Tool access scoped to minimum required operations
+- Interaction logs sanitized of personally identifiable information
+- Rate limiting on webhook endpoints
+- TLS encryption for all API communications
 
 ---
 
-## Comportamiento operativo
+## 7. Business Impact
 
-| Propiedad | Comportamiento |
-|---|---|
-| **Disponibilidad** | 24/7, incluidos fines de semana y festivos |
-| **Cobertura de idioma** | EN y ES en la misma línea, detectado por llamada |
-| **Ciclo de calendario completo** | Consultar · crear · buscar · cancelar · reagendar |
-| **Degradación controlada** | Herramienta lenta o caída → respuesta útil + escalado, nunca silencio |
-| **Trazabilidad** | Cada llamada deja registro de idioma, intención y acción ejecutada |
-| **Sin citas fantasma** | La validación previa impide escribir citas inválidas |
-
----
-
-## Fragmento ilustrativo
-
-> ⚠️ **Genérico y no funcional de extremo a extremo.** Muestra la *forma* del presupuesto de
-> latencia por herramienta. No contiene los tiempos reales, el catálogo de intenciones, las
-> reglas de validación ni el prompt del agente de voz.
-
-```js
-// ILUSTRATIVO — en voz, una herramienta lenta es peor que una herramienta ausente.
-
-async function callToolWithBudget(tool, args, budgetMs, locale) {
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('tool_budget_exceeded')), budgetMs)
-  );
-
-  try {
-    return { ok: true, data: await Promise.race([tool.run(args), timeout]) };
-  } catch (err) {
-    // Nunca devolver silencio: siempre una frase hablable en el idioma detectado.
-    return {
-      ok: false,
-      spoken: fallbackPhrase(locale),   // catálogo de frases no publicado
-      shouldEscalate: err.message === 'tool_budget_exceeded',
-    };
-  }
-}
-```
-
----
-
-## Qué NO encontrarás en este repositorio
-
-- El workflow n8n exportado ni el grafo real de nodos y conexiones.
-- El prompt del agente de voz ni el catálogo de frases habladas.
-- El catálogo de intenciones ni las reglas del motor de validación.
-- Los presupuestos de latencia reales por herramienta.
-- Credenciales, IDs de calendario, números de teléfono, URLs de webhook, claves de tienda.
-
-Ver [SECURITY.md](../../SECURITY.md).
+| Benefit | Impact |
+|---------|--------|
+| **24/7 phone coverage** | Every call answered, every hour of the day |
+| **Bilingual service** | Native EN/ES experience without team duplication |
+| **Reduced admin burden** | Calendar operations handled without human intervention |
+| **Faster resolution** | Order inquiries resolved in seconds, not hours |
+| **Higher conversion** | Missed calls recovered; follow-ups automated |
+| **Operational insight** | Call metrics and intent trends visible in dashboards |
 
 ---
 
 <div align="center">
 
-**¿Quieres una recepcionista de voz que nunca duerma?**
-[CONTACT.md](../../CONTACT.md)
-
-[⬅️ Volver al portafolio](../../README.md) · [Patrón reutilizable](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
+[⬅️ Back to Portfolio](../../README.md) · [Pattern Reference](../../docs/patterns/webhook-ai-crm-notify.md)
 
 </div>

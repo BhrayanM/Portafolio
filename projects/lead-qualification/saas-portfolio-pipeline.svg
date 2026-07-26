@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 600" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.25"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#475569"/>
+    </marker>
+  </defs>
+
+  <rect width="900" height="600" fill="url(#bg)" rx="12"/>
+
+  <text x="450" y="30" text-anchor="middle" fill="#e2e8f0" font-size="17" font-weight="700">SaaS Portfolio — Client Automation Pipeline</text>
+  <line x1="220" y1="40" x2="680" y2="40" stroke="#334155" stroke-width="1"/>
+
+  <!-- Pipeline stages -->
+  <rect x="50" y="70" width="130" height="60" rx="8" fill="#1e3a5f" stroke="#2563eb" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="115" y="95" text-anchor="middle" fill="#60a5fa" font-size="12" font-weight="600">Lead</text>
+  <text x="115" y="112" text-anchor="middle" fill="#64748b" font-size="9">Inbound Capture</text>
+  <line x1="180" y1="100" x2="195" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="200" y="70" width="130" height="60" rx="8" fill="#3b1a1a" stroke="#dc2626" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="265" y="95" text-anchor="middle" fill="#fca5a5" font-size="12" font-weight="600">Validated</text>
+  <text x="265" y="112" text-anchor="middle" fill="#64748b" font-size="9">Schema · Auth · Rate</text>
+  <line x1="330" y1="100" x2="345" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="350" y="70" width="130" height="60" rx="8" fill="#2e1052" stroke="#7c3aed" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="415" y="95" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="600">AI Enrichment</text>
+  <text x="415" y="112" text-anchor="middle" fill="#64748b" font-size="9">LLM Score · Categorize</text>
+  <line x1="480" y1="100" x2="495" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="500" y="70" width="130" height="60" rx="8" fill="#2a1a0a" stroke="#ea580c" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="565" y="95" text-anchor="middle" fill="#fdba74" font-size="12" font-weight="600">CRM Sync</text>
+  <text x="565" y="112" text-anchor="middle" fill="#64748b" font-size="9">HubSpot Upsert</text>
+  <line x1="630" y1="100" x2="645" y2="100" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="650" y="70" width="130" height="60" rx="8" fill="#2a1020" stroke="#e11d48" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="715" y="95" text-anchor="middle" fill="#fda4af" font-size="12" font-weight="600">Alert</text>
+  <text x="715" y="112" text-anchor="middle" fill="#64748b" font-size="9">Slack Notification</text>
+  <line x1="715" y1="130" x2="715" y2="150" stroke="#475569" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <rect x="620" y="155" width="190" height="50" rx="8" fill="#0a2a1a" stroke="#059669" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="715" y="177" text-anchor="middle" fill="#6ee7b7" font-size="12" font-weight="600">Billing Integration</text>
+  <text x="715" y="192" text-anchor="middle" fill="#64748b" font-size="9">Stripe Subscription</text>
+
+  <!-- Metrics Section -->
+  <text x="70" y="280" fill="#94a3b8" font-size="13" font-weight="600">Business Metrics</text>
+  <line x1="70" y1="290" x2="380" y2="290" stroke="#334155" stroke-width="1"/>
+
+  <rect x="70" y="305" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="140" y="320" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">Response Time</text>
+  <text x="140" y="334" text-anchor="middle" fill="#64748b" font-size="9">&lt; 3s end-to-end</text>
+
+  <rect x="230" y="305" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="300" y="320" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">Conversion Rate</text>
+  <text x="300" y="334" text-anchor="middle" fill="#64748b" font-size="9">Real-time tracking</text>
+
+  <rect x="70" y="355" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="140" y="370" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">API Uptime</text>
+  <text x="140" y="384" text-anchor="middle" fill="#64748b" font-size="9">99.9% SLA</text>
+
+  <rect x="230" y="355" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="300" y="370" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="600">Error Rate</text>
+  <text x="300" y="384" text-anchor="middle" fill="#64748b" font-size="9">&lt; 0.1% pipeline</text>
+
+  <!-- Security Section -->
+  <text x="500" y="280" fill="#94a3b8" font-size="13" font-weight="600">Security Layer</text>
+  <line x1="500" y1="290" x2="830" y2="290" stroke="#334155" stroke-width="1"/>
+
+  <rect x="500" y="305" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="570" y="320" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">TLS 1.2+</text>
+  <text x="570" y="334" text-anchor="middle" fill="#64748b" font-size="9">Edge encryption</text>
+
+  <rect x="660" y="305" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="730" y="320" text-anchor="middle" fill="#fca5a5" font-size="11" font-weight="600">API Key Auth</text>
+  <text x="730" y="334" text-anchor="middle" fill="#64748b" font-size="9">Per-tenant keys</text>
+
+  <rect x="500" y="355" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="570" y="370" text-anchor="middle" fill="#6ee7b7" font-size="11" font-weight="600">PostgreSQL RLS</text>
+  <text x="570" y="384" text-anchor="middle" fill="#64748b" font-size="9">Row-level security</text>
+
+  <rect x="660" y="355" width="140" height="36" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="730" y="370" text-anchor="middle" fill="#fdba74" font-size="11" font-weight="600">Rate Limiting</text>
+  <text x="730" y="384" text-anchor="middle" fill="#64748b" font-size="9">Edge enforcement</text>
+
+  <!-- Infrastructure -->
+  <text x="450" y="450" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="600">Infrastructure Stack</text>
+  <line x1="250" y1="460" x2="650" y2="460" stroke="#334155" stroke-width="1"/>
+
+  <rect x="100" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="150" y="501" text-anchor="middle" fill="#60a5fa" font-size="10">Docker</text>
+
+  <rect x="220" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="270" y="501" text-anchor="middle" fill="#c4b5fd" font-size="10">n8n</text>
+
+  <rect x="340" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="390" y="501" text-anchor="middle" fill="#fbbf24" font-size="10">PostgreSQL</text>
+
+  <rect x="460" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="510" y="501" text-anchor="middle" fill="#f472b6" font-size="10">NGINX</text>
+
+  <rect x="580" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="630" y="501" text-anchor="middle" fill="#34d399" font-size="10">Redis</text>
+
+  <rect x="700" y="480" width="100" height="34" rx="4" fill="#1e293b" stroke="#334155" stroke-width="1"/>
+  <text x="750" y="501" text-anchor="middle" fill="#fca5a5" font-size="10">Grafana</text>
+
+  <!-- Observability bar -->
+  <rect x="200" y="540" width="500" height="36" rx="6" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="450" y="562" text-anchor="middle" fill="#64748b" font-size="11">Observability · Prometheus · Loki · Health Checks · Error Workflow</text>
+</svg>

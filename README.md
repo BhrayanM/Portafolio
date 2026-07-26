@@ -58,6 +58,51 @@
     └─────────────────┘   └─────────────────┘   └─────────────────┘
 ```
 
+## Featured AI Automation Systems
+
+<details open>
+<summary><b>Production AI automation platforms — end-to-end architecture, workflows, and deployment.</b></summary>
+
+<br>
+
+### 🤖 [Lead Qualification Engine](projects/lead-qualification/README.md)
+
+AI-powered lead capture, scoring, and CRM automation platform. Event-driven pipeline with LLM enrichment, deterministic routing, human-in-the-loop approval, idempotent CRM sync, and automated follow-up orchestration.
+
+```
+[Webhook] → [Validation] → [AI Scoring] → [Router] → [Approval Gate] → [CRM] → [Follow-up]
+```
+
+`#LLM` `#n8n` `#HubSpot` `#PostgreSQL` `#HumanInTheLoop` `#EventDriven`
+
+---
+
+### 🎙️ [AI Voice Receptionist](projects/voice-receptionist/README.md)
+
+Bilingual conversational voice agent (EN/ES) with real-time language detection, deterministic intent routing, full calendar lifecycle management, and commerce integration.
+
+```
+[Call] → [Language Detection] → [Rules Engine] → [Tool Router] → [Calendar/Shopify]
+```
+
+`#VoiceAI` `#Twilio` `#Bilingual` `#CalendarAPI` `#LowLatency`
+
+---
+
+### 💬 [WhatsApp Ecommerce Agent](projects/whatsapp-ecommerce-agent/README.md)
+
+AI customer support automation for commerce with real-time order lookup, FAQ engine, persistent conversation memory, and intelligent human handoff protocol.
+
+```
+[Message] → [Fast-ACK] → [Dedup] → [AI Agent Tools] → [Reply/Handoff]
+```
+
+`#WhatsApp` `#Shopify` `#ConversationalAI` `#FastACK` `#Deduplication`
+
+</details>
+
+<br>
+
 ### Technology Choices
 
 | Layer | Technology | Rationale |
