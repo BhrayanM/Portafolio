@@ -58,6 +58,29 @@ Cerrada el 2026-07-25. **Siguiente paso: F19 Security Hardening — requiere con
 
 ## Último bloque cerrado
 
+**F19(a) — Security Hardening Backend. Auditoría + correcciones aplicadas.**
+
+Detalle completo en **`docs/FASE19_SECURITY_HARDENING.md`**. Resumen:
+
+- **13 hallazgos corregidos** (2 críticos, 3 altos, 6 medios/bajos). Tests **93/93**, lint limpio.
+- **H-01 Stripe**: el matiz importa — con `STRIPE_WEBHOOK_SECRET` vacía la firma **no fallaba en
+  cerrado**, era **forjable por cualquiera** (HMAC con clave vacía), y el webhook escribía `plan` y
+  `tenant_id` del metadata sin validar → cualquiera se ponía `enterprise` en cualquier tenant.
+- **H-02**: eliminados los secretos por defecto del código (`'dev-secret-change-in-production'`,
+  `'postgres'`, credenciales de rabbit). En producción, sin las variables **el proceso no arranca**.
+- **`/register` cerrado a admin** (D-07): el `tenantId` del body se ignora. La lógica de creación
+  quedó **intacta** para construir invitaciones encima.
+- PII fuera de los logs; `/api/metrics` autenticado; `x-tenant-id` como puerta trasera eliminado;
+  `algorithms: ['HS256']` fijado; CSP aditiva sin tocar `scriptSrc`.
+
+**Dos acciones manuales pendientes** (ver el doc): el `.env` local tiene `JWT_EXPIRES_IN=7d` que
+sobrescribe el nuevo default de 24h, y `STRIPE_WEBHOOK_SECRET` sigue vacía — en producción el
+backend no arrancará hasta que tenga valor real.
+
+**Siguiente**: F19(b) Infra — requiere confirmación humana. **Parada obligatoria antes de F20.**
+
+---
+
 **F18.5 — Nginx reverse proxy local + `trust proxy` en el backend. Con esto FASE 18 queda cerrada.**
 
 ### Estado real que se encontró (no era lo que parecía)
@@ -260,6 +283,8 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | F18.4 — Redis (alcance vacío, no cableado) | ✅ Cerrado |
 | F18.5 — Nginx reverse proxy + trust proxy | ✅ Cerrado |
 | **FASE 18 completa** | ✅ **Cerrada** |
+| F19(a) — Security Hardening Backend | ✅ Cerrado |
+| F19(b) Infra · (c) DB · (d) Frontend · (e) Swagger | ⏸ Pendientes |
 
 ## Estado que se pierde al cortar
 

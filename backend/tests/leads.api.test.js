@@ -80,8 +80,17 @@ describe('GET /health', () => {
 });
 
 describe('GET /api/metrics', () => {
-  it('responde con metricas del proceso', async () => {
+  // F19(a) H-07: la ruta era publica y filtraba hostname, PID, version de Node y
+  // plataforma. Ahora exige autenticacion; el test refleja el nuevo contrato.
+  it('responde 401 sin token', async () => {
     const res = await request(app).get('/api/metrics');
+    expect(res.status).toBe(401);
+  });
+
+  it('responde con metricas del proceso con token valido', async () => {
+    const res = await request(app)
+      .get('/api/metrics')
+      .set('Authorization', authHeader);
     expect(res.status).toBe(200);
     expect(res.body).toHaveProperty('process');
     expect(res.body).toHaveProperty('memory');

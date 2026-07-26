@@ -4,6 +4,8 @@ const { pool } = require('../db');
 const config = require('../config');
 const { UnauthorizedError } = require('../utils/errors');
 
+const BCRYPT_ROUNDS = 12;
+
 class AuthService {
   async login(email, password) {
     const result = await pool.query(
@@ -40,7 +42,9 @@ class AuthService {
 
   async register(data) {
     const { email, password, name, tenantId } = data;
-    const hash = await bcrypt.hash(password, 10);
+    // D-06: 12 rondas. No invalida los hashes existentes: bcrypt guarda el coste
+    // dentro del propio hash, asi que los antiguos se siguen verificando bien.
+    const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
     const result = await pool.query(
       `INSERT INTO users (tenant_id, email, password_hash, name, role)
@@ -52,8 +56,10 @@ class AuthService {
     return result.rows[0];
   }
 
+  // H-13: se fija el algoritmo. Sin `algorithms`, jsonwebtoken acepta el que venga
+  // en la cabecera del token, que abre la puerta a ataques de confusion de algoritmo.
   verifyToken(token) {
-    return jwt.verify(token, config.jwt.secret);
+    return jwt.verify(token, config.jwt.secret, { algorithms: config.jwt.algorithms });
   }
 }
 

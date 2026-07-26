@@ -12,7 +12,8 @@ const authenticate = async (req, res, next) => {
       throw new UnauthorizedError('Token requerido');
     }
 
-    const decoded = jwt.verify(token, config.jwt.secret);
+    // H-13: algoritmo fijado explicitamente, no el que declare el propio token.
+    const decoded = jwt.verify(token, config.jwt.secret, { algorithms: config.jwt.algorithms });
 
     const result = await pool.query(
       'SELECT id, tenant_id, email, name, role FROM users WHERE id = $1 AND is_active = true',

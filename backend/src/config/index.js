@@ -1,5 +1,9 @@
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
+
+const nodeEnv = process.env.NODE_ENV || 'development';
+const isProd = nodeEnv === 'production';
 
 /**
  * Valor de `trust proxy` de Express.
@@ -20,36 +24,103 @@ function parseTrustProxy(raw) {
   return value;
 }
 
-module.exports = {
+/**
+ * F19(a) H-02 — Arranque en fallo rapido.
+ *
+ * Antes, los secretos tenian un valor por defecto en el codigo
+ * (`'dev-secret-change-in-production'`, `'postgres'`, credenciales de rabbit).
+ * En un repo publico eso significa que un despliegue al que se le olvide una
+ * variable arranca **igual**, firmando tokens con una cadena que cualquiera puede
+ * leer en GitHub: se pueden forjar JWTs de admin de cualquier tenant.
+ *
+ * Ahora en produccion no hay valor por defecto: si falta algo, el proceso no
+ * arranca. Fuera de produccion se sigue pudiendo trabajar sin .env completo.
+ */
+const missing = [];
+function requiredInProd(name, value, when = true) {
+  if (isProd && when && !String(value || '').trim()) missing.push(name);
+  return value;
+}
+
+/**
+ * Secreto de firma del JWT.
+ *
+ * En produccion es obligatorio. Fuera de produccion, si no esta definido se genera
+ * uno **aleatorio en cada arranque**: nunca vuelve a haber un secreto conocido
+ * escrito en el codigo. Efecto secundario buscado: al reiniciar en dev, las sesiones
+ * anteriores dejan de valer.
+ */
+function resolveJwtSecret() {
+  const fromEnv = process.env.JWT_SECRET;
+  if (fromEnv && fromEnv.trim()) return fromEnv;
+  requiredInProd('JWT_SECRET', fromEnv);
+  return crypto.randomBytes(48).toString('hex');
+}
+
+/**
+ * Origenes permitidos por CORS (D-01).
+ *
+ * Se mantiene la lista blanca por entorno. En produccion `CORS_ORIGINS` es
+ * obligatoria y no puede quedar abierta: ni `*` ni localhost, que dejaria entrar
+ * a cualquier frontend levantado en la maquina de la victima.
+ */
+function resolveCorsOrigins() {
+  const raw = process.env.CORS_ORIGINS;
+  requiredInProd('CORS_ORIGINS', raw);
+
+  const origins = (raw || 'http://localhost:3001,http://localhost:3000')
+    .split(',')
+    .map((o) => o.trim())
+    .filter(Boolean);
+
+  if (isProd) {
+    if (origins.includes('*')) {
+      missing.push("CORS_ORIGINS no puede ser '*' en produccion");
+    }
+    if (origins.some((o) => /localhost|127\.0\.0\.1/.test(o))) {
+      missing.push('CORS_ORIGINS no puede incluir localhost en produccion');
+    }
+  }
+  return origins;
+}
+
+const config = {
   port: parseInt(process.env.API_PORT) || 3000,
   host: process.env.API_HOST || '0.0.0.0',
-  nodeEnv: process.env.NODE_ENV || 'development',
+  nodeEnv,
+  isProd,
   trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
 
   jwt: {
-    secret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
-    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+    secret: resolveJwtSecret(),
+    // D-02: 24h, sin refresh tokens. Antes eran 7d.
+    expiresIn: process.env.JWT_EXPIRES_IN || '24h',
+    algorithms: ['HS256'],
   },
 
   cookie: {
     name: process.env.AUTH_COOKIE_NAME || 'access_token',
-    secure: process.env.NODE_ENV === 'production',
+    secure: isProd,
     sameSite: process.env.AUTH_COOKIE_SAMESITE || 'lax',
     domain: process.env.AUTH_COOKIE_DOMAIN || undefined,
-    maxAgeMs: parseInt(process.env.AUTH_COOKIE_MAX_AGE_MS) || 7 * 24 * 60 * 60 * 1000,
+    maxAgeMs: parseInt(process.env.AUTH_COOKIE_MAX_AGE_MS) || 24 * 60 * 60 * 1000,
   },
 
-  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:3001,http://localhost:3000')
-    .split(',')
-    .map((o) => o.trim())
-    .filter(Boolean),
+  corsOrigins: resolveCorsOrigins(),
 
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
     user: process.env.POSTGRES_USER || 'n8n',
-    password: process.env.POSTGRES_PASSWORD || 'postgres',
+    password: requiredInProd('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD),
     database: process.env.POSTGRES_DB || 'n8n',
+  },
+
+  stripe: {
+    // D-05(a): sin secret no se puede verificar la firma de los webhooks, y con la
+    // cadena vacia la firma pasa a ser **forjable por cualquiera** (ver H-01).
+    // En produccion es obligatorio; no se inventa ningun valor.
+    webhookSecret: requiredInProd('STRIPE_WEBHOOK_SECRET', process.env.STRIPE_WEBHOOK_SECRET),
   },
 
   redis: {
@@ -61,10 +132,21 @@ module.exports = {
 
   rabbitmq: {
     enabled: process.env.RABBITMQ_ENABLED === 'true',
-    url: process.env.RABBITMQ_URL || 'amqp://admin:changeme@localhost:5672',
+    // Sin credenciales por defecto en el codigo: solo se exige si esta habilitado.
+    url: requiredInProd('RABBITMQ_URL', process.env.RABBITMQ_URL, process.env.RABBITMQ_ENABLED === 'true'),
   },
 };
 
-// Se exporta aparte del objeto de config para poder testear el parseo sin
+if (missing.length > 0) {
+  throw new Error(
+    'Arranque abortado: faltan variables de entorno obligatorias en produccion -> ' +
+      missing.join(', ') +
+      '. No se usan valores por defecto para secretos.'
+  );
+}
+
+module.exports = config;
+
+// Se exportan aparte del objeto de config para poder testear el parseo sin
 // recargar el modulo con distintas variables de entorno.
 module.exports.parseTrustProxy = parseTrustProxy;

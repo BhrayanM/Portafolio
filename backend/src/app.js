@@ -14,6 +14,7 @@ const billingRoutes = require('./routes/billing.routes');
 const whatsappRoutes = require('./routes/whatsapp.routes');
 const voiceRoutes = require('./routes/voice.routes');
 const marketplaceRoutes = require('./routes/marketplace.routes');
+const { authenticate } = require('./middleware/auth');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityMiddleware } = require('./middleware/security');
 const { globalLimiter } = require('./middleware/rateLimit');
@@ -71,7 +72,9 @@ app.get('/health', (req, res) => {
     }));
 });
 
-app.get('/api/metrics', getMetrics);
+// H-07 — Requiere autenticacion: expone hostname, PID, version de Node y plataforma,
+// que es reconocimiento util para un atacante (version -> CVEs conocidos).
+app.get('/api/metrics', authenticate, getMetrics);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/users', usersRoutes);
