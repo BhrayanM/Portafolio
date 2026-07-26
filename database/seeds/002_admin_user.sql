@@ -6,7 +6,7 @@
 INSERT INTO users (tenant_id, email, password_hash, name, role)
 VALUES (
   '00000000-0000-0000-0000-000000000001',
-  'admin@portafolio.ai',
+  'admin@example.com',
   '$2b$12$KHB6xEBMtm6eXgv7OMYKy.gawqL9IKcTKYDMfBEAI/SQvTYcTjKCq',
   'Admin',
   'admin'

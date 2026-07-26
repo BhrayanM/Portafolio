@@ -115,9 +115,9 @@ Stack de producción completo levantado con certificados autofirmados de validac
 | CHECK | RESULTADO |
 |---|---|
 | `GET /health` directo en el contenedor | ✅ `{"status":"ok","version":"1.0.0","db":"connected"}` |
-| `GET /health` **a través de nginx** (`Host: api.portafolio.ai`, TLS) | ✅ `status: ok`, `db: connected` |
-| `GET /login` a través de nginx (`Host: portafolio.ai`) | ✅ HTTP 200 |
-| Redirección HTTP → HTTPS | ✅ `301 → https://portafolio.ai/` |
+| `GET /health` **a través de nginx** (`Host: api.example.com`, TLS) | ✅ `status: ok`, `db: connected` |
+| `GET /login` a través de nginx (`Host: example.com`) | ✅ HTTP 200 |
+| Redirección HTTP → HTTPS | ✅ `301 → https://example.com/` |
 | `GET /api/leads` sin token | ✅ **HTTP 401** — autenticación activa |
 | `POST /api/auth/login` con payload inválido | ✅ **HTTP 400** — validación Joi activa |
 | `POST /api/auth/login` credenciales erróneas | ✅ **HTTP 401** |

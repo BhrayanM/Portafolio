@@ -159,9 +159,9 @@ es justo lo que los patrones `sk-`/`xox-`/`ghp_` no detectan.
 
 42 ficheros versionados en v2 no son publicables:
 
-- **IDs reales de credenciales n8n** (`1SSa86iJODaXpkD6`, `5mpbT73GTHmK5DJ9`,
-  `aEsbKrH2FsoB9UHJ`, `ABfLC3myrfeFGWOW`), portal HubSpot `246823552`, `vid: 525347024611`,
-  y rutas de workspace privado (`C:\Segundo-Cerebro`) en `CLAUDE.md`, `AGENTS.md`,
+- **4 IDs reales de credenciales n8n** (PostgreSQL, LLM, Slack, HubSpot), el **ID del portal de
+  HubSpot**, el **`vid` de un contacto real** creado durante las pruebas E2E,
+  y rutas de workspace privado en `CLAUDE.md`, `AGENTS.md`,
   `docs/HANDOFF.md`, `docs/CIERRE_FASE.md`, `docs/AUDITORIA_*.md` (3), `docs/FASE20_DESPLIEGUE.md`,
   `docs/FASE21_AUDITORIA_FINAL.md`. → **SECURITY.md reglas 6 y 10.**
 - **`docs/fase-1/prompts/lead-scoring-system.md`**: el system prompt de producción, descrito en

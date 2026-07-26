@@ -96,7 +96,7 @@ workflows de CI de `main` — superados por `ci.yml` de v2, cuyo barrido de secr
 
 Commit `4cc796d`. `remediacion/v2` versionaba material no publicable:
 
-- **IDs reales de credenciales n8n**, portal HubSpot `246823552`, `vid` de un contacto real y
+- **IDs reales de credenciales n8n**, el ID del portal de HubSpot, el `vid` de un contacto real y
   rutas de workspace privado en `CLAUDE.md`, `AGENTS.md` y 6 documentos más → SECURITY.md reglas
   6 y 10.
 - **`docs/fase-1/prompts/lead-scoring-system.md`**: el system prompt de producción, descrito en su

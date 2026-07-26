@@ -20,10 +20,10 @@ case "${1:-hot}" in
     curl -s -X POST "${WEBHOOK_URL}" \
       -H "Content-Type: application/json" \
       -d '{
-        "name": "Carlos Mendoza",
-        "email": "carlos@techsolve.mx",
-        "company": "TechSolve México",
-        "phone": "+52 55 1234 5678",
+        "name": "Jane Smith",
+        "email": "jane.smith@example.com",
+        "company": "Demo Company",
+        "phone": "+1-555-0123",
         "message": "Director de operaciones. 45 empleados. Presupuesto $1,500/mes para automatización de leads. Urgente.",
         "source": "tally"
       }' | python3 -m json.tool 2>/dev/null || cat
@@ -34,10 +34,10 @@ case "${1:-hot}" in
     curl -s -X POST "${WEBHOOK_URL}" \
       -H "Content-Type: application/json" \
       -d '{
-        "name": "Ana López",
-        "email": "ana@crece.mx",
-        "company": "Crece Consultoría",
-        "phone": "+52 33 9876 5432",
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "company": "Sample Consulting",
+        "phone": "+1-555-0144",
         "message": "Me interesa saber cómo funcionan sus automatizaciones para leads. ¿Podrían darme más información?",
         "source": "tally"
       }' | python3 -m json.tool 2>/dev/null || cat

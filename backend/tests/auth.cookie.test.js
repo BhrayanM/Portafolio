@@ -14,7 +14,7 @@ let PASSWORD_HASH;
 const USER = {
   id: '11111111-1111-1111-1111-111111111111',
   tenant_id: '22222222-2222-2222-2222-222222222222',
-  email: 'admin@portafolio.ai',
+  email: 'admin@example.com',
   name: 'Admin',
   role: 'admin',
 };
@@ -100,7 +100,7 @@ describe('POST /api/auth/login', () => {
   it('rechaza un email inexistente', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'nadie@portafolio.ai', password: PASSWORD });
+      .send({ email: 'nadie@example.com', password: PASSWORD });
 
     expect(res.status).toBe(401);
   });

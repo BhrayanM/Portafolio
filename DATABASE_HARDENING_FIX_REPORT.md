@@ -336,7 +336,7 @@ Stack de producción levantado (5 servicios) contra la base con las 15 migracion
 | Tests backend | ✅ **98 passed / 98** · 6 suites |
 
 El login usó un usuario de prueba creado en la base efímera con un hash generado al vuelo: la
-contraseña del seed `admin@portafolio.ai` no está en el repositorio ni en su historial, y así debe
+contraseña del seed `admin@example.com` no está en el repositorio ni en su historial, y así debe
 seguir.
 
 Al terminar: `docker compose down -v`, y borrados `.env` y `docker/ssl` de validación.

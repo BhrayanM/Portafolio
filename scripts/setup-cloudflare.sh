@@ -1,11 +1,15 @@
 #!/bin/bash
-# setup-cloudflare.sh — Configura Cloudflare para portafolio.ai
+# setup-cloudflare.sh — Guia de configuracion de Cloudflare para el dominio del despliegue
 # Requiere: cloudflare CLI (wrangler) o API Token
-# Uso: ./scripts/setup-cloudflare.sh
+# Uso: DOMAIN=tu-dominio.tld ./scripts/setup-cloudflare.sh
+#
+# F21.5 — El dominio estaba fijado en el codigo. Ahora se pasa por entorno: este
+# repositorio es publico y no debe declarar infraestructura propia (SECURITY.md
+# regla 3). El script solo imprime instrucciones; no modifica nada.
 
 set -euo pipefail
 
-DOMAIN="portafolio.ai"
+DOMAIN="${DOMAIN:-example.com}"
 SERVER_IP="$(curl -s ifconfig.me)"
 
 echo "═══ Configuración Cloudflare para ${DOMAIN} ═══"
