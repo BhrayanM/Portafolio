@@ -14,7 +14,13 @@
 // el test da el mismo resultado en cualquier maquina y en CI.
 process.env.STRIPE_WEBHOOK_SECRET = '';
 
-jest.mock('../src/db', () => ({ pool: { query: jest.fn() } }));
+jest.mock('../src/db', () => ({
+  pool: { query: jest.fn() },
+  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
+  runWithTenant: (tenantId, fn) => fn(),
+  getCurrentTenantId: () => null,
+}));
 
 const billingService = require('../src/services/billing.service');
 

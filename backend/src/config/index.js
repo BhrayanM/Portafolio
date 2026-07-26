@@ -108,11 +108,29 @@ const config = {
 
   corsOrigins: resolveCorsOrigins(),
 
+  /**
+   * F21.5 — `DB_USER` / `DB_PASSWORD` permiten que el backend conecte con un rol de
+   * aplicacion sin privilegios de propietario (`app`, creado NOLOGIN en la
+   * migracion 012 y habilitado en el despliegue). POSTGRES_USER queda para las
+   * migraciones y el mantenimiento, que si necesitan ser propietario.
+   *
+   * NO ES OPCIONAL. `POSTGRES_USER` en la imagen oficial de PostgreSQL es
+   * SUPERUSUARIO, y un superusuario ignora RLS aunque las tablas tengan FORCE ROW
+   * LEVEL SECURITY (verificado en F21.5: `rolsuper=t`, `rolbypassrls=t`). Mientras
+   * el backend conecte con el, las politicas de la migracion 016 no filtran nada y
+   * el aislamiento entre tenants depende solo del `WHERE tenant_id` del codigo.
+   *
+   * Con `DB_USER=app` —NOSUPERUSER y NOBYPASSRLS— el motor impone el aislamiento:
+   * sin contexto de tenant se ven 0 filas, y un INSERT con tenant ajeno se rechaza.
+   */
   db: {
     host: process.env.DB_HOST || 'localhost',
     port: parseInt(process.env.DB_PORT) || 5432,
-    user: process.env.POSTGRES_USER || 'n8n',
-    password: requiredInProd('POSTGRES_PASSWORD', process.env.POSTGRES_PASSWORD),
+    user: process.env.DB_USER || process.env.POSTGRES_USER || 'n8n',
+    password: requiredInProd(
+      'POSTGRES_PASSWORD',
+      process.env.DB_PASSWORD || process.env.POSTGRES_PASSWORD
+    ),
     database: process.env.POSTGRES_DB || 'n8n',
   },
 
