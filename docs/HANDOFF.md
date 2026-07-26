@@ -1,8 +1,58 @@
 # HANDOFF — estado para retomar sin repetir
 
-**Última actualización:** 2026-07-25 · Rama `remediacion/v2`
+**Última actualización:** 2026-07-25 (cierre F20) · Rama `remediacion/v2`
 
 Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
+
+# FASE 20 COMPLETADA — el stack queda desplegable
+
+Cerrada el 2026-07-25. Detalle en **`docs/FASE20_DESPLIEGUE.md`**.
+Backend lint limpio · **98/98 tests** · build frontend **OK (14 rutas)** · los 3 compose validan.
+
+**Siguiente paso: despliegue real** (VPS + dominio + Cloudflare), bloqueado por los 7 requisitos
+previos de la tabla de abajo. Ninguno es código.
+
+## Lo que corrigió F20
+
+| # | Hallazgo | Corrección |
+|---|---|---|
+| F20-3 | 🔴 Mount `./docker/ssl:/etc/ssl` vs `nginx.conf` que lee de `/etc/nginx/ssl` → **prod no arrancaba** | Mount movido a `/etc/nginx/ssl`. `nginx.conf` intacto |
+| F20-4 | 🔴 `frontend/src/lib/api.ts` **no compilaba** desde F19(d): 4 exports perdidos que 5 páginas importan | Repuestos `apiFetch`, `activityApi`, `settingsApi`, `usageApi` |
+| F20-5 | 🔴 `apiFetch` mandaba cuerpo JSON **sin `Content-Type`** → el login respondía 400 con credenciales correctas | Header por defecto en cuanto hay `body` |
+| F20-2 | 6 imágenes con tag flotante | Pineadas a patch exacto, **sin cambiar de versión** |
+| F20-1 | `STRIPE_WEBHOOK_SECRET`: fallo en cerrado implementado pero **sin un solo test** | `backend/tests/deploy.config.test.js`, 5 tests |
+
+**F20-4 y F20-5 no estaban previstos**: salieron al ejecutar `npm run build`, que era una validación
+obligatoria de la fase. En el mismo fichero se eliminaron dos restos de F19(d) que contradecían el
+contrato de seguridad: una comprobación de origen inoperante (leía `CORS_ORIGINS`, sin prefijo
+`NEXT_PUBLIC_` → siempre `undefined` en el navegador → logueaba el tenant ID en cada petición) y una
+lectura de `localStorage.getItem('app.authToken')`, cuando la sesión va en cookie HttpOnly desde F19.
+
+## Decisiones de F20
+
+1. **No se creó ningún secreto de Stripe falso.** Lo entregado es el fallo en cerrado **verificado
+   con tests**: aborta el arranque en producción, 503 `STRIPE_WEBHOOK_NOT_CONFIGURED` fuera de ella.
+2. **Los pins no cambian ninguna versión.** Cada uno es lo que el tag flotante ya resolvía
+   (comprobado contra la API de Docker Hub). Se congela la resolución, no se actualiza nada.
+3. **`n8nio/n8n:2.31.6` y `docker/nginx.conf` no se tocaron.** El primero es el runtime del workflow
+   activo; el segundo tenía las rutas repetidas en 3 `server` blocks y el compose una sola línea.
+4. **RabbitMQ se queda en 3.13.7.** Subir a 4.x es cambio de major y el worker es un placeholder.
+5. **No se levantó ningún contenedor.** El demonio de Docker no corría, y `up` habría reiniciado el
+   n8n con el workflow activo. F20-3 está verificado por lectura cruzada mount↔config.
+
+## Requisitos previos de despliegue (los aporta quien despliega)
+
+| # | Requisito |
+|---|---|
+| 1 | `STRIPE_WEBHOOK_SECRET` = `whsec_...` real |
+| 2 | `JWT_SECRET` real (`openssl rand -hex 64`) |
+| 3 | `CORS_ORIGINS` con dominio real (ni `*` ni `localhost`) |
+| 4 | `POSTGRES_PASSWORD` + `N8N_ENCRYPTION_KEY` (`${VAR:?error}` en compose) |
+| 5 | **`docker/ssl/*.pem` presentes** — gitignored, no vienen en un clon nuevo |
+| 6 | `TRUST_PROXY=1` con nginx delante (desactivado por defecto a propósito) |
+| 7 | `.env` local: `JWT_EXPIRES_IN=7d` sigue pisando el default de 24h (heredado de F19a) |
+
+---
 
 # FASE 18 COMPLETADA
 
@@ -44,9 +94,9 @@ Cerrada el 2026-07-25. **Siguiente paso: F19 Security Hardening — requiere con
 
 | Deuda | Destino |
 |---|---|
-| `STRIPE_WEBHOOK_SECRET` vacío → firma se verifica con `\|\| ''` | **F19 — requiere decisión** |
-| Certs de nginx prod: mount `/etc/ssl` vs rutas `/etc/ssl/certs` → **prod no arrancaría** | ETAPA C |
-| Imágenes docker sin pinear (`n8nio/n8n:latest`) | F19(b) |
+| ~~`STRIPE_WEBHOOK_SECRET` vacío → firma se verifica con `\|\| ''`~~ | ✅ F19(a) H-01 + tests en **F20** |
+| ~~Certs de nginx prod: mount `/etc/ssl` vs rutas de `nginx.conf`~~ | ✅ **F20-3** |
+| ~~Imágenes docker sin pinear~~ | ✅ **F20-2** |
 | Renombrar `ai_category` → `classification` | Futuro (requiere migración + tocar n8n) |
 | Intención de lead sin contrato real (columna nueva si se quiere) | Futuro |
 | Redis al rate limiter cuando haya varias réplicas | Futuro |
@@ -284,7 +334,9 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | F18.5 — Nginx reverse proxy + trust proxy | ✅ Cerrado |
 | **FASE 18 completa** | ✅ **Cerrada** |
 | F19(a) — Security Hardening Backend | ✅ Cerrado |
-| F19(b) Infra · (c) DB · (d) Frontend · (e) Swagger | ⏸ Pendientes |
+| F19(c) DB · (d) Frontend | ✅ Cerrados |
+| F19(b) Infra · (e) Swagger | ⏸ Pendientes |
+| **F20 — Auditoría y Preparación para Despliegue** | ✅ **Cerrada** |
 
 ## Estado que se pierde al cortar
 
@@ -301,7 +353,7 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 - **`backend/src/lib/lead.js` es la implementación de referencia** de los Code nodes
   `Sanitize & Validate` / `Parse AI Response` / `Is Hot?`. Si cambias uno, sincroniza el otro
   y **publica** el workflow. Ahora mismo están sincronizados.
-- `npm test` en `backend/` → **78 verdes**.
+- `npm test` en `backend/` → **98 verdes** (6 suites) desde F20.
 - **El LLM del workflow es Groq** (`llama-3.3-70b-versatile`), no OpenAI: esa cuenta sigue sin
   saldo (429). El nodo lleva `User-Agent: curl/8.0.0` porque Cloudflare bloquea el de n8n/urllib.
 - Canal de Slack: `C0BJYN0QKPT` (`#nuevo-canal`), fijado literal en el nodo porque `$env` está

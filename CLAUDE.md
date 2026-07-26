@@ -11,8 +11,11 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 - `POST /webhook/lead-qualification` responde **200** con `{"received":true}` (Fast ACK). **No romper esto.**
 - **IA**: Groq (`llama-3.3-70b-versatile`) vía HTTP Request node. OpenAI sin saldo (429).
 - **PostgreSQL**: 10 migraciones ejecutadas, tablas `lead_log` y `error_log` funcionales.
-- **Backend**: `/health`, `/api/auth/login`, `/api/leads`, `/api-docs` responden 200. 59 tests.
+- **Backend**: `/health`, `/api/auth/login`, `/api/leads`, `/api-docs` responden 200. **98 tests** (F20).
 - **Frontend**: build Next.js 14.2.35 OK. 14 rutas (dashboard, leads, analytics, activity, billing, integrations, marketplace, usage, settings, login, error, 404).
+- **F20 cerrada**: imágenes Docker pineadas a patch exacto, mount SSL de nginx prod corregido
+  (`/etc/nginx/ssl`), `frontend/src/lib/api.ts` reparado (no compilaba desde F19d).
+  Requisitos previos de despliegue en `docs/FASE20_DESPLIEGUE.md`.
 - **Stripe**: checkout funcional con test key. Webhook raw body fix aplicado.
 - **WhatsApp/Voice**: scaffolding backend listo (requiere credenciales externas).
 - **Marketplace**: catálogo + instalación persistente.
@@ -36,8 +39,9 @@ Estado de las credenciales: cargadas con valores reales en n8n.
 - **Backend**: Node.js + Express, PostgreSQL (`pg` pool), JWT (cookie HttpOnly). Config vía `backend/src/config/index.js`.
 - **Frontend**: Next.js 14.2.35 (App Router), Tailwind CSS, TypeScript estricto, lucide-react.
 - **Automatización**: n8n v2.31.6 (Docker).
-- **DB**: PostgreSQL 16 (Docker), RLS habilitado.
-- **Infra**: Docker Compose (`docker-compose.yml`, `docker-compose.prod.yml`), certs self-signed en `certs/`.
+- **DB**: PostgreSQL **15** (`postgres:15.18-alpine`, Docker), RLS habilitado.
+- **Infra**: Docker Compose (`docker-compose.yml`, `.dev.yml`, `.prod.yml`), certs self-signed en
+  `docker/ssl/` (gitignored: no vienen en un clon nuevo).
 - **Externos**: Groq, HubSpot, Slack, Stripe (+ scaffolding para WhatsApp Cloud API, Twilio).
 
 ## Commits recientes (orden cronológico)
@@ -131,6 +135,7 @@ cd frontend && npm run build
 - `/leads/activity` endpoint backend no implementado
 - `/usage` endpoint backend no implementado
 - WhatsApp/Voice requieren cuentas Meta/Twilio
-- Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) vacío
+- Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) vacío → **requisito previo de despliegue**, no un
+  bug: el backend aborta en producción y responde 503 fuera de ella (verificado, F20-1)
 - Worker RabbitMQ placeholder
 - 0 tests frontend

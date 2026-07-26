@@ -1,13 +1,22 @@
+# F20 — Imagenes pineadas a patch exacto (ver nota en docker-compose.yml).
+# Cada pin coincide con lo que el tag flotante resolvia: no hay salto de version.
 services:
   nginx:
-    image: nginx:1.27-alpine
+    image: nginx:1.27.5-alpine
     restart: always
     ports:
       - "80:80"
       - "443:443"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./docker/ssl:/etc/ssl:ro
+      # F20 — El mount estaba en `/etc/ssl` mientras docker/nginx.conf carga los
+      # certs desde `/etc/nginx/ssl/`: los ficheros nunca aparecian donde nginx
+      # los busca y el contenedor de produccion moria al arrancar
+      # ("cannot load certificate ... No such file or directory"). Ademas, montar
+      # sobre /etc/ssl tapa el bundle de CAs del contenedor, con lo que cualquier
+      # salida TLS desde nginx dejaria de validar. Se mueve el destino a la ruta
+      # que la config ya espera; nginx.conf no se toca.
+      - ./docker/ssl:/etc/nginx/ssl:ro
     depends_on:
       - portafolio-api
       - portafolio-frontend
@@ -47,7 +56,7 @@ services:
       - portafolio-net
 
   postgres:
-    image: postgres:15-alpine
+    image: postgres:15.18-alpine
     restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-n8n}
