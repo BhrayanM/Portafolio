@@ -4,7 +4,139 @@
 
 Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
 
+# FASE 18 COMPLETADA
+
+Cerrada el 2026-07-25. **Siguiente paso: F19 Security Hardening — requiere confirmación humana.**
+**Parada obligatoria antes de F20.**
+
+## Bloques ejecutados
+
+| Bloque | Commit | Resultado |
+|---|---|---|
+| F18.1 — Normalización billing plans | `b91fba6` | `price: 'pro'` permitido en `growth`/`enterprise`; mensaje corregido |
+| F18.2 — Alineación enums de Lead | `f3805f1` | `ai_category` canónico `HOT/WARM/COLD` en las 6 capas |
+| F18.3 — Limpieza lint backend | `41cf053` | De 5 errores a lint limpio, sin tocar lógica |
+| F18.4 — Redis | `6f355ff` | Alcance vacío: verificado y documentado, **no cableado** |
+| F18.5 — Nginx + trust proxy | `feat(F18.5)` | Proxy local funcional + `trust proxy` resuelto y probado |
+
+## Decisiones clave
+
+1. **`ai_business_category` NO es un enum de intención** (F18.2). Es el sector de negocio en texto
+   libre que emite el LLM. Cerrarlo a 4 valores habría rechazado lo que n8n ya escribe.
+2. **Redis no se cableó** (F18.4). Está completo pero sin un solo consumidor; integrarlo no
+   habría cambiado nada en runtime. Anti-sobreingeniería.
+3. **`TRUST_PROXY` desactivado por defecto** (F18.5). Activarlo sin proxy delante permite falsear
+   la IP por cabecera y saltarse el rate limiter. Y vale `1`, no `true`.
+4. **El nginx de producción no se tocó** (F18.5). Se creó un config local aparte en vez de
+   convertir el de prod a HTTP.
+5. **Compose local separado** (F18.5), para no reiniciar el n8n con el workflow activo.
+6. **Los enums vienen de una sola fuente**: `backend/src/lib/lead.js` es el origen de
+   `CATEGORIES`/`normalizeCategory`; el resto de capas los importan.
+
+## Estado al cerrar la fase
+
+- **Tests: 86/86 verdes** (empezó la fase en 77).
+- **Lint: limpio** en `src/` y en `tests/`.
+- **Build frontend: OK**, 14 rutas.
+- n8n **intacto** durante toda la fase: no se tocó el workflow ni se reinició el contenedor.
+
+## Deuda restante al cerrar FASE 18
+
+| Deuda | Destino |
+|---|---|
+| `STRIPE_WEBHOOK_SECRET` vacío → firma se verifica con `\|\| ''` | **F19 — requiere decisión** |
+| Certs de nginx prod: mount `/etc/ssl` vs rutas `/etc/ssl/certs` → **prod no arrancaría** | ETAPA C |
+| Imágenes docker sin pinear (`n8nio/n8n:latest`) | F19(b) |
+| Renombrar `ai_category` → `classification` | Futuro (requiere migración + tocar n8n) |
+| Intención de lead sin contrato real (columna nueva si se quiere) | Futuro |
+| Redis al rate limiter cuando haya varias réplicas | Futuro |
+| n8n `leadStatus` COLD→OPEN · mapeo `hs_lead_status` unificado | Pendiente |
+| Secretos locales en disco | F19(b) |
+| `/leads/activity` y `/usage` sin implementar · 0 tests frontend | Futuro |
+
+---
+
 ## Último bloque cerrado
+
+**F18.5 — Nginx reverse proxy local + `trust proxy` en el backend. Con esto FASE 18 queda cerrada.**
+
+### Estado real que se encontró (no era lo que parecía)
+
+- Nginx existía **solo en `docker-compose.prod.yml`**, nunca en el compose local.
+- **Nunca se había ejecutado**: no había contenedor nginx ni en `docker ps -a`.
+- `docker/nginx.conf` es **100 % HTTPS + dominio** (`portafolio.ai`, `api.`, `n8n.`). El puerto 80
+  solo hace `301` a https. No servía para trabajar en local.
+- `docker/ssl/` sí tiene certs self-signed (`fullchain.pem`, `privkey.pem`).
+- El backend **no tenía `trust proxy`** (hallazgo heredado de F18.4).
+
+### Qué se hizo
+
+| Archivo | Cambio |
+|---|---|
+| `backend/src/config/index.js` | Nuevo `trustProxy` + helper `parseTrustProxy()`, leído de `TRUST_PROXY`. Exportado aparte para poder testearlo. |
+| `backend/src/app.js` | `app.set('trust proxy', config.trustProxy)` antes de los middlewares. |
+| `docker/nginx.dev.conf` | **Nuevo.** Reverse proxy HTTP para local: `server_tokens off`, cabeceras de proxy completas, timeouts, log con `xff`. |
+| `docker-compose.dev.yml` | **Nuevo.** `nginx-local` (8080→80) + `portafolio-api` con `TRUST_PROXY=1`, sobre la red **externa** ya existente. |
+| `backend/tests/config.test.js` | **Nuevo.** 8 tests del parseo de `TRUST_PROXY` y del default seguro. |
+| `.env.example` | Documentada `TRUST_PROXY`. |
+
+### Decisiones técnicas
+
+1. **`docker/nginx.conf` (prod) NO se tocó.** Se creó un archivo local aparte en vez de convertir
+   el de producción a HTTP: el de prod es de ETAPA C y romperlo para probar en local sería un
+   cambio destructivo.
+2. **Compose local separado, con `networks: external: true`.** `docker-compose.yml` levanta el n8n
+   con el workflow activo; añadir nginx ahí y hacer `up` lo habría reiniciado. Con un fichero
+   aparte enganchado a la red ya creada, **n8n y postgres no se tocan** (verificado: siguieron
+   con 14 h y 16 h de uptime durante toda la prueba).
+3. **`TRUST_PROXY` por defecto DESACTIVADO.** Es la decisión de seguridad del bloque: con el
+   backend expuesto directo, `trust proxy` activo permitiría a cualquiera mandar
+   `X-Forwarded-For: <lo que sea>` y estrenar cubo de rate limit en cada petición. Se activa
+   (`=1`) solo donde de verdad hay un proxy delante.
+4. **`1` y no `true`.** `true` confía en toda la cadena XFF y vuelve a ser falsificable;
+   `1` descuenta exactamente un salto, el de nginx.
+5. Puerto **8080** en el host, no 80, para no chocar con nada que ya escuche ahí.
+6. **Los ficheros se llaman `.dev.` y no `.local.`**: `.gitignore:112` ignora `*.local.*` como red
+   de seguridad contra secretos en un repo público, y estos dos deben versionarse. Se renombraron
+   en vez de forzar `git add -f`, para no debilitar ese guardia ni sentar el precedente.
+
+### Evidencia de la prueba real
+
+```
+curl http://localhost:8080/health -> 200
+{"status":"ok","db":"connected",...}                      # nginx -> backend OK
+
+# Rate limiter keyea por XFF (trust proxy activo):
+XFF=10.9.9.1 -> RateLimit-Remaining: 99
+XFF=10.9.9.1 -> RateLimit-Remaining: 98     # mismo cubo
+XFF=10.9.9.2 -> RateLimit-Remaining: 99     # cubo nuevo
+
+# A traves de nginx, cliente falsificando XFF:
+finge 8.8.8.8 -> Remaining: 99
+finge 1.1.1.1 -> Remaining: 98              # MISMO cubo: no es falsificable
+
+# Log de nginx:
+172.21.0.1 -> 172.21.0.4:3000 "GET /api/billing/plans HTTP/1.1" 200 xff="8.8.8.8"
+```
+
+Tests: **86/86 verdes** (78 → 86, +8 nuevos). Lint limpio (`src/` y `tests/`).
+
+### Deuda / entregado a F19 y ETAPA C
+
+- **`docker-compose.prod.yml` monta `./docker/ssl:/etc/ssl:ro`, pero `docker/nginx.conf` busca los
+  certs en `/etc/ssl/certs/fullchain.pem` y `/etc/ssl/private/privkey.pem`.** Con ese mount los
+  ficheros quedan en `/etc/ssl/fullchain.pem`: **nginx de producción no arrancaría**. Además,
+  montar sobre `/etc/ssl` tapa el bundle de CAs del contenedor. No se corrigió aquí porque
+  SSL/certs/dominio están explícitamente fuera de alcance. → **ETAPA C**.
+- `docker-compose.prod.yml` y `docker-compose.yml` usan `n8nio/n8n:latest` (imagen sin pinear). → **F19(b)**.
+- El nginx local proxya **solo al backend**. El frontend no se incluyó: su upstream no resolvería
+  si el contenedor no está levantado y nginx **falla al arrancar** si un upstream no resuelve.
+- Rate limiting en nginx, WAF y headers de seguridad del proxy: **fuera de alcance de F18.5**, → **F19**.
+
+Para levantar/parar el stack local:
+`docker compose -f docker-compose.dev.yml up -d --build` · `... down`
+
+---
 
 **F18.4 — Redis verificado y cerrado con alcance vacío. No se cableó nada.**
 
@@ -126,6 +258,8 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | F18.2 — Alineación enums de Lead | ✅ Cerrado |
 | F18.3 — Limpieza lint backend | ✅ Cerrado |
 | F18.4 — Redis (alcance vacío, no cableado) | ✅ Cerrado |
+| F18.5 — Nginx reverse proxy + trust proxy | ✅ Cerrado |
+| **FASE 18 completa** | ✅ **Cerrada** |
 
 ## Estado que se pierde al cortar
 

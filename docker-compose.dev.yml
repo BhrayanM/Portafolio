@@ -1,0 +1,50 @@
+# Stack LOCAL con nginx delante del backend.
+#
+# Existe aparte de `docker-compose.yml` a proposito: ese fichero tiene el n8n con el
+# workflow activo y postgres, y levantarlos de nuevo para probar el proxy los reiniciaria.
+# Aqui solo se anaden nginx + el backend, enganchados a la red que ya existe.
+#
+#   docker compose -f docker-compose.dev.yml up -d --build
+#   curl http://localhost:8080/health
+#   docker compose -f docker-compose.dev.yml down
+#
+# Nombrado .dev. y no .local. a proposito: .gitignore ignora `*.local.*` como red de
+# seguridad contra secretos en un repo publico, y estos dos ficheros deben versionarse.
+#
+# Produccion sigue siendo docker-compose.prod.yml + docker/nginx.conf (HTTPS + dominio).
+
+services:
+  nginx-local:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      # 8080 en el host para no chocar con nada que ya escuche en el 80.
+      - "8080:80"
+    volumes:
+      - ./docker/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - portafolio-api
+    networks:
+      - portafolio-net
+
+  portafolio-api:
+    build: ./backend
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Hay exactamente un proxy delante (nginx-local), asi que Express debe
+      # descartar 1 salto de X-Forwarded-For para resolver la IP real del cliente.
+      # Fuera de esta topologia va desactivado por defecto: ver backend/src/config/index.js.
+      TRUST_PROXY: "1"
+      # El backend habla con el postgres que ya corre en la red compartida.
+      DB_HOST: postgres
+      DB_PORT: "5432"
+    networks:
+      - portafolio-net
+
+networks:
+  # Red ya creada por docker-compose.yml. `external` evita que compose intente
+  # recrearla y con ello tocar los contenedores que ya estan levantados.
+  portafolio-net:
+    external: true
+    name: portafolio-publico_portafolio-net

@@ -24,6 +24,13 @@ const swaggerSpec = require('./docs/swagger');
 
 const app = express();
 
+// Detras de nginx, `req.ip` seria la IP del contenedor proxy y no la del cliente:
+// el rate limiter contaria a todo el mundo en el mismo cubo. Con `trust proxy`
+// Express resuelve `req.ip` desde X-Forwarded-For. Se configura por entorno y
+// viene desactivado por defecto (ver config/index.js), porque activarlo sin un
+// proxy delante permitiria falsear la IP con una cabecera.
+app.set('trust proxy', config.trustProxy);
+
 securityMiddleware(app);
 app.use(cors({ origin: config.corsOrigins, credentials: true }));
 app.use(requestId);
