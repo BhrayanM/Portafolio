@@ -1,6 +1,6 @@
 services:
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     restart: always
     ports:
       - "80:80"
@@ -11,6 +11,11 @@ services:
     depends_on:
       - portafolio-api
       - portafolio-frontend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
@@ -21,6 +26,11 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
@@ -28,6 +38,11 @@ services:
     build: ./frontend
     restart: always
     env_file: .env
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
@@ -45,11 +60,16 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
   n8n:
-    image: n8nio/n8n:latest
+    image: n8nio/n8n:2.31.6
     restart: always
     depends_on:
       postgres:
@@ -72,6 +92,11 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/backup/workflows
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 

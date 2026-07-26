@@ -19,11 +19,16 @@ services:
     restart: unless-stopped
     ports:
       # 8080 en el host para no chocar con nada que ya escuche en el 80.
-      - "8080:80"
+      - "127.0.0.1:8080:80"
     volumes:
       - ./docker/nginx.dev.conf:/etc/nginx/nginx.conf:ro
     depends_on:
       - portafolio-api
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
@@ -39,6 +44,11 @@ services:
       # El backend habla con el postgres que ya corre en la red compartida.
       DB_HOST: postgres
       DB_PORT: "5432"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
