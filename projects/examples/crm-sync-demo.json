@@ -5,8 +5,11 @@
       "id": "cron-trigger",
       "name": "Schedule",
       "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.1,
-      "position": [0, 300],
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
         "rule": {
           "interval": [
@@ -19,17 +22,18 @@
       }
     },
     {
-      "id": "webhook-manual",
-      "name": "Manual Trigger",
-      "type": "n8n-nodes-base.webhook",
+      "id": "read-cursor",
+      "name": "Read Sync Cursor",
+      "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [0, 500],
+      "position": [
+        220,
+        300
+      ],
       "parameters": {
-        "path": "crm-sync-trigger",
-        "options": {
-          "responseData": "allEntries",
-          "responseMode": "lastNode"
-        }
+        "language": "javaScript",
+        "jsCode": "// Cursor de sincronizacion incremental.\n//\n// La version anterior leia LAST_SYNC_TIMESTAMP de $env. Un workflow no puede\n// escribir en su propio entorno, asi que el cursor nunca avanzaba: cada ejecucion\n// repetia la misma ventana. El estado de una sincronizacion incremental tiene que\n// vivir donde el workflow pueda actualizarlo.\n//\n// Aqui se usa la clave estatica del workflow (getWorkflowStaticData), que n8n\n// persiste entre ejecuciones. En produccion, con varios workers, conviene una\n// tabla en PostgreSQL para evitar carreras.\nconst state = $getWorkflowStaticData('global');\n\nconst since = state.lastSyncedAt || new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();\n\nreturn [{ json: { since: since, page: 1, startedAt: new Date().toISOString() } }];\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
@@ -37,21 +41,54 @@
       "name": "Fetch Contacts (Source)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [300, 300],
+      "position": [
+        440,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
       "parameters": {
         "method": "GET",
         "url": "={{ $env.SOURCE_API_URL }}/contacts",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.SOURCE_API_TOKEN }}" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.SOURCE_API_TOKEN }}"
+            }
           ]
         },
+        "sendQuery": true,
         "queryParameters": {
           "parameters": [
-            { "name": "updatedSince", "value": "={{ $env.LAST_SYNC_TIMESTAMP }}" }
+            {
+              "name": "updatedSince",
+              "value": "={{ $json.since }}"
+            },
+            {
+              "name": "page",
+              "value": "={{ $json.page }}"
+            },
+            {
+              "name": "pageSize",
+              "value": "100"
+            }
           ]
+        },
+        "options": {
+          "timeout": 30000,
+          "pagination": {
+            "pagination": {
+              "paginationMode": "responseContainsNextURL",
+              "nextURL": "={{ $response.body.next_page_url }}",
+              "paginationCompleteWhen": "other",
+              "completeExpression": "={{ !$response.body.next_page_url }}",
+              "limitPagesFetched": true,
+              "maxRequestsAmount": 50
+            }
+          }
         }
       }
     },
@@ -60,10 +97,14 @@
       "name": "Transform Fields",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [600, 300],
+      "position": [
+        660,
+        300
+      ],
       "parameters": {
-        "language": "javascript",
-        "code": "// Field mapping transformation\nconst mapped = [];\nfor (const contact of $input.all()) {\n  mapped.push({\n    email: contact.json.email,\n    firstName: contact.json.first_name || contact.json.givenName,\n    lastName: contact.json.last_name || contact.json.surname,\n    phone: contact.json.phone || contact.json.telephone,\n    company: contact.json.company || contact.json.organization,\n    lastModified: new Date().toISOString()\n  });\n}\nreturn mapped;\n"
+        "language": "javaScript",
+        "jsCode": "// Mapeo de campos entre los dos esquemas.\n//\n// Se descartan los registros sin email: es la identidad de negocio con la que se\n// deduplica en destino. Sin ella, el upsert crearia duplicados en cada pasada.\nconst mapped = [];\n\nfor (const item of $input.all()) {\n  const c = item.json;\n  const email = String(c.email || '').trim().toLowerCase();\n  if (!email) continue;\n\n  mapped.push({\n    json: {\n      email: email,\n      firstName: c.first_name || c.givenName || '',\n      lastName: c.last_name || c.surname || '',\n      phone: c.phone || c.telephone || '',\n      company: c.company || c.organization || '',\n      lastModified: new Date().toISOString()\n    }\n  });\n}\n\nreturn mapped;\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
@@ -71,74 +112,156 @@
       "name": "Upsert Contacts (Destination)",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [900, 300],
+      "position": [
+        880,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 3000,
+      "onError": "continueRegularOutput",
       "parameters": {
         "method": "POST",
         "url": "={{ $env.DESTINATION_API_URL }}/contacts/batch",
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            { "name": "Authorization", "value": "Bearer {{ $env.DESTINATION_API_TOKEN }}" }
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $env.DESTINATION_API_TOKEN }}"
+            },
+            {
+              "name": "Idempotency-Key",
+              "value": "={{ $json.email }}"
+            }
           ]
         },
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            { "name": "contacts", "value": "={{ $json }}" }
-          ]
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contacts: [$json] }) }}",
+        "options": {
+          "timeout": 30000,
+          "batching": {
+            "batch": {
+              "batchSize": 20,
+              "batchInterval": 1000
+            }
+          }
         }
       }
     },
     {
-      "id": "log-sync",
-      "name": "Log Sync Result",
+      "id": "commit-cursor",
+      "name": "Commit Cursor & Summarize",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [1200, 300],
+      "position": [
+        1100,
+        300
+      ],
       "parameters": {
-        "language": "javascript",
-        "code": "// Log sync statistics\nconst response = $input.first().json;\nreturn [{\n  syncTimestamp: new Date().toISOString(),\n  contactsSynced: response.synced || response.upserted?.length || 0,\n  contactsFailed: response.failed?.length || 0,\n  status: response.success ? 'completed' : 'partial'\n}];\n"
+        "language": "javaScript",
+        "jsCode": "// El cursor solo avanza si la pasada termino: si se avanzase antes, un fallo a\n// mitad dejaria un hueco de registros que ya nadie volveria a mirar.\nconst state = $getWorkflowStaticData('global');\nconst started = $('Read Sync Cursor').first().json.startedAt;\n\nconst items = $input.all();\nconst failed = items.filter(function (i) { return i.json && i.json.error; }).length;\nconst synced = items.length - failed;\n\nif (failed === 0) {\n  state.lastSyncedAt = started;\n}\n\nreturn [{\n  json: {\n    syncTimestamp: new Date().toISOString(),\n    contactsSynced: synced,\n    contactsFailed: failed,\n    cursorAdvanced: failed === 0,\n    status: failed === 0 ? 'completed' : 'partial'\n  }\n}];\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
       "id": "notify-slack",
       "name": "Notify Summary",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2,
-      "position": [1500, 300],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1320,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 2000,
       "parameters": {
-        "channel": "{{ $env.SLACK_SYNC_CHANNEL }}",
-        "text": "={{ '🔄 *CRM Sync Complete*\nSynced: ' + $json.contactsSynced + ' contacts\nFailed: ' + $json.contactsFailed + '\nStatus: ' + $json.status }}",
-        "otherOptions": {
-          "icon_emoji": ":arrows_counterclockwise:"
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: ':arrows_counterclockwise: Sincronizacion CRM ' + $json.status + ' — ' + $json.contactsSynced + ' contactos, ' + $json.contactsFailed + ' fallidos' }) }}",
+        "options": {
+          "timeout": 10000
         }
       }
     }
   ],
   "connections": {
-    "Manual Trigger": {
-      "main": [[ { "node": "Fetch Contacts (Source)", "type": "main", "index": 0 } ]]
-    },
     "Schedule": {
-      "main": [[ { "node": "Fetch Contacts (Source)", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Read Sync Cursor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Sync Cursor": {
+      "main": [
+        [
+          {
+            "node": "Fetch Contacts (Source)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Fetch Contacts (Source)": {
-      "main": [[ { "node": "Transform Fields", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Transform Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Transform Fields": {
-      "main": [[ { "node": "Upsert Contacts (Destination)", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Upsert Contacts (Destination)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Upsert Contacts (Destination)": {
-      "main": [[ { "node": "Log Sync Result", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Commit Cursor & Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
-    "Log Sync Result": {
-      "main": [[ { "node": "Notify Summary", "type": "main", "index": 0 } ]]
+    "Commit Cursor & Summarize": {
+      "main": [
+        [
+          {
+            "node": "Notify Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true
-  }
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "executionTimeout": 900
+  },
+  "pinData": {}
 }

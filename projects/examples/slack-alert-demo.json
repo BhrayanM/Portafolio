@@ -6,13 +6,30 @@
       "name": "Alert Webhook",
       "type": "n8n-nodes-base.webhook",
       "typeVersion": 2,
-      "position": [0, 300],
+      "position": [
+        0,
+        300
+      ],
       "parameters": {
+        "httpMethod": "POST",
         "path": "slack-alert",
-        "options": {
-          "responseData": "allEntries",
-          "responseMode": "responseNode"
-        }
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "verify-secret",
+      "name": "Verify Shared Secret",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "language": "javaScript",
+        "jsCode": "// Un endpoint de alertas sin autenticar es un altavoz publico hacia el canal de\n// operaciones: cualquiera puede inyectar avisos falsos o ahogar los reales.\nconst expected = $env.ALERT_WEBHOOK_SECRET;\nif (!expected) {\n  throw new Error('ALERT_WEBHOOK_SECRET no configurado: el webhook se rechaza por defecto');\n}\n\nconst headers = $input.first().json.headers || {};\nif (headers['x-webhook-secret'] !== expected) {\n  throw new Error('Secreto de webhook invalido');\n}\n\nreturn [{ json: $input.first().json.body || {} }];\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
@@ -20,10 +37,14 @@
       "name": "Validate Payload",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [300, 300],
+      "position": [
+        440,
+        300
+      ],
       "parameters": {
-        "language": "javascript",
-        "code": "// Validate required fields\nconst payload = $input.first().json;\nconst required = ['title', 'severity', 'message'];\nconst missing = required.filter(f => !payload[f]);\nif (missing.length > 0) {\n  throw new Error('Missing required fields: ' + missing.join(', '));\n}\n// Validate severity\nconst validSeverity = ['critical', 'warning', 'info'];\nif (!validSeverity.includes(payload.severity)) {\n  throw new Error('Invalid severity. Must be one of: ' + validSeverity.join(', '));\n}\nreturn [payload];\n"
+        "language": "javaScript",
+        "jsCode": "// Validacion de contrato antes de formatear nada.\nconst payload = $input.first().json;\n\nconst required = ['title', 'severity', 'message'];\nconst missing = required.filter((f) => !payload[f]);\nif (missing.length > 0) {\n  throw new Error('Faltan campos obligatorios: ' + missing.join(', '));\n}\n\nconst validSeverity = ['critical', 'warning', 'info'];\nif (!validSeverity.includes(payload.severity)) {\n  throw new Error('Severidad invalida. Valores admitidos: ' + validSeverity.join(', '));\n}\n\nreturn [{ json: payload }];\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
@@ -31,24 +52,36 @@
       "name": "Format Slack Message",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [600, 300],
+      "position": [
+        660,
+        300
+      ],
       "parameters": {
-        "language": "javascript",
-        "code": "// Format message based on severity\nconst alert = $input.first().json;\nconst severityConfig = {\n  critical: { emoji: ':red_circle:', color: '#E01E5A' },\n  warning:  { emoji: ':warning:', color: '#FFC107' },\n  info:     { emoji: ':information_source:', color: '#36A64F' }\n};\nconst config = severityConfig[alert.severity] || severityConfig.info;\n\nconst blocks = [\n  {\n    type: 'header',\n    text: { type: 'plain_text', text: config.emoji + ' ' + alert.title }\n  },\n  {\n    type: 'section',\n    text: { type: 'mrkdwn', text: alert.message }\n  }\n];\n\nif (alert.fields) {\n  const fieldItems = Object.entries(alert.fields).map(([name, value]) => ({\n    type: 'mrkdwn',\n    text: '*' + name + ':* ' + String(value)\n  }));\n  blocks.push({ type: 'section', fields: fieldItems });\n}\n\nif (alert.link) {\n  blocks.push({\n    type: 'actions',\n    elements: [\n      {\n        type: 'button',\n        text: { type: 'plain_text', text: 'View Details' },\n        url: alert.link,\n        style: alert.severity === 'critical' ? 'danger' : 'primary'\n      }\n    ]\n  });\n}\n\nreturn [{ blocks: blocks, text: alert.title }];\n"
+        "language": "javaScript",
+        "jsCode": "// Formatea el mensaje segun severidad.\nconst alert = $input.first().json;\n\nconst severityConfig = {\n  critical: { emoji: ':red_circle:' },\n  warning: { emoji: ':warning:' },\n  info: { emoji: ':information_source:' }\n};\nconst config = severityConfig[alert.severity] || severityConfig.info;\n\nconst blocks = [\n  { type: 'header', text: { type: 'plain_text', text: config.emoji + ' ' + alert.title } },\n  { type: 'section', text: { type: 'mrkdwn', text: alert.message } }\n];\n\nif (alert.fields) {\n  blocks.push({\n    type: 'section',\n    fields: Object.entries(alert.fields).map(function (entry) {\n      return { type: 'mrkdwn', text: '*' + entry[0] + ':* ' + String(entry[1]) };\n    })\n  });\n}\n\nif (alert.link) {\n  blocks.push({\n    type: 'actions',\n    elements: [{\n      type: 'button',\n      text: { type: 'plain_text', text: 'Ver detalle' },\n      url: alert.link,\n      style: alert.severity === 'critical' ? 'danger' : 'primary'\n    }]\n  });\n}\n\nreturn [{ json: { blocks: blocks, text: alert.title } }];\n",
+        "mode": "runOnceForAllItems"
       }
     },
     {
       "id": "send-slack",
       "name": "Send to Slack",
-      "type": "n8n-nodes-base.slack",
-      "typeVersion": 2,
-      "position": [900, 300],
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        300
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000,
       "parameters": {
-        "channel": "={{ $env.SLACK_ALERTS_CHANNEL }}",
-        "blocks": "={{ $json.blocks }}",
-        "text": "={{ $json.text }}",
-        "otherOptions": {
-          "icon_emoji": ":robot_face:"
+        "method": "POST",
+        "url": "={{ $env.SLACK_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ text: $json.text, blocks: $json.blocks }) }}",
+        "options": {
+          "timeout": 10000
         }
       }
     },
@@ -57,30 +90,79 @@
       "name": "Respond 200",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1,
-      "position": [900, 500],
+      "position": [
+        1100,
+        300
+      ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "=\n{\n  \"status\": \"sent\",\n  \"channel\": $env.SLACK_ALERTS_CHANNEL\n}\n"
+        "responseCode": 200,
+        "responseBody": "={{ JSON.stringify({ status: 'sent' }) }}"
       }
     }
   ],
   "connections": {
     "Alert Webhook": {
-      "main": [[ { "node": "Validate Payload", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Verify Shared Secret",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify Shared Secret": {
+      "main": [
+        [
+          {
+            "node": "Validate Payload",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Validate Payload": {
-      "main": [[ { "node": "Format Slack Message", "type": "main", "index": 0 } ]]
+      "main": [
+        [
+          {
+            "node": "Format Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "Format Slack Message": {
       "main": [
-        [ { "node": "Send to Slack", "type": "main", "index": 0 } ],
-        [ { "node": "Respond 200", "type": "main", "index": 0 } ]
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to Slack": {
+      "main": [
+        [
+          {
+            "node": "Respond 200",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     }
   },
   "settings": {
     "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all",
-    "saveManualExecutions": true
-  }
+    "saveDataSuccessExecution": "none",
+    "saveManualExecutions": true,
+    "executionTimeout": 60
+  },
+  "pinData": {}
 }
