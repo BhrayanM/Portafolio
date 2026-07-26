@@ -1,0 +1,86 @@
+{
+  "name": "Slack Alert Demo",
+  "nodes": [
+    {
+      "id": "webhook-alert",
+      "name": "Alert Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "parameters": {
+        "path": "slack-alert",
+        "options": {
+          "responseData": "allEntries",
+          "responseMode": "responseNode"
+        }
+      }
+    },
+    {
+      "id": "validate-payload",
+      "name": "Validate Payload",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [300, 300],
+      "parameters": {
+        "language": "javascript",
+        "code": "// Validate required fields\nconst payload = $input.first().json;\nconst required = ['title', 'severity', 'message'];\nconst missing = required.filter(f => !payload[f]);\nif (missing.length > 0) {\n  throw new Error('Missing required fields: ' + missing.join(', '));\n}\n// Validate severity\nconst validSeverity = ['critical', 'warning', 'info'];\nif (!validSeverity.includes(payload.severity)) {\n  throw new Error('Invalid severity. Must be one of: ' + validSeverity.join(', '));\n}\nreturn [payload];\n"
+      }
+    },
+    {
+      "id": "format-slack",
+      "name": "Format Slack Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [600, 300],
+      "parameters": {
+        "language": "javascript",
+        "code": "// Format message based on severity\nconst alert = $input.first().json;\nconst severityConfig = {\n  critical: { emoji: ':red_circle:', color: '#E01E5A' },\n  warning:  { emoji: ':warning:', color: '#FFC107' },\n  info:     { emoji: ':information_source:', color: '#36A64F' }\n};\nconst config = severityConfig[alert.severity] || severityConfig.info;\n\nconst blocks = [\n  {\n    type: 'header',\n    text: { type: 'plain_text', text: config.emoji + ' ' + alert.title }\n  },\n  {\n    type: 'section',\n    text: { type: 'mrkdwn', text: alert.message }\n  }\n];\n\nif (alert.fields) {\n  const fieldItems = Object.entries(alert.fields).map(([name, value]) => ({\n    type: 'mrkdwn',\n    text: '*' + name + ':* ' + String(value)\n  }));\n  blocks.push({ type: 'section', fields: fieldItems });\n}\n\nif (alert.link) {\n  blocks.push({\n    type: 'actions',\n    elements: [\n      {\n        type: 'button',\n        text: { type: 'plain_text', text: 'View Details' },\n        url: alert.link,\n        style: alert.severity === 'critical' ? 'danger' : 'primary'\n      }\n    ]\n  });\n}\n\nreturn [{ blocks: blocks, text: alert.title }];\n"
+      }
+    },
+    {
+      "id": "send-slack",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "channel": "={{ $env.SLACK_ALERTS_CHANNEL }}",
+        "blocks": "={{ $json.blocks }}",
+        "text": "={{ $json.text }}",
+        "otherOptions": {
+          "icon_emoji": ":robot_face:"
+        }
+      }
+    },
+    {
+      "id": "respond-success",
+      "name": "Respond 200",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [900, 500],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "=\n{\n  \"status\": \"sent\",\n  \"channel\": $env.SLACK_ALERTS_CHANNEL\n}\n"
+      }
+    }
+  ],
+  "connections": {
+    "Alert Webhook": {
+      "main": [[ { "node": "Validate Payload", "type": "main", "index": 0 } ]]
+    },
+    "Validate Payload": {
+      "main": [[ { "node": "Format Slack Message", "type": "main", "index": 0 } ]]
+    },
+    "Format Slack Message": {
+      "main": [
+        [ { "node": "Send to Slack", "type": "main", "index": 0 } ],
+        [ { "node": "Respond 200", "type": "main", "index": 0 } ]
+      ]
+    }
+  },
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true
+  }
+}

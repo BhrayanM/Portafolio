@@ -1,0 +1,206 @@
+{
+  "name": "Lead Scoring Demo",
+  "nodes": [
+    {
+      "id": "webhook-inbound",
+      "name": "Inbound Lead",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 300],
+      "parameters": {
+        "path": "lead-inbound",
+        "options": {
+          "responseData": "allEntries",
+          "responseMode": "lastNode"
+        }
+      }
+    },
+    {
+      "id": "http-enrich",
+      "name": "Enrich Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [300, 300],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.ENRICHMENT_API_URL }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.email }}"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "llm-score",
+      "name": "LLM Score Lead",
+      "type": "n8n-nodes-base.openAi",
+      "typeVersion": 2,
+      "position": [600, 300],
+      "parameters": {
+        "model": "gpt-4o-mini",
+        "prompt": "={{ 'Score this lead from 1-100 based on: company size, industry fit, and engagement signals. Return only a JSON with score, category, and reasoning. Lead data: ' + JSON.stringify($json) }}",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      }
+    },
+    {
+      "id": "switch-route",
+      "name": "Route by Score",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 2,
+      "position": [900, 300],
+      "parameters": {
+        "dataType": "number",
+        "value1": "={{ $json.score }}",
+        "rules": [
+          { "value2": ">= 80", "output": "Hot" },
+          { "value2": ">= 50", "output": "Warm" },
+          { "value2": "< 50", "output": "Cold" }
+        ]
+      }
+    },
+    {
+      "id": "crm-upsert-hot",
+      "name": "CRM Upsert (Hot)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 100],
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.CRM_API_URL }}/contacts/upsert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.CRM_ACCESS_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "email", "value": "={{ $json.email }}" },
+            { "name": "score", "value": "={{ $json.score }}" },
+            { "name": "category", "value": "={{ $json.category }}" },
+            { "name": "status", "value": "hot" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "crm-upsert-warm",
+      "name": "CRM Upsert (Warm)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 300],
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.CRM_API_URL }}/contacts/upsert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.CRM_ACCESS_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "email", "value": "={{ $json.email }}" },
+            { "name": "score", "value": "={{ $json.score }}" },
+            { "name": "status", "value": "warm" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "crm-upsert-cold",
+      "name": "CRM Upsert (Cold)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [1200, 500],
+      "parameters": {
+        "method": "PUT",
+        "url": "={{ $env.CRM_API_URL }}/contacts/upsert",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "headerParameters": {
+          "parameters": [
+            { "name": "Authorization", "value": "Bearer {{ $env.CRM_ACCESS_TOKEN }}" }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            { "name": "email", "value": "={{ $json.email }}" },
+            { "name": "score", "value": "={{ $json.score }}" },
+            { "name": "status", "value": "cold" }
+          ]
+        }
+      }
+    },
+    {
+      "id": "notify-slack-hot",
+      "name": "Notify Slack (Hot)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1500, 100],
+      "parameters": {
+        "channel": "{{ $env.SLACK_LEADS_CHANNEL }}",
+        "text": "={{ '🚀 *Hot Lead Alert*\nCompany: ' + $json.company + '\nScore: ' + $json.score + '/' + $json.category + '\nEmail: ' + $json.email }}",
+        "otherOptions": {
+          "icon_emoji": ":fire:"
+        }
+      }
+    },
+    {
+      "id": "notify-slack-warm",
+      "name": "Notify Slack (Warm)",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [1500, 300],
+      "parameters": {
+        "channel": "{{ $env.SLACK_LEADS_CHANNEL }}",
+        "text": "={{ '📈 *Warm Lead*\nCompany: ' + $json.company + '\nScore: ' + $json.score + '/' + $json.category }}",
+        "otherOptions": {
+          "icon_emoji": ":chart_with_upwards_trend:"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Inbound Lead": {
+      "main": [[ { "node": "Enrich Contact", "type": "main", "index": 0 } ]]
+    },
+    "Enrich Contact": {
+      "main": [[ { "node": "LLM Score Lead", "type": "main", "index": 0 } ]]
+    },
+    "LLM Score Lead": {
+      "main": [[ { "node": "Route by Score", "type": "main", "index": 0 } ]]
+    },
+    "Route by Score": {
+      "main": [
+        [ { "node": "CRM Upsert (Hot)", "type": "main", "index": 0 } ],
+        [ { "node": "CRM Upsert (Warm)", "type": "main", "index": 0 } ],
+        [ { "node": "CRM Upsert (Cold)", "type": "main", "index": 0 } ]
+      ]
+    },
+    "CRM Upsert (Hot)": {
+      "main": [[ { "node": "Notify Slack (Hot)", "type": "main", "index": 0 } ]]
+    },
+    "CRM Upsert (Warm)": {
+      "main": [[ { "node": "Notify Slack (Warm)", "type": "main", "index": 0 } ]]
+    }
+  },
+  "settings": {
+    "saveDataErrorExecution": "all",
+    "saveDataSuccessExecution": "all",
+    "saveManualExecutions": true
+  }
+}

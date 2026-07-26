@@ -358,11 +358,24 @@ npm audit             # Dependency scanning
 
 ---
 
+## Public Automation Examples
+
+Sanitized, educational n8n workflow examples demonstrating the core automation pattern:
+
+| Workflow | Description |
+|----------|-------------|
+| [Lead Scoring Demo](projects/examples/lead-scoring-demo.json) | Score inbound leads via LLM and route by priority |
+| [CRM Sync Demo](projects/examples/crm-sync-demo.json) | Bidirectional contact sync between systems |
+| [Slack Alert Demo](projects/examples/slack-alert-demo.json) | Send context-rich alerts to Slack channels |
+
+See [Examples README](projects/examples/README.md) for pattern documentation and usage instructions.
+
 ## Related Documentation
 
 - [Engineering Notes](ENGINEERING_NOTES.md) — Reliability, AI integration, and multi-tenant patterns
 - [Architecture Decision Records](docs/adr/README.md) — ADRs with rationale and rollback procedures
 - [Pattern: Webhook → AI → CRM → Notification](docs/patterns/webhook-ai-crm-notify.md) — Reusable reliability pattern
+- [Deployment Guide](docs/deployment-guide.md) — Production deployment instructions
 - [Security Policy](SECURITY.md) — Publication policy and controls
 
 ---
