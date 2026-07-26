@@ -415,6 +415,41 @@ Sanitized, educational n8n workflow examples demonstrating the core automation p
 
 See [Examples README](projects/examples/README.md) for pattern documentation and usage instructions.
 
+## Engineering Documentation
+
+In-depth technical documentation for each automation system — covering architecture, API contracts, security practices, and workflow patterns.
+
+### Lead Qualification Engine
+
+| Document | Description |
+|----------|-------------|
+| [Workflow Explanation](projects/lead-qualification/docs/workflow-explanation.md) | End-to-end data flow, component breakdown, error handling |
+| [API Integration](projects/lead-qualification/docs/api-integration.md) | Webhook contracts, rate limiting, CRM sync examples |
+| [Security Notes](projects/lead-qualification/docs/security-notes.md) | Authentication, secrets management, input validation |
+| [n8n Workflow Patterns](projects/lead-qualification/n8n/workflow-pattern.md) | Webhook, AI agent, router, approval, CRM sync patterns |
+| [Architecture Diagrams](projects/lead-qualification/architecture/README.md) | System, workflow, enterprise, and pipeline diagrams |
+| [Example: Webhook Payload](projects/lead-qualification/examples/webhook-payload.example.json) | Sample inbound lead payload |
+| [Example: AI Scoring Response](projects/lead-qualification/examples/ai-scoring-response.example.json) | LLM enrichment output |
+| [Example: CRM Sync](projects/lead-qualification/examples/crm-sync.example.json) | HubSpot upsert payload |
+
+### Bilingual Voice Receptionist
+
+| Document | Description |
+|----------|-------------|
+| [Conversation Flow](projects/voice-receptionist/docs/conversation-flow.md) | Call lifecycle, intent recognition, error recovery |
+| [Voice Agent Design](projects/voice-receptionist/docs/voice-agent-design.md) | Latency budget, tool design, bilingual architecture |
+| [Security Notes](projects/voice-receptionist/docs/security-notes.md) | Authentication, data protection, rate limiting |
+| [Example: Call Event](projects/voice-receptionist/examples/call-event.example.json) | Sample voice interaction payload |
+
+### WhatsApp Ecommerce Agent
+
+| Document | Description |
+|----------|-------------|
+| [Ecommerce Flow](projects/whatsapp-ecommerce-agent/docs/ecommerce-flow.md) | Customer journey, order inquiry, FAQ resolution |
+| [Tool Calling Pattern](projects/whatsapp-ecommerce-agent/docs/tool-calling-pattern.md) | Bounded tool loop, cost optimization, error handling |
+| [Human Handoff Protocol](projects/whatsapp-ecommerce-agent/docs/human-handoff.md) | Escalation triggers, thread pause, context passing |
+| [Example: Customer Message](projects/whatsapp-ecommerce-agent/examples/customer-message.example.json) | Sample WhatsApp interaction |
+
 ## Related Documentation
 
 - [Engineering Notes](ENGINEERING_NOTES.md) — Reliability, AI integration, and multi-tenant patterns
