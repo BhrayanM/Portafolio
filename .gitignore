@@ -43,9 +43,12 @@ id_ed25519*
 .pgpass
 .aws/
 .ssh/
-*apikey*
-*api_key*
-*secret*
+# Patrones específicos para secretos reales (no código)
+*apikey*.secret
+*api_key*.key
+*secret*.key
+*secret*.pem
+*secret*.env
 !SECURITY.md
 
 # ── Exportaciones de n8n (NUNCA se publican) ─────────────────
