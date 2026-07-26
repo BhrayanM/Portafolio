@@ -1,8 +1,71 @@
 # HANDOFF — estado para retomar sin repetir
 
-**Última actualización:** 2026-07-25 (cierre F20) · Rama `remediacion/v2`
+**Última actualización:** 2026-07-26 (cierre F21 · Release Candidate) · Rama `remediacion/v2`
 
 Al retomar: leer `CLAUDE.md` + este archivo. No re-auditar lo cerrado.
+
+# FASE 21 COMPLETADA — Release Candidate: APTO CON CONDICIONES
+
+Cerrada el 2026-07-26. Informe completo en **`docs/FASE21_AUDITORIA_FINAL.md`**.
+Auditoría integral F0→F20 sobre 8 áreas. **0 bloqueantes abiertos.**
+
+Backend lint limpio · **98/98 tests** · build frontend OK · los 3 compose validan.
+
+## Corregido en F21 (solo config/docs, sin tocar lógica)
+
+| ID | Hallazgo | Corrección |
+|---|---|---|
+| A-04 | nginx prod sin `n8n` en `depends_on` pese a declarar `upstream n8n` → nginx se niega a arrancar si el nombre no resuelve | Añadido a `depends_on` |
+| A-03 | `.env.example` declaraba Redis **dos veces** con valores contradictorios; dotenv se queda con la última → dentro de Docker apuntaba a `localhost` | Consolidado en una sola declaración |
+| A-02 | `NEXT_PUBLIC_REQUEST_TIMEOUT_MS` usada en código y sin documentar (la introduje en F20) | Añadida a `.env.example` |
+| A-05 | CLAUDE.md decía «10 migraciones»; son **15** + 2 seeds | Corregido |
+
+## Hallazgos que NO se corrigieron (y por qué)
+
+- **A-01 · el caso `/usage` estaba mal diagnosticado.** No es «endpoint sin implementar»:
+  `/api/tenants/usage` **existe**. Lo que hay es doble desajuste — el frontend llama a `/usage`, y
+  aunque se repunte los contratos no casan (backend `{total_leads,total_runs,total_users}` vs tipo
+  `ApiUsage {total,by_endpoint,period}`; la página haría `undefined.toLocaleString()`).
+  Decidir qué significa «uso» es **decisión de producto**, no arreglo de auditoría. → F22.
+- **A-08 · Joi solo cubre `auth`/`leads`/`billing`.** Entran sin validar `users`, `tenants`, `keys`,
+  `marketplace`, `whatsapp`, `voice`. Mitigado por las allowlists de campo de los servicios.
+- **A-09 · `users.role` sin enum** ni en Joi ni en `CHECK` de DB. No es escalada (la ruta ya es
+  admin-only), pero un rol con errata deja al usuario fuera de todo `authorize()` en silencio.
+- **A-07 · dos migraciones `013_*`.** Renumerar descuadraría el registro de aplicadas en la DB real.
+
+## El hallazgo con más consecuencias: A-18
+
+**El CI nunca ha corrido.** `origin/main` sigue en `e2cadc3`, hay **57 commits locales sin pushear**.
+`.github/workflows/ci.yml` está bien montado y su job de frontend ejecuta `npm run build`: **si
+hubiera corrido una sola vez, habría detectado el frontend roto (F20-4) en el momento en que F19(d)
+lo rompió**, no tres fases después. Con 0 tests de frontend (A-17), el build es la única red de
+seguridad de esa capa, y estaba desconectada.
+
+## Verificado limpio (lo que más importa en repo público)
+
+- Los 4 exports de workflows n8n están en disco pero **nunca entraron en el historial**:
+  `git log --all -- "n8n/workflows/*.json"` sale vacío. La barrera aguanta.
+- `.env` no trackeado · 0 `.pem`/`.key` en git · `_PRIVADO_NO_SUBIR/` y `backups/` fuera.
+- 0 SQL por concatenación · CSP completa · aislamiento multi-tenant con allowlist de campos.
+- Producción no expone nada al host salvo nginx (80/443).
+
+## No verificado en F21
+
+El demonio de Docker no estaba corriendo. **No se re-verificó** el workflow `92fIV59ijURIYfwT`, las
+ejecuciones E2E ni `lead_log`; ese estado viene de fases cerradas. Levantar el stack habría
+reiniciado el n8n con el workflow activo. Tampoco se han podido probar en vivo las dos correcciones
+de infra (F20-3 certs y A-04 upstream): **verificarlas en el primer arranque real**.
+
+## Checklist de release
+
+- [ ] Los **7 requisitos previos** de `docs/FASE20_DESPLIEGUE.md` (secretos + certs).
+- [ ] **A-11**: el `.env` local sigue con `JWT_EXPIRES_IN=7d` pisando el default de 24h. Verificado
+      abierto; es la única deuda de F19/F20 que sigue viva.
+- [ ] Push de los 57 commits y CI en verde antes de etiquetar.
+- [ ] Confirmar a mano que el workflow n8n sigue activo y publicado.
+- [ ] Primer `up` de producción: nginx con certs en `/etc/nginx/ssl` y upstream `n8n` resuelto.
+
+---
 
 # FASE 20 COMPLETADA — el stack queda desplegable
 
@@ -337,6 +400,7 @@ Tests: **78/78 verdes**. Build frontend OK (14 rutas). `leads` sigue con 0 filas
 | F19(c) DB · (d) Frontend | ✅ Cerrados |
 | F19(b) Infra · (e) Swagger | ⏸ Pendientes |
 | **F20 — Auditoría y Preparación para Despliegue** | ✅ **Cerrada** |
+| **F21 — Auditoría Final Integral · Release Candidate** | ✅ **Cerrada** (apto con condiciones) |
 
 ## Estado que se pierde al cortar
 

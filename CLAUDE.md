@@ -10,12 +10,16 @@ Contexto permanente del proyecto. Se auto-carga en cada sesión: **no hay que re
 - **E2E completo verificado**: WARM (exec 46 SUCCESS), HOT con aprobacion (exec 48 SUCCESS), COLD (exec 49 SUCCESS, lead_log id=5).
 - `POST /webhook/lead-qualification` responde **200** con `{"received":true}` (Fast ACK). **No romper esto.**
 - **IA**: Groq (`llama-3.3-70b-versatile`) vía HTTP Request node. OpenAI sin saldo (429).
-- **PostgreSQL**: 10 migraciones ejecutadas, tablas `lead_log` y `error_log` funcionales.
+- **PostgreSQL**: **15 migraciones** de esquema (`001`–`014`, con dos ficheros `013_*`) + 2 seeds,
+  tablas `lead_log` y `error_log` funcionales.
 - **Backend**: `/health`, `/api/auth/login`, `/api/leads`, `/api-docs` responden 200. **98 tests** (F20).
 - **Frontend**: build Next.js 14.2.35 OK. 14 rutas (dashboard, leads, analytics, activity, billing, integrations, marketplace, usage, settings, login, error, 404).
 - **F20 cerrada**: imágenes Docker pineadas a patch exacto, mount SSL de nginx prod corregido
   (`/etc/nginx/ssl`), `frontend/src/lib/api.ts` reparado (no compilaba desde F19d).
   Requisitos previos de despliegue en `docs/FASE20_DESPLIEGUE.md`.
+- **F21 cerrada — Release Candidate APTO CON CONDICIONES**. Auditoría integral F0→F20, 0
+  bloqueantes. Informe en `docs/FASE21_AUDITORIA_FINAL.md`; checklist de release en `HANDOFF.md`.
+  Pendiente crítico: **el CI nunca ha corrido** (57 commits sin pushear, `origin/main` en `e2cadc3`).
 - **Stripe**: checkout funcional con test key. Webhook raw body fix aplicado.
 - **WhatsApp/Voice**: scaffolding backend listo (requiere credenciales externas).
 - **Marketplace**: catálogo + instalación persistente.
@@ -133,7 +137,9 @@ cd frontend && npm run build
 ## Deuda técnica conocida
 
 - `/leads/activity` endpoint backend no implementado
-- `/usage` endpoint backend no implementado
+- `/usage`: **mal diagnosticado hasta F21**. `/api/tenants/usage` **sí existe**; el frontend llama a
+  `/usage` y además los contratos no casan (backend `{total_leads,total_runs,total_users}` vs tipo
+  `ApiUsage {total,by_endpoint,period}`). Requiere decisión de producto — ver F21 A-01
 - WhatsApp/Voice requieren cuentas Meta/Twilio
 - Stripe webhook secret (`STRIPE_WEBHOOK_SECRET`) vacío → **requisito previo de despliegue**, no un
   bug: el backend aborta en producción y responde 503 fuera de ella (verificado, F20-1)

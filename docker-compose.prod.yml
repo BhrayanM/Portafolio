@@ -20,6 +20,12 @@ services:
     depends_on:
       - portafolio-api
       - portafolio-frontend
+      # F21 A-04: `n8n` faltaba aqui y docker/nginx.conf declara
+      # `upstream n8n { server n8n:5678; }`. Nginx resuelve los upstreams al
+      # cargar la config y **se niega a arrancar** si un nombre no resuelve
+      # ("host not found in upstream"). Como n8n espera a que postgres este
+      # healthy, nginx arrancaba antes de que el contenedor existiese.
+      - n8n
     logging:
       driver: "json-file"
       options:
