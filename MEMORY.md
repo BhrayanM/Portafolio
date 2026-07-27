@@ -37,10 +37,38 @@ Automation Engine (n8n) → AI Agents → CRM / Notifications / DB
 PostgreSQL (Multi-tenant, RLS)
 ```
 
+## Sistema Maestro de Memoria (Dos Sistemas)
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ SISTEMA 1: Estado Operativo (C:\Portafolio-Publico)          │
+│ STATE.md · PROJECT_STATUS.md · PROGRESO.md · MEMORY.md      │
+│ DECISIONS.md · ENGINEERING_NOTES.md                         │
+│ Contiene únicamente el estado dinámico actual del proyecto. │
+└─────────────────────────────────────────────────────────────┘
+                               ▲
+                               │ Decisión al finalizar tarea
+                               ▼
+┌─────────────────────────────────────────────────────────────┐
+│ SISTEMA 2: Conocimiento Permanente (C:\Segundo-Cerebro)      │
+│ 02_Aprendizaje · 04_Workflows · 05_Prompts                  │
+│ 07_Recursos · 09_Errores-Soluciones                         │
+│ Contiene únicamente activos reutilizables futuros.          │
+└─────────────────────────────────────────────────────────────┘
+```
+
 ## Estructura del repositorio
 
 ```
 Portafolio-Publico/
+├── STATE.md             # Estado dinámico instantáneo (< 30s)
+├── AGENTS.md            # Protocolo universal multi-agente
+├── CLAUDE.md            # Instrucciones auto-cargables para Claude Code
+├── MEMORY.md            # Conocimiento estable del proyecto
+├── PROJECT_STATUS.md    # Estado detallado de fases y tareas
+├── PROGRESO.md          # Checkpoint cronológico
+├── DECISIONS.md         # Registro de decisiones de arquitectura (ADR)
+├── ENGINEERING_NOTES.md # Patrones de ingeniería y lecciones
 ├── .github/workflows/   # CI/CD
 ├── backend/             # Express API
 ├── frontend/            # Next.js dashboard
@@ -112,12 +140,13 @@ Portafolio-Publico/
 | F21 | Auditoría final, release | ✅ |
 | F22 | UI Overhaul SaaS | ✅ |
 | F22.1 | Visual QA y documentación | ✅ |
-| **F23** | **Product Experience Polish** | **✅** |
-| **Upwork Opt.** | **Upwork Profile Optimization Phase 1 (Completed — Phase 2 pending)** | **✅ Actual** |
+| F23 | Product Experience Polish | ✅ |
+| Upwork Opt. | Upwork Profile Optimization Phase 1 | ✅ |
+| **Sistema Persistente** | **Sistema Maestro de Estado Persistente Multi-Agente** | **✅ Actual** |
 
 ## LinkedIn Profile — Conventions
 
-- **Tono:** Profesional, técnico pero accesible. Resultados y arquitectura.
+- **Tono:** Profesional, técnico pero accessible. Resultados y arquitectura.
 - **Headline:** Máximo 220 caracteres. Formato: `Rol · Propuesta de valor`
 - **About:** Máximo 2,000 caracteres. Estructura: quién soy → capacidades → proyectos destacados → stack → idiomas
 - **Experiencia:** Por proyecto o rol. Incluir: tecnologías, logro cuantificable, patrón de diseño clave
@@ -171,7 +200,7 @@ Regla de oro: *"Solo actualizar conocimiento útil que seguirá siendo relevante
 
 ## Auditoría
 
-- **Última actualización:** 2026-07-26 (7ª)
-- **Fase actual:** Upwork Profile Optimization Phase 1 — Completed
+- **Última actualización:** 2026-07-27 (8ª)
+- **Fase actual:** Sistema Maestro de Estado Persistente Multi-Agente — Completed
 - **Build:** ✅ Next.js 14.2.35 — 14/14 static pages — 0 errores
-- **Próxima fase:** Upwork Optimization Phase 2 (Video Introduction) / F24 — Portfolio Showcase
+- **Próxima fase:** Validar protocolo multi-agente / Upwork Phase 2 (Video Introduction) / F24 — Portfolio Showcase
