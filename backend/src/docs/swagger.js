@@ -8,7 +8,10 @@ const options = {
       version: '1.0.0',
       description: 'API REST del sistema Portafolio — gestion de leads, autenticacion y facturacion',
     },
-    servers: [{ url: 'http://localhost:3000', description: 'Local' }],
+    servers: [
+      { url: 'https://api.example.com', description: 'Produccion local' },
+      { url: 'http://localhost:3000', description: 'Desarrollo' },
+    ],
     components: {
       securitySchemes: {
         cookieAuth: { type: 'apiKey', in: 'cookie', name: 'access_token' },
@@ -151,6 +154,50 @@ const options = {
           summary: 'Estadisticas de leads',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           responses: { 200: { description: 'Estadisticas', content: { 'application/json': { schema: { '$ref': '#/components/schemas/LeadStats' } } } } },
+        },
+      },
+      // F22 R-07 — Documenta el endpoint implementado en esta fase. Sirve la
+      // pantalla /dashboard/activity y lee de `lead_log`, la traza que escribe el
+      // workflow de n8n (no de `leads`, que es el recurso del CRM).
+      '/api/leads/activity': {
+        get: {
+          tags: ['Leads'],
+          summary: 'Actividad reciente procesada por el workflow',
+          description: 'Entradas de `lead_log`, mas recientes primero. Aisladas por tenant via RLS.',
+          security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+          parameters: [
+            { in: 'query', name: 'limit', schema: { type: 'integer', minimum: 1, maximum: 200, default: 50 } },
+            { in: 'query', name: 'offset', schema: { type: 'integer', minimum: 0, default: 0 } },
+          ],
+          responses: {
+            200: { description: 'Listado de actividad' },
+            400: { description: 'Parametros de paginacion invalidos' },
+          },
+        },
+      },
+      // F22 R-08 — Contrato real, alineado con el tipo `TenantUsage` del frontend.
+      '/api/tenants/usage': {
+        get: {
+          tags: ['Tenants'],
+          summary: 'Consumo de recursos del tenant',
+          security: [{ cookieAuth: [] }, { bearerAuth: [] }],
+          responses: {
+            200: {
+              description: 'Totales del tenant',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      total_leads: { type: 'integer' },
+                      total_runs: { type: 'integer' },
+                      total_users: { type: 'integer' },
+                    },
+                  },
+                },
+              },
+            },
+          },
         },
       },
       '/api/leads/{id}': {
