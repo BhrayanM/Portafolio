@@ -25,16 +25,12 @@ function parseTrustProxy(raw) {
 }
 
 /**
- * F19(a) H-02 — Arranque en fallo rapido.
+ * Fail-fast configuration validation for production environments.
  *
- * Antes, los secretos tenian un valor por defecto en el codigo
- * (`'dev-secret-change-in-production'`, `'postgres'`, credenciales de rabbit).
- * En un repo publico eso significa que un despliegue al que se le olvide una
- * variable arranca **igual**, firmando tokens con una cadena que cualquiera puede
- * leer en GitHub: se pueden forjar JWTs de admin de cualquier tenant.
- *
- * Ahora en produccion no hay valor por defecto: si falta algo, el proceso no
- * arranca. Fuera de produccion se sigue pudiendo trabajar sin .env completo.
+ * Critical secrets (JWT, DB credentials, webhook signing keys) must be set
+ * via environment variables. In production the process aborts on missing
+ * values. Outside production, sensible defaults or auto-generated values
+ * allow local development without a complete .env file.
  */
 const missing = [];
 function requiredInProd(name, value, when = true) {
@@ -57,13 +53,12 @@ function resolveJwtSecret() {
   return crypto.randomBytes(48).toString('hex');
 }
 
-/**
- * Origenes permitidos por CORS (D-01).
- *
- * Se mantiene la lista blanca por entorno. En produccion `CORS_ORIGINS` es
- * obligatoria y no puede quedar abierta: ni `*` ni localhost, que dejaria entrar
- * a cualquier frontend levantado en la maquina de la victima.
- */
+  /**
+   * Allowed CORS origins per environment.
+   *
+   * In production CORS_ORIGINS must be set and cannot include wildcard or
+   * localhost addresses.
+   */
 function resolveCorsOrigins() {
   const raw = process.env.CORS_ORIGINS;
   requiredInProd('CORS_ORIGINS', raw);
@@ -93,7 +88,6 @@ const config = {
 
   jwt: {
     secret: resolveJwtSecret(),
-    // D-02: 24h, sin refresh tokens. Antes eran 7d.
     expiresIn: process.env.JWT_EXPIRES_IN || '24h',
     algorithms: ['HS256'],
   },
@@ -109,19 +103,10 @@ const config = {
   corsOrigins: resolveCorsOrigins(),
 
   /**
-   * F21.5 — `DB_USER` / `DB_PASSWORD` permiten que el backend conecte con un rol de
-   * aplicacion sin privilegios de propietario (`app`, creado NOLOGIN en la
-   * migracion 012 y habilitado en el despliegue). POSTGRES_USER queda para las
-   * migraciones y el mantenimiento, que si necesitan ser propietario.
+   * Application database role without superuser privileges.
    *
-   * NO ES OPCIONAL. `POSTGRES_USER` en la imagen oficial de PostgreSQL es
-   * SUPERUSUARIO, y un superusuario ignora RLS aunque las tablas tengan FORCE ROW
-   * LEVEL SECURITY (verificado en F21.5: `rolsuper=t`, `rolbypassrls=t`). Mientras
-   * el backend conecte con el, las politicas de la migracion 016 no filtran nada y
-   * el aislamiento entre tenants depende solo del `WHERE tenant_id` del codigo.
-   *
-   * Con `DB_USER=app` —NOSUPERUSER y NOBYPASSRLS— el motor impone el aislamiento:
-   * sin contexto de tenant se ven 0 filas, y un INSERT con tenant ajeno se rechaza.
+   * Connecting as a non-superuser (e.g. `app`) ensures Row-Level Security policies
+   * are enforced by the database engine — a superuser would bypass RLS entirely.
    */
   db: {
     host: process.env.DB_HOST || 'localhost',
@@ -135,9 +120,8 @@ const config = {
   },
 
   stripe: {
-    // D-05(a): sin secret no se puede verificar la firma de los webhooks, y con la
-    // cadena vacia la firma pasa a ser **forjable por cualquiera** (ver H-01).
-    // En produccion es obligatorio; no se inventa ningun valor.
+    // Without a signing secret the webhook signature cannot be verified.
+    // Required in production — never defaults to an empty string.
     webhookSecret: requiredInProd('STRIPE_WEBHOOK_SECRET', process.env.STRIPE_WEBHOOK_SECRET),
   },
 
