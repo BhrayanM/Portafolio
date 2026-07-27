@@ -8,7 +8,7 @@ Todas las pruebas se ejecutaron contra la rama release, no contra `main`.
 
 ---
 
-## 1. Backend (FASE D)
+## 1. Backend
 
 | CHECK | RESULTADO | ERROR | SOLUCIÓN |
 |---|---|---|---|
@@ -31,7 +31,7 @@ verificación de firma es posible (en `main` no lo era).
 
 ---
 
-## 2. Frontend (FASE E)
+## 2. Frontend
 
 | CHECK | RESULTADO | ERROR | SOLUCIÓN |
 |---|---|---|---|
@@ -52,7 +52,7 @@ Sidebar enlazaba a `/dashboard/leads`, que devolvía 404.
 
 ---
 
-## 3. Docker e infraestructura (FASES F y G)
+## 3. Docker e infraestructura
 
 | CHECK | RESULTADO | ERROR | SOLUCIÓN |
 |---|---|---|---|
@@ -108,7 +108,7 @@ escribieron y se dieron por buenas.
 
 ---
 
-## 5. Smoke test end-to-end (FASE H)
+## 5. Smoke test end-to-end
 
 Stack de producción completo levantado con certificados autofirmados de validación.
 
@@ -138,7 +138,7 @@ contenedor arranca y responde antes de que el healthcheck lo marque unhealthy.
 
 ---
 
-## 6. Verificación del `.gitignore` (FASE C)
+## 6. Verificación del `.gitignore`
 
 `git check-ignore -v` sobre cada ruta.
 
@@ -185,7 +185,7 @@ contenedor arranca y responde antes de que el healthcheck lo marque unhealthy.
 
 ## 8. Resultado consolidado
 
-| Fase | Estado |
+| Área | Estado |
 |---|---|
 | D — Backend | ✅ arranca, lint limpio, 98/98 tests |
 | E — Frontend | ✅ typecheck limpio, build 14 rutas, imports resueltos |

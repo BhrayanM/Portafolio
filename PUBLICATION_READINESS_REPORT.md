@@ -10,7 +10,7 @@
 
 ## 1. Estado antes / después
 
-| | Antes (F21.4) | Después (F21.5) |
+| | Antes | Después |
 |---|---|---|
 | IDs de credenciales n8n en ficheros versionados | **3 ficheros** | **0** |
 | PII realista (nombres, emails, teléfonos) | 2 ficheros | **0** |
@@ -18,7 +18,7 @@
 | Aislamiento multi-tenant | `WHERE tenant_id` del código; **RLS inerte** | **impuesto por el motor**, verificado |
 | Usuario de conexión del backend | superusuario con `BYPASSRLS` | rol `app` (`NOSUPERUSER`, `NOBYPASSRLS`) |
 | `FORCE ROW LEVEL SECURITY` | ausente | **6/6 tablas** |
-| README | congelado en «FASE 0 — Infraestructura Base» | describe la plataforma real + Roadmap explícito |
+| README | desactualizado | describe la plataforma real + Roadmap explícito |
 | Workflows n8n publicados | 3 con **5 defectos**; nunca importados | **importados y ejecutados** en n8n 2.31.6 limpio |
 | Reintentos en nodos HTTP de n8n | 0 | **10** |
 | Autenticación en webhooks n8n | ninguna | secreto compartido en los 2 |
@@ -114,7 +114,7 @@ leads en la base de ejecuciones.
 
 ### `0fbe6fe` — BLOQUE 3 · README
 
-Terminaba en «FASE 0 — Infraestructura Base» y su inicio rápido solo levantaba n8n y Postgres. No
+Terminaba en un README desactualizado y su inicio rápido solo levantaba n8n y Postgres. No
 mencionaba el backend, el dashboard, las migraciones, los 98 tests, Stripe, el marketplace ni el
 CI. Nueva sección **«La plataforma»** con arquitectura, tabla de capas con su estado verificado,
 dos inicios rápidos (incluido el paso del rol `app`, sin el cual RLS no aísla), bloque de
@@ -283,7 +283,7 @@ repositorio y esa es tu decisión.
 
 ## 5. Score actualizado
 
-| Área | F21.4 | F21.5 | Motivo del cambio |
+| Área | Antes | Después | Motivo del cambio |
 |---|---|---|---|
 | Arquitectura | 8 | **8** | sin cambios estructurales |
 | Backend | 8 | **8** | +ámbito de tenant · sigue pendiente el hash de API keys |

@@ -1,6 +1,6 @@
 # Release Alignment Summary
 
-**Fase:** 21.2 — Release Recovery & Production Alignment
+**Fase:** Release Recovery & Production Alignment
 **Rama candidata:** `release/v1-production-recovery`
 **Base:** `remediacion/v2` (`cd7a396`, 62 commits) + 3 commits de recuperación
 **Fecha:** 2026-07-26

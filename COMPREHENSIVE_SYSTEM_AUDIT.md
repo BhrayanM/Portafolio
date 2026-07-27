@@ -15,18 +15,18 @@ funcionando. Lo he arrancado entero: 15 migraciones aplican con exit 0, el backe
 pasan, el frontend construye 14 rutas, las dos imágenes Docker se construyen, nginx sirve TLS, y el
 ciclo completo login → crear lead → consultar lead responde 200/201 a través del proxy.
 
-Eso es un cambio de categoría respecto a la auditoría de FASE 21, que se hizo sobre `main` y
+Eso es un cambio de categoría respecto a la auditoría anterior, que se hizo sobre `main` y
 encontró un backend que ni siquiera arrancaba. De los 11 hallazgos críticos de entonces, **10 están
 resueltos** en esta rama.
 
 Lo que queda no es deuda estructural, son tres cosas concretas:
 
-1. **Los reportes que yo mismo escribí en FASE 21.2 filtran los IDs de credenciales n8n y el portal
+1. **Los reportes que yo mismo escribí filtran los IDs de credenciales n8n y el portal
    HubSpot** que documentaban como retirados. Están versionados y se publicarían.
 2. **RLS está completamente inerte.** El diseño es correcto —lo he probado— pero el backend conecta
    como propietario de las tablas, y PostgreSQL no aplica políticas al propietario. El aislamiento
    multi-tenant hoy lo sostiene únicamente el `WHERE tenant_id` del código.
-3. **El README está congelado en FASE 0.** Describe un repo de infraestructura con n8n y Postgres.
+3. **El README está desactualizado.** Describe un repo de infraestructura con n8n y Postgres.
    El código es un SaaS con 14 rutas, API de 9 recursos, Stripe, marketplace y 98 tests. Es el
    problema inverso al de `main`, pero cuesta lo mismo: nadie ve lo que construiste.
 
@@ -44,7 +44,7 @@ commit, no desde la documentación.
 
 | Bloque | Commits | Qué ocurrió |
 |---|---|---|
-| **FASE 0** | `de0a09d` | Base del portafolio: Docker, n8n, PostgreSQL |
+| **Inicial** | `de0a09d` | Base del portafolio: Docker, n8n, PostgreSQL |
 | **FASE 1–8** | `b1b22f8` → `28d1d15` | Construcción progresiva: motor de automatización, BD central, backend Express, dashboard Next.js, multi-tenancy + RLS + API keys, agentes IA, NGINX/SSL, observabilidad |
 | **FASE 9–13** | `b4649e2` | Stripe, WhatsApp, Voice, marketplace, escalabilidad |
 | **Auditoría interna** | `6c5ccbb` | *«checkpoint: auditoria completa + plan de remediacion»* — punto de inflexión: el proyecto se audita a sí mismo |

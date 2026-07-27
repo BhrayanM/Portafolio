@@ -37,7 +37,7 @@ squashed desde un árbol donde `.gitignore` excluía código de aplicación:
 | `leads/` **sin anclar** | `frontend/src/app/dashboard/leads/` — la pantalla central del producto |
 | `*secret*` | ficheros de configuración de test |
 
-El propio `.gitignore` de `remediacion/v2` documenta el diagnóstico (nota «F22 R-06»). El commit
+El propio `.gitignore` de `remediacion/v2` documenta el diagnóstico. El commit
 tope de esa rama es literalmente `fix(ci): track api keys files excluded by gitignore`: **la
 corrección existía y nunca se propagó a la rama publicada.**
 
@@ -164,8 +164,7 @@ es justo lo que los patrones `sk-`/`xox-`/`ghp_` no detectan.
   y rutas de workspace privado en `CLAUDE.md`, `AGENTS.md`,
   `docs/HANDOFF.md`, `docs/CIERRE_FASE.md`, `docs/AUDITORIA_*.md` (3), `docs/FASE20_DESPLIEGUE.md`,
   `docs/FASE21_AUDITORIA_FINAL.md`. → **SECURITY.md reglas 6 y 10.**
-- **`docs/fase-1/prompts/lead-scoring-system.md`**: el system prompt de producción, descrito en
-  su propia cabecera como «el núcleo intelectual del sistema». → **SECURITY.md regla 5.**
+- **`docs/fase-1/prompts/lead-scoring-system.md`**: el system prompt de producción. → **SECURITY.md regla 5.**
 - 30 ficheros más de bitácora de proceso (auditorías, planes, reportes de fase).
 
 **Mitigación aplicada** (commit `4cc796d`): `git rm --cached` + reglas en `.gitignore`. Los
