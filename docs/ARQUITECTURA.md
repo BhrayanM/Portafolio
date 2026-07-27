@@ -192,7 +192,4 @@ Sin este paso los cambios son invisibles y se pierde mucho tiempo depurando algo
 
 ## Documentos relacionados
 
-- [`docs/SPRINT2_SERVICIOS_EXTERNOS.md`](./SPRINT2_SERVICIOS_EXTERNOS.md) — bugs corregidos y evidencias
-- [`docs/PRODUCCION_CHECKLIST.md`](./PRODUCCION_CHECKLIST.md) — qué falta para producción
-- [`docs/VALIDACION_RUNTIME.md`](./VALIDACION_RUNTIME.md) — validación por fases
 - [`SECURITY.md`](../SECURITY.md) — qué no se publica en este repo

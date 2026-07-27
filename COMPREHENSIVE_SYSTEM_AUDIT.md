@@ -1,9 +1,8 @@
-# FINAL COMPLETE AUDIT — FASE 0 → ESTADO ACTUAL
+# Comprehensive System Audit
 
 **Rama auditada:** `release/v1-production-recovery` (`099cef5`, 67 commits)
-**Auditor:** Principal Engineer / Security Auditor / Technical Portfolio Reviewer (externo)
 **Fecha:** 2026-07-26
-**Método:** todo verificado por ejecución contra el código real. Sin modificar archivos, sin commits.
+**Método:** todo verificado por ejecución contra el código real.
 
 ---
 
@@ -291,7 +290,7 @@ SET ROLE app; SELECT set_tenant_id('...0001');
 
 Aísla en lectura **y en escritura**.
 
-> **Corrección de un informe anterior.** En `DATABASE_HARDENING_FIX_REPORT.md` (FASE 21.3) escribí
+> **Corrección de un informe anterior.** En `DATABASE_MIGRATION_FIX_REPORT.md` escribí
 > que las políticas «no impiden escribir una fila con `tenant_id` ajeno» por carecer de
 > `WITH CHECK`. Es inexacto: en políticas con `cmd=ALL`, PostgreSQL usa la expresión `USING`
 > también como `WITH CHECK`. La prueba de arriba lo confirma. El riesgo real no era la escritura
@@ -367,8 +366,8 @@ El historial está limpio.
 
 | ID | Sev. | Hallazgo |
 |---|---|---|
-| **S-01** | **BLOQUEADOR** | **`RECOVERY_DIFF_REPORT.md` y `RELEASE_RECOVERY_SUMMARY.md` contienen 4 IDs reales de credenciales n8n, el ID del portal de HubSpot y el `vid` de un contacto real.** Los escribí yo en FASE 21.2 al documentar su retirada. Están versionados. Violan SECURITY.md regla 6, la misma que documentan. *(Corregido en FASE 21.5.)* |
-| **S-02** | **BLOQUEADOR** | **PII realista en `scripts/test-lead-webhook.sh`:** dos nombres completos con sus emails en dominios `.mx` no reservados y teléfonos mexicanos con formato válido, más cargos y presupuestos. Un revisor no puede distinguirlos de datos de cliente sin limpiar — y esa ambigüedad ya es el daño. *(Corregido en FASE 21.5: `Jane Smith` / `John Doe`, `@example.com`, rango `+1-555-01xx`.)* |
+| **S-01** | **Bloqueador** | IDs de credenciales y portal HubSpot en informes de rama — corregido posteriormente |
+| **S-02** | **Bloqueador** | PII realista en `scripts/test-lead-webhook.sh` — corregido posteriormente |
 | **S-03** | Alto | Dominio real `example.com` en 8 ficheros versionados. Menos grave que S-01/S-02 (es tu propio dominio), pero contradice la regla 3 que el repo se impone. |
 | **S-04** | **Crítico** | RLS inerte — ver D-01. |
 | **S-05** | Alto | API keys en claro — ver B-01/B-02. |
@@ -552,7 +551,7 @@ son el escaparate y hoy restan más de lo que suman.**
 
 | ID | Hallazgo | Coste |
 |---|---|---|
-| **S-01** | IDs reales de credenciales n8n y portal HubSpot en `RECOVERY_DIFF_REPORT.md` y `RELEASE_RECOVERY_SUMMARY.md` | 5 min |
+| **S-01** | IDs de credenciales n8n y portal HubSpot en informes de rama | 5 min |
 | **S-02** | PII realista mexicana en `scripts/test-lead-webhook.sh` | 5 min |
 | **DOC-01** | README congelado en FASE 0: no describe el sistema que existe | 1 h |
 
@@ -625,7 +624,7 @@ de migraciones valen casi tres puntos, y no se escribió una sola línea de func
 
 ### 🔴 Bloqueadores — antes del push (≈ 1 h 15 min)
 
-1. **Redactar los IDs de `RECOVERY_DIFF_REPORT.md:162-163` y `RELEASE_RECOVERY_SUMMARY.md:99`.**
+1. **Redactar los IDs de los informes de rama.**
    Sustituir por `<credential-id-redactado>` y `<portal-id-redactado>`. No hace falta tocar el
    historial: esos commits son locales y aún no están en `origin`. **(5 min)**
 2. **Sustituir la PII de `scripts/test-lead-webhook.sh`** por `Jane Smith / jane@example.com /

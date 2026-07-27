@@ -4,7 +4,7 @@
 
 ---
 
-## 2026-07-26 — F23 Product Experience Polish
+## 2026-07-26 — Product Experience Polish
 
 **Estado:** Completed
 
@@ -38,7 +38,7 @@
 
 ---
 
-## 2026-07-26 — F22.1 Visual QA y Documentación
+## 2026-07-26 — Visual QA and Documentation
 
 **Estado:** Completed
 
@@ -48,10 +48,10 @@
 - URLs hardcodeadas en login reemplazadas por variable de entorno dinámica
 - Error states extraídos del bloque loading en activity y analytics
 - Skeleton loaders preservados en flujo principal
-- Creación de `docs/TEST_ACCESS.md` con URLs reales, usuarios de prueba y comandos de inicio rápido
+- Creación de `docs/DEVELOPMENT_SETUP.md` con URLs, usuarios de prueba y comandos de inicio rápido
 
 **Archivos modificados:**
-- `docs/TEST_ACCESS.md` (creado)
+- `docs/DEVELOPMENT_SETUP.md` (creado)
 - `frontend/src/app/dashboard/layout.tsx`
 - `frontend/src/app/error.tsx`
 - `frontend/src/app/not-found.tsx`
@@ -62,11 +62,11 @@
 
 **Validación:**
 - Build: ✅ 14/14 static pages, 0 errores
-- Problemas corregidos: 4 (color inconsistency, hardcoded URL, error in loading, outdated TEST_ACCESS)
+- Problemas corregidos: 4 (color inconsistency, hardcoded URL, error in loading, outdated DEVELOPMENT_SETUP)
 
 ---
 
-## 2026-07-25 — F22 UI Overhaul
+## 2026-07-25 — UI Overhaul
 
 **Estado:** Completed
 
@@ -110,16 +110,16 @@
 
 ---
 
-## 2026-07-24 — F21 Auditoría Final y Release
+## 2026-07-24 — Final Audit and Release
 
 **Estado:** Completed
 
 **Cambios realizados:**
-- F21.1: Auditoría integral del sistema (security, deployment, testing)
-- F21.2: Reportes de recuperación, diff y smoke test
-- F21.3: Reparación de migraciones de hardening 011-015
-- F21.4: Sanitización completa de datos reales del repositorio público
-- F21.5: Reporte de preparación para publicación
+- Auditoría integral del sistema (security, deployment, testing)
+- Reportes de recuperación, diff y smoke test
+- Reparación de migraciones de hardening 011-015
+- Sanitización completa de datos reales del repositorio público
+- Reporte de preparación para publicación
 - Corrección de Dockerfiles y estructura frontend
 - Activación de aislamiento multi-tenant real (RLS efectivo)
 - Reparación de 3 workflows de ejemplo n8n
@@ -132,7 +132,7 @@
 
 ---
 
-## 2026-07-23 — F20 Preparación para Despliegue
+## 2026-07-23 — Deployment Preparation
 
 **Estado:** Completed
 
@@ -148,16 +148,16 @@
 
 ---
 
-## 2026-07-22 — F19 Security Hardening
+## 2026-07-22 — Security Hardening
 
 **Estado:** Completed
 
 **Cambios realizados:**
-- F19a: Security hardening del backend (middleware, validación, rate limiting)
-- F19b: Infrastructure hardening (nginx, Docker, red)
-- F19c: Database hardening (migraciones 011-016, RLS forzado, roles, grants, índices, validación)
-- F19d: Frontend hardening (API security, CORS enforcement, HTTP-only cookies)
-- Sincronización de documentación con Segundo Cerebro
+- Backend hardening (middleware, validation, rate limiting)
+- Infrastructure hardening (nginx, Docker, network)
+- Database hardening (migrations 011-016, RLS, roles, grants, indexes, validation)
+- Frontend hardening (API security, CORS enforcement, HTTP-only cookies)
+- Sincronización de documentación de arquitectura
 
 **Componentes hardening:**
 - `backend/src/middleware/security.js`
@@ -174,16 +174,16 @@
 
 ---
 
-## 2026-07-21 — F18 Normalización y Correcciones
+## 2026-07-21 — Billing and Proxy Normalization
 
 **Estado:** Completed
 
 **Cambios realizados:**
-- F18.1: Normalización billing plans — marketplace pro items para growth/enterprise
-- F18.2: Alineación enums lead clasificación e intención
-- F18.3: Limpieza lint backend
-- F18.4: Redis verificado y documentado
-- F18.5: nginx reverse proxy + trust proxy backend
+- Normalización billing plans — marketplace pro items para growth/enterprise
+- Alineación enums lead clasificación e intención
+- Limpieza lint backend
+- Redis verificado y documentado
+- nginx reverse proxy + trust proxy backend
 - E2E HOT cerrado: exec 48 success, lead_log id=4 approved, HubSpot verificado
 
 **Validación:**
@@ -192,7 +192,7 @@
 
 ---
 
-## 2026-07-20 — F13-16 Escalabilidad, SaaS, Observabilidad y Testing
+## 2026-07-20 — Scalability, SaaS, Observability and Testing
 
 **Estado:** Completed
 
@@ -209,7 +209,7 @@
 
 ---
 
-## 2026-07-19 — F10-12 WhatsApp, Voice AI y Marketplace
+## 2026-07-19 — WhatsApp, Voice AI and Marketplace
 
 **Estado:** Completed
 
@@ -232,7 +232,7 @@
 
 ---
 
-## 2026-07-18 — F9 Stripe Integration
+## 2026-07-18 — Stripe Integration
 
 **Estado:** Completed
 
@@ -248,13 +248,13 @@
 
 ---
 
-## 2026-07-17 — F7-8 Backend y Frontend
+## 2026-07-17 — Backend and Frontend
 
 **Estado:** Completed
 
 **Cambios realizados:**
-- F7: Backend robusto con Express, middleware, controladores, servicios
-- F8: Frontend Next.js con App Router, Tailwind CSS, dashboard completo
+- Backend robusto con Express, middleware, controladores, servicios
+- Frontend Next.js con App Router, Tailwind CSS, dashboard completo
 - Autenticación con cookies HttpOnly
 - CRUD de leads con filtros y búsqueda
 - Panel de analytics y actividad
@@ -264,17 +264,17 @@
 
 ---
 
-## 2026-07-16 — F1-6 Fundaciones
+## 2026-07-16 — Foundation
 
 **Estado:** Completed
 
 **Cambios realizados:**
-- F1: Motor de automatización core (n8n)
-- F2: Base de datos PostgreSQL con esquema multi-tenant
-- F3: Backend Node.js/Express profesional
-- F4: Dashboard web Next.js
-- F5: Sistema multi-tenant + RLS + API Keys
-- F6: Agentes IA (Sales, WhatsApp, Voice)
+- Motor de automatización core (n8n)
+- Base de datos PostgreSQL con esquema multi-tenant
+- Backend Node.js/Express profesional
+- Dashboard web Next.js
+- Sistema multi-tenant + RLS + API Keys
+- Agentes IA (Sales, WhatsApp, Voice)
 
 **Arquitectura:**
 - n8n 2.31.6 como orquestador de workflows

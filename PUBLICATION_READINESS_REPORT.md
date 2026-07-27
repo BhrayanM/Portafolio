@@ -1,10 +1,10 @@
-# FINAL PUBLICATION READINESS REPORT — FASE 21.5
+# Publication Readiness Report
 
 **Rama:** `release/v1-publication-ready` (`8590279`, 72 commits)
-**Base:** `release/v1-production-recovery` (`099cef5`) · **Backup:** `backup-before-phase21.5`
+**Base:** `release/v1-production-recovery` (`099cef5`)
 **Fecha:** 2026-07-26
 
-**Sin push. Sin merge a `main`. Pendiente de revisión humana.**
+**Sin push. Pendiente de revisión humana.**
 
 ---
 
@@ -36,10 +36,9 @@ Cinco commits, cada uno con su justificación técnica en el mensaje.
 
 Tres familias de datos, detectadas por barrido sobre `git ls-files` y no por la lista previa:
 
-- **IDs reales de credenciales.** `RECOVERY_DIFF_REPORT.md` y `RELEASE_RECOVERY_SUMMARY.md`
-  citaban textualmente los 4 IDs de credenciales n8n, el ID del portal de HubSpot y el `vid` de
+- **IDs reales de credenciales.** Informes de rama citaban textualmente los 4 IDs de credenciales n8n, el ID del portal de HubSpot y el `vid` de
   un contacto real — escritos al documentar su retirada, con lo que el informe filtraba
-  exactamente lo que denunciaba. `FINAL_COMPLETE_AUDIT_PHASE0_TO_PRESENT.md` repetía el error al
+  exactamente lo que denunciaba. El informe de auditoría repetía el error al
   reportarlo. Sustituidos por descripciones.
 - **PII en `scripts/test-lead-webhook.sh`.** Dos nombres completos con emails en dominios `.mx`
   no reservados y teléfonos mexicanos con formato válido. Ahora `Jane Smith` / `John Doe`,
@@ -266,8 +265,8 @@ modelo (`[filtrado]` presente en el payload enviado).
 ### Decisión pendiente para el humano
 
 **¿Se publican los 6 informes de auditoría del directorio raíz?**
-`RECOVERY_DIFF_REPORT.md`, `RELEASE_RECOVERY_SUMMARY.md`, `SMOKE_TEST_REPORT.md`,
-`DATABASE_HARDENING_FIX_REPORT.md`, `FINAL_COMPLETE_AUDIT_PHASE0_TO_PRESENT.md` y este mismo.
+`BRANCH_RECONCILIATION_REPORT.md`, `RELEASE_ALIGNMENT_SUMMARY.md`, `SYSTEM_VALIDATION_REPORT.md`,
+`DATABASE_MIGRATION_FIX_REPORT.md`, `COMPREHENSIVE_SYSTEM_AUDIT.md` y este mismo.
 
 Están sanitizados, y son evidencia genuina de rigor: documentan un incidente de release, su causa
 raíz y su reparación con verificación. **A favor:** cuentan la historia de ingeniería más valiosa

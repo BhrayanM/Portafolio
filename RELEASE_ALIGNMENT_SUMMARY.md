@@ -1,4 +1,4 @@
-# Release Recovery Summary
+# Release Alignment Summary
 
 **Fase:** 21.2 — Release Recovery & Production Alignment
 **Rama candidata:** `release/v1-production-recovery`
@@ -152,7 +152,7 @@ tenía `main`.
 | Migraciones 001–010 + seeds | ✅ 12/12 · `tenants=1 users=1` |
 | Migraciones 011–014 | ❌ **5/5 fallan** |
 
-Detalle completo en `SMOKE_TEST_REPORT.md`.
+Detalle completo en `SYSTEM_VALIDATION_REPORT.md`.
 
 ---
 

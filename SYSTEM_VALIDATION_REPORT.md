@@ -1,4 +1,4 @@
-# SMOKE TEST REPORT — FASE 21.2
+# System Validation Report
 
 **Rama:** `release/v1-production-recovery` (`f354336`)
 **Entorno:** Windows 11 · Docker 29.6.2 · Node 20 · PostgreSQL 15-alpine

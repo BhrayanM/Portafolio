@@ -1,18 +1,13 @@
-# DATABASE HARDENING FIX REPORT — FASE 21.3
+# Database Migration Fix Report
 
-**Rama:** `release/v1-production-recovery`
-**Motor de validación:** PostgreSQL 15.18 (`postgres:15.18-alpine`) sobre Docker 29.6.2
-**Fecha:** 2026-07-26
 **Resultado:** `001`–`015` + seeds aplican con **EXIT CODE 0**
 
 ---
 
 ## 1. Causa raíz
 
-Las cinco migraciones de endurecimiento de F19(c) **nunca se ejecutaron contra una base de
-datos**. Se escribieron, se documentaron como completas en `docs/FASE19_SECURITY_HARDENING.md`
-(«Estado: COMPLETO ✅») y se dieron por buenas. Los cinco fallos son de sintaxis o de semántica
-elemental de PostgreSQL: aparecen en el primer segundo de la primera ejecución.
+Las cinco migraciones de hardening **nunca se ejecutaron contra una base de
+datos**. Se escribieron, se documentaron como completas y se dieron por buenas.
 
 Hay tres causas encadenadas.
 
@@ -345,7 +340,7 @@ Al terminar: `docker compose down -v`, y borrados `.env` y `docker/ssl` de valid
 
 ## 6. Estado
 
-**Cerrada.** El bloqueante que quedaba abierto en `RELEASE_RECOVERY_SUMMARY.md` está resuelto y
+**Cerrada.** El bloqueante que quedaba abierto está resuelto y
 verificado end-to-end.
 
 ```

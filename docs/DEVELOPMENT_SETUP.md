@@ -1,36 +1,35 @@
-# Accesos de Prueba — Entorno Local
+# Development Environment Setup — Local Testing
 
 ## URLs del Entorno de Prueba
 
 | Servicio | URL |
-|---|---|
 | Frontend | `http://localhost:3000` |
 | Login | `http://localhost:3000/login` |
-| API (directo) | `http://localhost:3001` |
-| API (vía nginx dev) | `http://localhost:8080` |
+| API (direct) | `http://localhost:3001` |
+| API (via nginx) | `http://localhost:8080` |
 | Health Check | `http://localhost:3001/health` |
 | Swagger | `http://localhost:3001/api-docs` |
 | n8n | `http://localhost:5678` |
 
-## Usuarios de Prueba
+## Test Users
 
-### Admin (acceso completo)
+### Admin (full access)
 - **Email**: `admin@example.com`
-- **Contraseña**: `kWkryenHoYUQLk5NdicqhDGJ`
+- **Password**: `kWkryenHoYUQLk5NdicqhDGJ`
 
-### Member (acceso limitado)
+### Member (limited access)
 - **Email**: `member.prueba@example.com`
-- **Contraseña**: `MemberPrueba2026`
+- **Password**: `MemberPrueba2026`
 
 ## Notas
 
-1. **SSL Self-Signed**: En el stack con nginx (`docker-compose.prod.yml`), el certificado SSL es autofirmado. Si el navegador muestra advertencia de seguridad, acepta el riesgo manualmente para continuar.
+1. **SSL Self-Signed**: In the nginx stack (`docker-compose.prod.yml`), the SSL certificate is self-signed. Accept the browser warning to proceed.
 
-2. **Health Check**: Si la API no responde, visita primero `http://localhost:3001/health` para confirmar que el backend está corriendo. Luego reintenta el login.
+2. **Health Check**: If the API does not respond, visit `http://localhost:3001/health` first to confirm the backend is running.
 
-3. **Credenciales exclusivas para testing**: No usar en producción ni compartir públicamente.
+3. **Test credentials only**: Not for production use.
 
-4. **Inicio rápido**:
+4. **Quick start**:
    ```bash
    # Frontend (dev)
    cd frontend && npm run dev
@@ -38,7 +37,7 @@
    # Backend (dev)
    cd backend && npm run dev
 
-   # Stack completo (Docker)
+   # Full Docker stack
    docker compose up -d
    docker compose -f docker-compose.dev.yml up -d
    ```

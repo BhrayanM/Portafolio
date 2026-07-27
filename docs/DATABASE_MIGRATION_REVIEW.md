@@ -1,11 +1,9 @@
-# Auditoría de migraciones de base de datos
+# Database Migration Review
 
-**Fecha:** 2026-07-26 · **Fase:** 21.3 · **Motor:** PostgreSQL 15.18 (`postgres:15.18-alpine`)
-**Rama:** `release/v1-production-recovery`
+**Fecha:** 2026-07-26 · **Motor:** PostgreSQL 15.18 (`postgres:15.18-alpine`)
 
 Inventario y análisis de `database/migrations/*.sql`. El estado que se describe en la columna
-«problemas» es el que tenían los ficheros **antes** de la reparación de F21.3; las correcciones
-están en `DATABASE_HARDENING_FIX_REPORT.md`.
+«problemas» es el que tenían los ficheros **antes** de la reparación.
 
 ---
 
@@ -216,7 +214,7 @@ están en `DATABASE_HARDENING_FIX_REPORT.md`.
 
 1. **Ninguna de las cinco migraciones `011`–`014` llegó a ejecutarse jamás contra una base de
    datos.** Los cinco fallos son de sintaxis o de semántica básica de PostgreSQL, y aparecen en la
-   primera ejecución. La fase F19(c) se dio por cerrada sobre ficheros escritos, no aplicados.
+   primera ejecución.
 
 2. **Ninguna migración era transaccional.** Sin `BEGIN`/`COMMIT`, `psql` commitea sentencia a
    sentencia: un fallo a mitad deja el esquema en un estado intermedio. Es lo que convirtió el

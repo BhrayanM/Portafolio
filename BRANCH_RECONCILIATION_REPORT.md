@@ -1,4 +1,4 @@
-# RECOVERY DIFF REPORT — FASE 21.2
+# Branch Reconciliation Report
 
 **Comparación:** `main` (`f5f82b3`) ↔ `remediacion/v2` (`cd7a396`)
 **Rama resultante:** `release/v1-production-recovery`
@@ -197,7 +197,7 @@ desactualizado; queda fuera de la publicación por R-1.
 
 ### R-3 · Migraciones 011–014 no aplican — **ABIERTO, bloqueante**
 
-Ver `SMOKE_TEST_REPORT.md` §4. Las 5 migraciones de hardening de BD fallan contra PostgreSQL 15,
+Ver `SYSTEM_VALIDATION_REPORT.md` §4. Las 5 migraciones de hardening de BD fallan contra PostgreSQL 15,
 y `011_hardening.sql` deja la base **medio migrada** de forma que impide sembrar el tenant admin.
 No se corrige en esta fase (fuera de alcance declarado).
 
