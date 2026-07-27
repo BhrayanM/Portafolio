@@ -61,6 +61,14 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      # F22 R-09 — `eslint` y `eslint-config-next` estaban en devDependencies y
+      # `npm run lint` declarado en package.json, pero FALTABA el fichero de
+      # configuracion: `next lint` abria un prompt interactivo para crearlo y se
+      # quedaba colgado. Como este job solo hacia typecheck + build, nadie lo
+      # detectaba. Con .eslintrc.json ya presente, el paso corre desatendido.
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
         env:

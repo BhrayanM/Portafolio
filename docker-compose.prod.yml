@@ -28,6 +28,15 @@ services:
       # salida TLS desde nginx dejaria de validar. Se mueve el destino a la ruta
       # que la config ya espera; nginx.conf no se toca.
       - ./docker/ssl:/etc/nginx/ssl:ro
+    # F22 R-11 — Sin healthcheck, un nginx que arrancase pero dejase de servir
+    # seguiria como "Up" indefinidamente. Apunta a `location = /healthz` del
+    # server de :80 (ver docker/nginx.conf), que responde 200 sin redirigir.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
     depends_on:
       - portafolio-api
       - portafolio-frontend
@@ -49,6 +58,44 @@ services:
     build: ./backend
     restart: always
     env_file: .env
+    # F22 R-02 — `env_file` por si solo no basta. `.env` declara DB_HOST=localhost
+    # porque ese es el valor correcto para ejecutar el backend EN EL HOST (lo dice
+    # el propio comentario del fichero). Dentro de la red de compose, `localhost`
+    # es el contenedor de la API, donde no hay ningun PostgreSQL: el pool daba
+    # ECONNREFUSED, `/health` (SELECT 1) caia al .catch() y devolvia 503 en bucle,
+    # con lo que el HEALTHCHECK del Dockerfile marcaba el contenedor `unhealthy`.
+    # `environment` tiene prioridad sobre `env_file`, asi que se corrige aqui el
+    # destino sin tocar `.env` ni romper el flujo de desarrollo en host. Mismo
+    # patron que ya usa el servicio n8n mas abajo (DB_POSTGRESDB_HOST: postgres).
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      # F22 R-03 — Mismo motivo que DB_HOST: `.env` trae los origenes del flujo de
+      # desarrollo en host (localhost:3000/3001), no los del stack servido tras
+      # nginx. Aqui el navegador carga el frontend desde https://example.com y
+      # llama a https://api.example.com: son origenes distintos, asi que sin este
+      # valor el backend rechazaria por CORS toda peticion con credenciales
+      # (`credentials: 'include'` exige Allow-Origin exacto, nunca '*').
+      # `.env` no se toca: sigue sirviendo al flujo en host tal cual.
+      CORS_ORIGINS: ${PROD_CORS_ORIGINS:-https://example.com,https://www.example.com}
+      # F22 R-04 — Rol de aplicacion. `POSTGRES_USER` es SUPERUSUARIO en la imagen
+      # oficial de PostgreSQL y un superusuario IGNORA Row Level Security aunque
+      # las tablas tengan FORCE RLS: mientras el backend conectase con el, las
+      # politicas de la migracion 016 no filtraban nada y el aislamiento entre
+      # tenants dependia solo del `WHERE tenant_id` del codigo.
+      #
+      # `app` es NOSUPERUSER + NOBYPASSRLS (migracion 012), asi que el aislamiento
+      # pasa a imponerlo el motor. Verificado: sin contexto de tenant, 0 filas.
+      #
+      # Sin `:?` habria un fallback silencioso al superusuario, que es justo el
+      # agujero que esto cierra: si falta la variable, el stack NO arranca.
+      DB_USER: ${DB_APP_USER:?falta DB_APP_USER en .env}
+      DB_PASSWORD: ${DB_APP_PASSWORD:?falta DB_APP_PASSWORD en .env}
+      # F22 R-05 — Hay exactamente un proxy delante (nginx). Sin esto, Express
+      # resuelve req.ip como la IP del contenedor nginx y el rate limiter mete a
+      # TODOS los clientes en el mismo cubo: un solo cliente agota el limite de
+      # los demas. Mismo valor que docker-compose.dev.yml, que ya lo declaraba.
+      TRUST_PROXY: "1"
     depends_on:
       postgres:
         condition: service_healthy
@@ -61,7 +108,22 @@ services:
       - portafolio-net
 
   portafolio-frontend:
-    build: ./frontend
+    # F22 R-03 — El build necesita argumentos, asi que `build:` deja de ser una
+    # cadena. Las NEXT_PUBLIC_* se hornean al compilar (ver frontend/Dockerfile);
+    # pasarlas solo por `env_file` en runtime NO tiene ningun efecto sobre el
+    # bundle que descarga el navegador.
+    #
+    # El valor apunta al vhost `api.example.com` que docker/nginx.conf ya declara:
+    # esta es la topologia del proyecto —frontend y API en origenes separados por
+    # subdominio, con CORS— y no una ruta nueva inventada aqui.
+    #
+    # Se parametriza igual que N8N_HOST mas abajo: cambiar de dominio es definir
+    # FRONTEND_API_URL en .env, sin tocar este fichero.
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${FRONTEND_API_URL:-https://api.example.com/api}
+        NEXT_PUBLIC_REQUEST_TIMEOUT_MS: ${NEXT_PUBLIC_REQUEST_TIMEOUT_MS:-10000}
     restart: always
     env_file: .env
     logging:
@@ -121,6 +183,14 @@ services:
     volumes:
       - n8n_data:/home/node/.n8n
       - ./n8n/workflows:/backup/workflows
+    # F22 R-11 — n8n expone /healthz desde el arranque. `start_period` generoso:
+    # el arranque en frio incluye migraciones de su propio esquema y tarda.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     logging:
       driver: "json-file"
       options:
