@@ -1,7 +1,7 @@
 # Contacto
 
-**Bhrayan Márquez** — AI Automation Engineer
-Diseño, construyo y opero sistemas de automatización con IA en producción.
+**Bhrayan Márquez** — AI Automation Developer
+Diseño y construyo sistemas de automatización con IA orientados a producción.
 
 ---
 

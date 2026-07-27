@@ -1,8 +1,8 @@
 <div align="center">
 
-# Bhrayan Márquez — AI Automation Engineer
+# Bhrayan Márquez — AI Automation Developer
 
-**Diseño y opero sistemas de automatización con IA en producción.**
+**Diseño sistemas de automatización con IA orientados a producción.**
 Webhook → IA → CRM → Notificación. Con persistencia real, human-in-the-loop y manejo de errores.
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)](#stack)
@@ -12,7 +12,7 @@ Webhook → IA → CRM → Notificación. Con persistencia real, human-in-the-lo
 [![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?style=for-the-badge&logo=hubspot&logoColor=white)](#stack)
 [![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=for-the-badge&logo=twilio&logoColor=white)](#stack)
 
-[![Estado](https://img.shields.io/badge/sistemas-en_producción-2ea44f?style=flat-square)](#los-sistemas)
+[![Estado](https://img.shields.io/badge/arquitectura-documentada-2ea44f?style=flat-square)](#los-sistemas)
 [![Idiomas](https://img.shields.io/badge/EN%20%2F%20ES-bilingüe-0aa?style=flat-square)](#los-sistemas)
 [![Licencia](https://img.shields.io/badge/licencia-All_Rights_Reserved-red?style=flat-square)](./LICENSE)
 [![Contacto](https://img.shields.io/badge/contacto-disponible-blue?style=flat-square)](./CONTACT.md)
@@ -24,7 +24,7 @@ Webhook → IA → CRM → Notificación. Con persistencia real, human-in-the-lo
 ## Qué encontrarás aquí
 
 Este repositorio documenta **cómo están diseñados** cuatro sistemas de automatización que
-construí y opero — no cómo se copian.
+construí — no cómo se copian.
 
 > **Nota deliberada sobre el alcance.**
 > No vas a encontrar workflows exportados, prompts de producción, umbrales de puntuación ni
@@ -97,7 +97,7 @@ Automatización post-cita: sincronización con CRM, registro auditable y notific
 
 ### 4. Bilingual Voice Receptionist (EN/ES)
 
-Recepcionista de voz 24/7 que detecta idioma, entiende intención y gestiona el calendario.
+Diseño de recepcionista de voz bilingüe que detecta idioma, entiende intención y gestiona el calendario.
 
 ![Voice Receptionist — arquitectura](./assets/voice-receptionist-architecture.png)
 
