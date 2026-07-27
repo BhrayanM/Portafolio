@@ -137,29 +137,29 @@ Production startup aborts if critical secrets are missing: `JWT_SECRET`, `STRIPE
 
 When multiple LLM agents (Claude Code, OpenCode, Codex, Cursor, Gemini, ChatGPT) work on the same project sequentially, each agent starts with zero context from the previous session. The solution is not a larger model context window — it's a persistent file-based architecture decoupled from any single AI's memory.
 
-**System 1 — Operational State (`Portafolio-Publico`):**
-Answers "where are we now?" in under 30 seconds. `STATE.md` is the entry point with a fixed schema: project, date, local time, last agent, last commit, branch, current phase, blockers, next step. Supporting files (`AGENTS.md`, `PROJECT_STATUS.md`, `PROGRESO.md`, `MEMORY.md`, `DECISIONS.md`, `ENGINEERING_NOTES.md`) provide depth without bloating the entry point.
+**System 1 — Operational State (repository root):**
+Answers "where are we now?" in under 30 seconds. `STATE.md` is the entry point with a fixed schema: project, date, last commit, branch, current phase, blockers, next step. Supporting files (`AGENTS.md`, `PROJECT_STATUS.md`, `PROGRESO.md`, `MEMORY.md`, `DECISIONS.md`, `ENGINEERING_NOTES.md`) provide depth without bloating the entry point.
 
-**System 2 — Permanent Knowledge (`Segundo-Cerebro`):**
-Answers "what have we learned that outlives this project?" Organized by category (Aprendizaje, Workflows, Prompts, Recursos, Errores-Soluciones). Never contains project daily status.
+**System 2 — Permanent Knowledge (external directory):**
+Answers "what have we learned that outlives this project?" Organized by category (Learning, Workflows, Prompts, Resources, Errors-Solutions). Never contains project daily status.
 
 **Key decisions:**
 - `STATE.md` must be the first file read — under 30s or the protocol fails.
 - `AGENTS.md` acts as the universal protocol contract, not a memory dump.
 - Every task completion triggers a two-way decision: does this update System 1 (project state) or System 2 (permanent knowledge)?
-- Chronological log entries are appended, never edited in-place. History is sacred.
+- Chronological log entries are appended, never edited in-place.
 - Compatible with any agent that reads Markdown — zero dependency on internal model memory, tool-specific features, or cloud sync.
 
 ---
 
 ## Related Documentation
 
-- [Architecture Decision Records](../adr/README.md)
-- [Pattern: Webhook → AI → CRM → Notification](../patterns/webhook-ai-crm-notify.md)
-- [Project: Lead Qualification Engine](../../projects/lead-qualification/README.md)
-- [Project: WhatsApp Conversational Agent](../../projects/whatsapp-agent/README.md)
-- [Project: Voice Receptionist](../../projects/voice-receptionist/README.md)
-- [Security Policy](../../SECURITY.md)
-- [STATE.md — Estado Operativo](../../STATE.md)
-- [AGENTS.md — Protocolo Universal Multi-Agente](../../AGENTS.md)
-- [MEMORY.md — Conocimiento Estable](../../MEMORY.md)
+- [Architecture Decision Records](docs/adr/README.md)
+- [Pattern: Webhook → AI → CRM → Notification](docs/patterns/webhook-ai-crm-notify.md)
+- [Project: Lead Qualification Engine](projects/lead-qualification/README.md)
+- [Project: WhatsApp Conversational Agent](projects/whatsapp-agent/README.md)
+- [Project: Voice Receptionist](projects/voice-receptionist/README.md)
+- [Security Policy](SECURITY.md)
+- [STATE.md](STATE.md)
+- [AGENTS.md](AGENTS.md)
+- [MEMORY.md](MEMORY.md)
