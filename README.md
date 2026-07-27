@@ -2,7 +2,7 @@
 
 # Bhrayan Márquez — AI Automation Developer
 
-**Diseño sistemas de automatización con IA orientados a producción.**
+**Diseño sistemas de automatización con IA, desde prototipos funcionales hasta sistemas preparados para producción.**
 Webhook → IA → CRM → Notificación. Con persistencia real, human-in-the-loop y manejo de errores.
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=for-the-badge&logo=n8n&logoColor=white)](#stack)
@@ -147,7 +147,7 @@ Cambia el canal y las herramientas; el esqueleto de fiabilidad ya está probado.
 
 ## Decisiones de ingeniería que marcan la diferencia
 
-Esto es lo que separa una automatización de demo de una que aguanta producción:
+Esto es lo que separa una automatización funcional de una diseñada para producción:
 
 | Decisión | Qué resuelve |
 |---|---|
@@ -209,8 +209,8 @@ IDs de hojas/canales/instancias, cadenas de conexión ni datos de clientes.
 ## La plataforma — AI Lead Automation Platform
 
 Además de la documentación de arriba, este repositorio **contiene el código** de una plataforma
-SaaS multi-tenant de captación y calificación de leads. Todo lo que sigue está verificado
-ejecutándolo, no solo escrito.
+SaaS multi-tenant de captación y calificación de leads. Las capacidades descritas
+han sido verificadas mediante ejecución local y pruebas automatizadas donde aplica.
 
 ### Arquitectura
 
