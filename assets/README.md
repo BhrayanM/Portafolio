@@ -1,32 +1,27 @@
 # Assets
 
-Infografías conceptuales de arquitectura usadas en los READMEs de este portafolio.
+Conceptual architecture diagrams used across the portfolio README files.
 
-| Archivo | Usado en | Contenido |
+| File | Used in | Content |
 |---|---|---|
-| `lead-qualification-architecture.png` | [Lead Qualification](../projects/lead-qualification/README.md) | Etapas conceptuales del motor de calificación y bucle de seguimiento |
-| `whatsapp-agent-architecture.png` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Arquitectura del agente conversacional |
-| `whatsapp-agent-flow.png` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Vista conceptual del grafo: modelo, memoria y herramientas como dependencias |
-| `whatsapp-agent-commerce.webp` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Variante para comercio electrónico (EN/ES + pedidos) |
-| `voice-receptionist-architecture.png` | [Voice Receptionist](../projects/voice-receptionist/README.md) | Etapas de la recepcionista de voz bilingüe |
+| `lead-qualification-architecture.png` | [Lead Qualification](../projects/lead-qualification/README.md) | Conceptual stages of the lead scoring engine and follow-up loop |
+| `whatsapp-agent-architecture.png` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Conversational agent architecture |
+| `whatsapp-agent-flow.png` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Graph view: model, memory, and tools as dependencies |
+| `whatsapp-agent-commerce.webp` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | E-commerce variant (EN/ES + orders) |
+| `voice-receptionist-architecture.png` | [Voice Receptionist](../projects/voice-receptionist/README.md) | Bilingual voice receptionist pipeline |
 
 ---
 
-## Verificación aplicada a cada imagen
+## Security verification applied to each image
 
-Antes de incluirse, cada archivo pasó por:
+Before inclusion, every file was checked for:
 
-1. **Revisión visual** — ninguna imagen muestra credenciales, tokens, URLs de webhook,
-   IDs de hoja/canal/instancia, texto de prompts, umbrales, parámetros internos ni datos
-   de clientes. Los nombres visibles son genéricos y descriptivos.
-2. **Escaneo de metadatos** — verificadas sin bloques EXIF, sin coordenadas GPS, sin nombre
-   de equipo y sin rutas locales incrustadas.
-3. **Optimización** — las PNG se redimensionaron a un ancho máximo de 1600 px cuando eso
-   reducía el peso; el proceso de reencodificado no conserva metadatos.
+1. **Visual review** — no credentials, tokens, webhook URLs, sheet/channel/instance IDs, prompt text, thresholds, internal parameters, or client data. Visible names are generic and descriptive.
+2. **Metadata scan** — verified free of EXIF blocks, GPS coordinates, device names, and embedded local paths.
+3. **Optimization** — PNG files were resized to a max width of 1600 px where it reduced weight; the re-encoding process discards metadata.
 
-Son **representaciones conceptuales**: comunican la forma del sistema, no su
-implementación. Ver [SECURITY.md](../SECURITY.md).
+These are **conceptual representations**: they communicate system shape, not implementation details. See [SECURITY.md](../SECURITY.md).
 
 ---
 
-<sub>© 2026 Bhrayan Márquez · Todos los derechos reservados · [Volver al inicio](../README.md)</sub>
+<sub>© 2026 Bhrayan Márquez · All rights reserved · [Back to home](../README.md)</sub>
