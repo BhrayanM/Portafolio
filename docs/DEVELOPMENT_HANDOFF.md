@@ -94,7 +94,7 @@ docker exec -i portafolio-prod-postgres-1 psql -U n8n -d n8n \
 |---|---|---|
 | `docker-compose.prod.yml` | Modificado (sesión anterior) | `DB_HOST: postgres` + `DB_PORT: 5432` en `environment:` de `portafolio-api`. `.env` declara `DB_HOST=localhost`, correcto para ejecutar el backend en el host pero inválido dentro de la red de compose: causaba `ECONNREFUSED` → `/health` 503 → contenedor `unhealthy`. `environment` gana a `env_file`, así que se corrige sin tocar `.env`. Sigue el patrón que `docker-compose.dev.yml:46` ya usaba. |
 | `docker/ssl/fullchain.pem`, `docker/ssl/privkey.pem` | Creados (sesión anterior) | Self-signed RSA 2048, 365 días, SAN `localhost, example.com, www/api/n8n.example.com, 127.0.0.1`. `docker/ssl/` estaba vacío (`.gitignore:63-64` excluye `*.pem`), y nginx aborta al arrancar si faltan. **Gitignored — verificado con `git check-ignore`.** |
-| `docs/HANDOFF_F22_VALIDACION_LOCAL.md` | Creado (este fichero) | Documento de handoff. Sin trackear. |
+| `docs/DEVELOPMENT_HANDOFF.md` | Creado (este fichero) | Documento de handoff técnico. |
 
 **En esta sesión no se modificó ningún otro fichero del proyecto**: ni seeds, ni migraciones,
 ni `.env`, ni `nginx.conf`, ni código de backend/frontend, ni documentación existente.
