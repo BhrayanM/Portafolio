@@ -17,20 +17,20 @@ export default function Header({ user, onMenuToggle }: { user: User | null; onMe
   };
 
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 lg:px-6">
+    <header className="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6">
       <button
         onClick={onMenuToggle}
-        className="lg:hidden p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100"
+        className="lg:hidden p-2 text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100"
         aria-label="Abrir menú"
       >
         <Menu className="w-5 h-5" />
       </button>
       <div className="hidden lg:block" />
       <div className="flex items-center gap-4">
-        <span className="text-sm text-gray-600">{user?.name || user?.email}</span>
+        <span className="text-sm text-slate-600">{user?.name || user?.email}</span>
         <button
           onClick={handleLogout}
-          className="text-sm text-gray-500 hover:text-red-600 transition-colors"
+          className="text-sm text-slate-500 hover:text-red-600 transition-colors font-medium"
         >
           Cerrar sesión
         </button>

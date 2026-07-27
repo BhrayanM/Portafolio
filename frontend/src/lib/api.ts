@@ -17,7 +17,7 @@
    ════════════════════════════════════════════════════════════════
 */
 
-import type { User, Lead, LeadStats, BillingPlan, Subscription, ApiKey, LeadLogEntry, ApiUsage } from './types';
+import type { User, Lead, LeadStats, BillingPlan, Subscription, ApiKey, LeadLogEntry, TenantUsage } from './types';
 
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
@@ -111,10 +111,11 @@ export const billingApi = {
     }),
 } as const;
 
-export const apiKeysApi = {
-  list: () => apiFetch<ApiKey[]>('/keys'),
-} as const;
-
+// F22 R-12 — `apiKeysApi` retirado: era `{ list: () => apiFetch('/keys') }`, la
+// MISMA llamada que `settingsApi.apiKeys()` y sin ningún consumidor en `src/app`
+// ni `src/components`. Dos nombres para una sola petición es superficie que se
+// desincroniza sola. Se conserva `settingsApi`, que es el que usa la página.
+//
 // `/settings` no es un recurso del backend: la pantalla de ajustes solo lista las
 // API keys del tenant. Se mantiene como namespace propio porque es lo que importa
 // la página, pero apunta a la ruta real `/keys`.
@@ -131,8 +132,10 @@ export const activityApi = {
   list: () => apiFetch<LeadLogEntry[]>('/leads/activity'),
 } as const;
 
+// F22 R-08 — Apuntaba a `/usage`, que nunca existio (404). La ruta real es
+// `/tenants/usage`, montada en backend/src/routes/tenants.routes.js.
 export const usageApi = {
-  get: () => apiFetch<ApiUsage>('/usage'),
+  get: () => apiFetch<TenantUsage>('/tenants/usage'),
 } as const;
 
 export const logout = () => authApi.logout();

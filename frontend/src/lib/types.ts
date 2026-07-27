@@ -80,8 +80,14 @@ export interface ApiKey {
   last_used_at: string | null;
 }
 
-export interface ApiUsage {
-  total: number;
-  by_endpoint: Record<string, number>;
-  period: { from: string; to: string };
+// F22 R-08 — Alineado con el contrato REAL de `GET /api/tenants/usage`.
+// Antes declaraba `{total, by_endpoint, period}`, que describe una medicion de
+// peticiones por endpoint que el backend NO registra en ninguna tabla: no habia
+// ningun origen posible para esos datos. Se ajusta el tipo a lo que el backend
+// sabe responder — consumo de recursos del tenant — en lugar de inventar un
+// subsistema de metering que la arquitectura no contempla.
+export interface TenantUsage {
+  total_leads: number;
+  total_runs: number;
+  total_users: number;
 }

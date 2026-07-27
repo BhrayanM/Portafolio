@@ -27,11 +27,18 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
       )}
       <aside
         className={clsx(
-          'fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-gray-200 p-4 transform transition-transform duration-200',
+          'fixed lg:static inset-y-0 left-0 z-30 w-64 bg-white border-r border-slate-200 p-4 transform transition-transform duration-200',
           open ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
         )}
       >
-        <div className="text-xl font-bold mb-8 px-3">Portafolio</div>
+        <div className="flex items-center gap-2 px-3 mb-8">
+          <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+            <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <span className="text-xl font-bold text-slate-900">Portafolio</span>
+        </div>
         <nav className="space-y-1">
           {links.map((link) => {
             const active = pathname === link.href;
@@ -44,8 +51,8 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
                 className={clsx(
                   'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                   active
-                    ? 'bg-brand-50 text-brand-700'
-                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                    ? 'bg-indigo-50 text-indigo-700'
+                    : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 )}
               >
                 <Icon className="w-5 h-5" />
