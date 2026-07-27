@@ -74,7 +74,7 @@ Track record of milestones and completed work packages.
 
 ### State Persistence System
 - Multi-agent state persistence protocol (`STATE.md` + `AGENTS.md`)
-- Universal protocol supporting any AI agent (Claude Code, OpenCode, Codex CLI, Cursor, Gemini, ChatGPT)
+- Universal protocol supporting any AI development agent
 - Two-system architecture: operational state + permanent knowledge
 
 ---

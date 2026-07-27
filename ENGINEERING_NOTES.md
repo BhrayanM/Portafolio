@@ -135,7 +135,7 @@ Production startup aborts if critical secrets are missing: `JWT_SECRET`, `STRIPE
 
 ### State Over Memory: Two-System Architecture for AI Continuity
 
-When multiple LLM agents (Claude Code, OpenCode, Codex, Cursor, Gemini, ChatGPT) work on the same project sequentially, each agent starts with zero context from the previous session. The solution is not a larger model context window — it's a persistent file-based architecture decoupled from any single AI's memory.
+When multiple AI development agents work on the same project sequentially, each agent starts with zero context from the previous session. The solution is not a larger model context window — it's a persistent file-based architecture decoupled from any single AI's memory.
 
 **System 1 — Operational State (repository root):**
 Answers "where are we now?" in under 30 seconds. `STATE.md` is the entry point with a fixed schema: project, date, last commit, branch, current phase, blockers, next step. Supporting files (`AGENTS.md`, `PROJECT_STATUS.md`, `PROGRESO.md`, `MEMORY.md`, `DECISIONS.md`, `ENGINEERING_NOTES.md`) provide depth without bloating the entry point.
