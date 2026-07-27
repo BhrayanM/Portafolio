@@ -1,6 +1,6 @@
 # Upwork Profile Changelog
 
-## 2026-07-26 — Optimización F23.1
+## 2026-07-26 — Optimización de perfil
 
 > Cambios basados en auditoría profesional de perfil Upwork.
 > Objetivo: reposicionar de "AI Automation Engineer" a "AI Automation Developer — n8n, AI Agents & CRM Workflows".
