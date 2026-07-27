@@ -9,4 +9,4 @@
 - **Branch:** `release/v1-publication-ready`
 - **Status:** Published. All phases complete. Repository sanitized for public presentation.
 - **Latest milestone:** GitHub folder messages sanitized — 4 commits pushed cleaning internal references and creating professional READMEs across all directories.
-- **Next work:** F24 — Portfolio Showcase / Documentation refinement.
+- **Next work:** Portfolio Showcase / Documentation refinement.

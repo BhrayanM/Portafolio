@@ -93,7 +93,7 @@ Track record of milestones and completed work packages.
 
 ## Next Suggested Phase
 
-**F24 — Portfolio Showcase / Documentation**
+**Portfolio Showcase / Documentation**
 - Refine main README with screenshots and visual demo
 - Add public API documentation
 - Prepare assets for portfolio demonstration

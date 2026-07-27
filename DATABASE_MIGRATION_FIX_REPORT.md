@@ -265,7 +265,7 @@ los resultados de abajo se obtuvieron ya con verificación de exit code.
 
 ## 5. Resultado final
 
-### 5.1 · Cadena completa sobre base limpia — FASE E
+### 5.1 · Cadena completa sobre base limpia — End-to-End
 
 ```
   OK    001_create_tenants.sql        OK    009_create_lead_log.sql
@@ -314,7 +314,7 @@ Reaplicando `011` y `015`, vuelve a exit 0.
 Reaplicar `011`–`015` sobre una base ya migrada: **5 de 5 en exit 0**. Todas usan
 `CREATE OR REPLACE`, `DROP ... IF EXISTS` y `CREATE ... IF NOT EXISTS`.
 
-### 5.5 · Sistema completo — FASE F
+### 5.5 · Sistema completo — Full Stack
 
 Stack de producción levantado (5 servicios) contra la base con las 15 migraciones y los seeds:
 
@@ -359,7 +359,7 @@ Sin merge a `main`. La rama `release/v1-production-recovery` sigue siendo la can
 3. **`users` y `tenants` no tienen RLS.**
 4. **No hay tabla de control de migraciones.** La idempotencia lo mitiga; no lo sustituye.
 5. **`docs/deployment-guide.md` sigue documentando** `cat database/migrations/*.sql | psql`, sin
-   `ON_ERROR_STOP=1`. Ese procedimiento es el que permitió que F19(c) se cerrara sin ejecutar
+   `ON_ERROR_STOP=1`. Ese procedimiento es el que permitió que la corrección anterior se cerrara sin ejecutar
    nada: un fallo no detiene el flujo y el operador ve código de salida 0.
 6. **`ALTER SYSTEM SET log_connections / log_disconnections / log_line_prefix`**, retirados de las
    migraciones, deben ir a la configuración del servidor si se quiere ese logging.

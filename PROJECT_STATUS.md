@@ -73,7 +73,7 @@ Scope:
 
 ## Next Steps
 
-- F24: Portfolio Showcase / Documentation
+- Portfolio Showcase / Documentation
 - Refine main README with screenshots and visual demo
 - Add public API documentation
 - Prepare assets for portfolio demonstration
