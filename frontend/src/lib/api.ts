@@ -1,19 +1,9 @@
 /* ════════════════════════════════════════════════════════════════
-   Cliente HTTP del frontend.
+   Frontend HTTP client.
 
-   F19(d) endureció este fichero, pero lo dejó sin compilar: se perdieron
-   cuatro exports que las páginas siguen importando (`apiFetch`,
-   `activityApi`, `settingsApi`, `usageApi`) y el build de Next fallaba.
-   F20 lo repara como parte de la preparación de despliegue. Ver
-   docs/FASE20_DESPLIEGUE.md para el detalle de cada corrección.
-
-   Contrato de seguridad vigente (F19a–c, lado servidor):
-   - La sesión viaja en cookie **HttpOnly** `access_token`. El JWT no está en
-     localStorage y JS no puede leerlo: por eso aquí solo hace falta
-     `credentials: 'include'`, no una cabecera Authorization construida a mano.
-   - El origen permitido lo decide el backend vía CORS_ORIGINS. Comprobarlo
-     también en el cliente no aporta nada: quien controla el navegador controla
-     esa comprobación.
+   Session is carried via HttpOnly `access_token` cookie — no JWT in
+   localStorage. The backend enforces CORS_ORIGINS; the client only
+   needs `credentials: 'include'` on every fetch.
    ════════════════════════════════════════════════════════════════
 */
 
@@ -111,29 +101,19 @@ export const billingApi = {
     }),
 } as const;
 
-// F22 R-12 — `apiKeysApi` retirado: era `{ list: () => apiFetch('/keys') }`, la
-// MISMA llamada que `settingsApi.apiKeys()` y sin ningún consumidor en `src/app`
-// ni `src/components`. Dos nombres para una sola petición es superficie que se
-// desincroniza sola. Se conserva `settingsApi`, que es el que usa la página.
-//
-// `/settings` no es un recurso del backend: la pantalla de ajustes solo lista las
-// API keys del tenant. Se mantiene como namespace propio porque es lo que importa
-// la página, pero apunta a la ruta real `/keys`.
+// settingsApi maps to the real backend route `/keys` — the /settings
+// page imports it as a semantic namespace.
 export const settingsApi = {
   apiKeys: () => apiFetch<ApiKey[]>('/keys'),
 } as const;
 
-// DEUDA CONOCIDA (heredada, no introducida en F20): `/leads/activity` y `/usage`
-// no están implementados en el backend — no hay router montado para ellos en
-// `backend/src/app.js`. Estas dos llamadas devuelven 404 y las páginas ya lo
-// tratan mostrando su banner de error. Se dejan apuntando a la ruta prevista
-// para que al implementarla no haya que tocar el cliente.
+// `/leads/activity` and `/usage` are not yet implemented in the backend.
+// These exports resolve to the intended routes for future implementation.
 export const activityApi = {
   list: () => apiFetch<LeadLogEntry[]>('/leads/activity'),
 } as const;
 
-// F22 R-08 — Apuntaba a `/usage`, que nunca existio (404). La ruta real es
-// `/tenants/usage`, montada en backend/src/routes/tenants.routes.js.
+// Points to the real route `/tenants/usage` in the backend.
 export const usageApi = {
   get: () => apiFetch<TenantUsage>('/tenants/usage'),
 } as const;
