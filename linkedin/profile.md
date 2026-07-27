@@ -7,7 +7,7 @@ Market: United States. Language: English.
 
 ## Headline
 
-AI Automation Engineer | Building Production AI Workflows, API Integrations & CRM Automation Systems with n8n
+AI Automation Engineer | Production Workflows, API Integrations & CRM Automation Systems
 
 ---
 
@@ -36,7 +36,7 @@ automation, deduplication, and controlled human handoff.
 - **Appointment Automation:** CRM synchronization and automated appointment workflows with
 reliable event handling and idempotent processing.
 
-Core stack: n8n · OpenAI · Node.js · PostgreSQL · Docker · REST APIs · Twilio · HubSpot
+Core stack: n8n · LLM orchestration · Node.js · PostgreSQL · Docker · REST APIs · Twilio · HubSpot
 
 Spanish native · English professional. Bilingual systems by design, not by translation.
 
@@ -57,7 +57,7 @@ workflow orchestration (n8n), backend APIs (Node.js/Express), database design
 Key projects:
 
 **Lead Qualification Engine**
-n8n, OpenAI, HubSpot, PostgreSQL, Docker
+n8n, LLM orchestration, HubSpot, PostgreSQL, Docker
 Event-driven lead workflow with LLM-based processing, human approval gates,
 and CRM synchronization. Patterns: webhook-driven architecture, human-in-the-loop
 design, idempotent processing.
@@ -69,7 +69,7 @@ and intelligent escalation. Patterns: event-driven routing, tool-based intent
 resolution.
 
 **WhatsApp Ecommerce Agent**
-n8n, Twilio WhatsApp API, OpenAI, Shopify, PostgreSQL
+n8n, Twilio WhatsApp API, LLM orchestration, Shopify, PostgreSQL
 Customer communication workflow with Fast-ACK protocol, message deduplication,
 and controlled human handoff. Patterns: webhook reliability, conversation state
 management.
@@ -94,7 +94,7 @@ Technical patterns applied across all projects:
 ### Top skills
 
 AI Automation · n8n · API Integration · Workflow Automation · CRM Automation
-OpenAI API · Webhooks · Voice AI · Conversational AI · REST API · Lead Generation
+LLM Orchestration · Webhooks · Voice AI · Conversational AI · REST API · Lead Generation
 
 ### Backend & integrations
 
@@ -253,9 +253,9 @@ High contrast, precise lines, minimalist. 8k quality. --ar 4:1 --v 6
 | Campo | Valor |
 |-------|-------|
 | **Título LinkedIn** | Lead Qualification Engine — AI Workflow + CRM Integration |
-| **Descripción** | Event-driven AI lead qualification system. n8n workflows ingest leads via webhook, process with OpenAI LLM classification, synchronize with HubSpot CRM, and route through human approval gates. Handles deduplication, retry logic, and structured logging. |
-| **Keywords** | n8n, OpenAI, HubSpot, Lead Scoring, Human-in-the-Loop |
-| **Stack** | n8n · OpenAI API · HubSpot CRM · PostgreSQL · Docker |
+| **Descripción** | Event-driven AI lead qualification system. n8n workflows ingest leads via webhook, process with LLM classification, synchronize with HubSpot CRM, and route through human approval gates. Handles deduplication, retry logic, and structured logging. |
+| **Keywords** | n8n, LLM Orchestration, HubSpot, Lead Scoring, Human-in-the-Loop |
+| **Stack** | n8n · LLM orchestration · HubSpot CRM · PostgreSQL · Docker |
 | **Razón estratégica** | Proyecto más fuerte técnicamente. Demuestra workflow complejo con integración CRM, procesamiento LLM, y control humano. El stack matcha con la mayoría de búsquedas de reclutadores. |
 
 **#3 — Bilingual AI Voice Receptionist (EN/ES)**
@@ -265,7 +265,7 @@ High contrast, precise lines, minimalist. 8k quality. --ar 4:1 --v 6
 | **Título LinkedIn** | Bilingual AI Voice Receptionist (EN/ES) |
 | **Descripción** | Conversational AI voice system with real-time language detection (EN/ES). Built with n8n workflow orchestration and Twilio telephony. Handles automated scheduling, intelligent escalation, and natural conversation. Designed for bilingual business environments. |
 | **Keywords** | Voice AI, Twilio, Conversational AI, EN/ES Bilingual, Workflow Automation |
-| **Stack** | n8n · Twilio · Calendar API · OpenAI · Docker |
+| **Stack** | n8n · Twilio · Calendar API · LLM orchestration · Docker |
 | **Razón estratégica** | Diferenciador de mercado. Pocos AI Automation Engineers pueden mostrar voice AI bilingüe. Este proyecto captura atención inmediata. |
 
 ---
@@ -273,9 +273,9 @@ High contrast, precise lines, minimalist. 8k quality. --ar 4:1 --v 6
 ### Projects Strategy
 
 **Projects to add:**
-1. Lead Qualification Engine — n8n, OpenAI, HubSpot, PostgreSQL, Docker
+1. Lead Qualification Engine — n8n, LLM orchestration, HubSpot, PostgreSQL, Docker
 2. Bilingual AI Voice Receptionist (EN/ES) — n8n, Twilio, Calendar API, Docker
-3. WhatsApp Ecommerce Agent — n8n, Twilio WhatsApp API, OpenAI, Shopify, PostgreSQL
+3. WhatsApp Ecommerce Agent — n8n, Twilio WhatsApp API, LLM orchestration, Shopify, PostgreSQL
 4. Appointment Automation — n8n, PostgreSQL, CRM API, Docker
 
 **Note:** These are recommended LinkedIn platform configurations, not automatic changes.

@@ -21,7 +21,7 @@ appears on the profile.
 | **Repo location** | `projects/lead-qualification/` |
 | **Technical purpose** | Event-driven lead pipeline with LLM scoring, human approval gates, and idempotent CRM sync |
 | **LinkedIn sections** | Experience (detail), Featured (#2), Projects (#1), Skills, Posts (#1, #5, #9) |
-| **Keywords** | n8n, OpenAI, HubSpot, PostgreSQL, Webhooks, Lead Generation, CRM Automation, Event-driven |
+| **Keywords** | n8n, LLM Orchestration, HubSpot, PostgreSQL, Webhooks, Lead Generation, CRM Automation, Event-driven |
 | **Content types** | Build Log, Architecture, Deep Dive |
 
 ### Bilingual AI Voice Receptionist (EN/ES)
@@ -41,7 +41,7 @@ appears on the profile.
 | **Repo location** | `projects/whatsapp-ecommerce-agent/` |
 | **Technical purpose** | Customer communication workflow with Fast-ACK protocol, message deduplication, and controlled human handoff |
 | **LinkedIn sections** | Experience (detail), Projects (#3), Skills, Posts (#6, #7) |
-| **Keywords** | n8n, Twilio WhatsApp API, OpenAI, Shopify, PostgreSQL, Fast-ACK, Deduplication |
+| **Keywords** | n8n, Twilio WhatsApp API, LLM Orchestration, Shopify, PostgreSQL, Fast-ACK, Deduplication |
 | **Content types** | Build Log, Deep Dive |
 
 ### Appointment Automation

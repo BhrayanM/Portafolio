@@ -30,7 +30,7 @@ Professional positioning and brand strategy. Updated when professional direction
 | 3 | API Integration | Key capability |
 | 4 | Workflow Automation | Core discipline |
 | 5 | CRM Automation | Specialization |
-| 6 | OpenAI API | AI integration |
+| 6 | LLM Orchestration | AI integration |
 | 7 | Webhooks | Architecture pattern |
 | 8 | Voice AI | Specialization |
 | 9 | REST API | Backend capability |
