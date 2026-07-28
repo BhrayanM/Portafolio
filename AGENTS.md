@@ -85,7 +85,7 @@ Upon completing any task (phase, feature, integration, audit, bugfix, refactor, 
 - **Backend**: Node.js + Express + PostgreSQL (pg pool)
 - **Frontend**: Next.js 14.2.35 (App Router) + Tailwind CSS + TypeScript strict
 - **Automation**: n8n v2.31.6 (Docker), Lead Qualification workflow active
-- **DB**: PostgreSQL 16 (Docker), RLS enabled, 16 migrations
+- **DB**: PostgreSQL 15 (Docker), RLS enabled, 16 migrations
 - **AI**: Groq (`llama-3.3-70b-versatile`) via HTTP Request — active
 - **CRM**: HubSpot (upsert contacts by email)
 - **Payments**: Stripe (test keys, webhook without secret)
@@ -116,3 +116,14 @@ Upon completing any task (phase, feature, integration, audit, bugfix, refactor, 
 - Both branches (HOT approved + WARM/COLD) converge at HubSpot Upsert
 - Without HubSpot token there is no complete E2E path
 - Multi-Agent State Persistence: Every agent must read `STATE.md` before acting and update `STATE.md` + `PROJECT_STATUS.md` + `PROGRESO.md` + `MEMORY.md` upon completion.
+
+---
+
+## Chronological Entries
+
+- **Date:** 2026-07-27
+- **Agent:** opencode (deepseek-v4-flash-free)
+- **Objective:** Final audit — Mermaid fix, numerical corrections, internal doc review, final report
+- **Result:** Sí escaped in Mermaid diagram; test counts corrected 48→103 and 98→103 across MEMORY.md, PROJECT_STATUS.md, README.md; DEVELOPMENT_HANDOFF.md and historical reports reviewed for archiving recommendation; final report generated
+- **Files modified:** README.md, MEMORY.md, PROJECT_STATUS.md
+- **Next step:** Merge into main, act on archiving recommendations

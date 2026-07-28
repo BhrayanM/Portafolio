@@ -16,7 +16,7 @@
 | Backend & Frontend | Robust Express API + Next.js dashboard | Complete |
 | Payments | Stripe integration | Complete |
 | Communication | WhatsApp, Voice AI, Marketplace | Complete |
-| Scale & SaaS | Scalability, SaaS, Observability (Grafana/Prometheus), 48 tests | Complete |
+| Scale & SaaS | Scalability, SaaS, Observability (Grafana/Prometheus), 103 tests | Complete |
 | Billing & Proxy | Billing normalization, enums, nginx reverse proxy, E2E validation | Complete |
 | Security | Hardening: backend, infra, DB, frontend | Complete |
 | Deployment | Production preparation | Complete |

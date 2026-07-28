@@ -112,7 +112,7 @@ Portafolio-Publico/
 | Backend & Frontend | Robust Express API + Next.js dashboard |
 | Payments | Stripe integration |
 | Communication | WhatsApp, Voice AI, Marketplace |
-| Scale & SaaS | Scalability, Observability, Testing (48 tests) |
+| Scale & SaaS | Scalability, Observability, Testing (103 tests) |
 | Billing & Proxy | Billing normalization, enums, nginx reverse proxy |
 | Security | Hardening across backend, infra, DB, frontend |
 | Deployment | Production preparation |

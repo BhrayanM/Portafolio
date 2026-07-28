@@ -123,7 +123,7 @@ flowchart LR
     B --> C["Saneamiento<br/>+ normalización"]
     C --> D["Capa de decisión IA<br/><i>score · intención · categoría</i>"]
     D --> E{"¿Necesita<br/>criterio humano?"}
-    E -- Sí --> F["Human-in-the-loop<br/><i>aprobar / rechazar</i>"]
+    E -- "Sí" --> F["Human-in-the-loop<br/><i>aprobar / rechazar</i>"]
     E -- No --> G["Sistemas de registro<br/><i>CRM + base de datos</i>"]
     F --> G
     G --> H["Notificación<br/>al equipo"]
@@ -238,7 +238,7 @@ Formulario · WhatsApp · Voz · API
 | **Notificaciones** | Slack | webhook entrante |
 | **Pagos** | Stripe | checkout + webhook con verificación de firma |
 | **Infraestructura** | Docker Compose, NGINX | imágenes pineadas a patch exacto |
-| **Testing** | Jest + Supertest | **98 tests**, CI con lint + typecheck + build + barrido de secretos |
+| **Testing** | Jest + Supertest | **103 tests**, CI con lint + typecheck + build + barrido de secretos |
 
 ### Seguridad
 
@@ -296,7 +296,7 @@ cd frontend && npm ci && npm run dev     # Panel → http://localhost:3001
 ### Verificación
 
 ```bash
-cd backend  && npm run lint && npm test        # 98 tests
+cd backend  && npm run lint && npm test        # 103 tests
 cd frontend && npx tsc --noEmit && npm run build
 docker compose -f docker-compose.prod.yml build
 ```
