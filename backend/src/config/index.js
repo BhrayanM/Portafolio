@@ -1,10 +1,30 @@
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 
+/**
+ * Valor de `trust proxy` de Express.
+ *
+ * Por defecto **desactivado**: confiar en `X-Forwarded-For` sin un proxy delante
+ * permitiria a cualquier cliente falsear su IP en la cabecera y saltarse el rate
+ * limiter. Solo se activa donde de verdad hay un proxy (nginx), via TRUST_PROXY.
+ *
+ * Acepta: vacio/'false'/'0' -> false · un numero -> nº de saltos de proxy
+ * (`TRUST_PROXY=1` con nginx delante) · cualquier otra cadena se pasa tal cual a
+ * Express ('loopback', una subred, una lista separada por comas).
+ */
+function parseTrustProxy(raw) {
+  const value = String(raw ?? '').trim();
+  if (!value || value === 'false' || value === '0') return false;
+  if (value === 'true') return true;
+  if (/^\d+$/.test(value)) return parseInt(value, 10);
+  return value;
+}
+
 module.exports = {
   port: parseInt(process.env.API_PORT) || 3000,
   host: process.env.API_HOST || '0.0.0.0',
   nodeEnv: process.env.NODE_ENV || 'development',
+  trustProxy: parseTrustProxy(process.env.TRUST_PROXY),
 
   jwt: {
     secret: process.env.JWT_SECRET || 'dev-secret-change-in-production',
@@ -44,3 +64,7 @@ module.exports = {
     url: process.env.RABBITMQ_URL || 'amqp://admin:changeme@localhost:5672',
   },
 };
+
+// Se exporta aparte del objeto de config para poder testear el parseo sin
+// recargar el modulo con distintas variables de entorno.
+module.exports.parseTrustProxy = parseTrustProxy;

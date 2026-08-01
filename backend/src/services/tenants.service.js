@@ -3,13 +3,13 @@ const { NotFoundError } = require('../utils/errors');
 
 class TenantsService {
   async getById(id) {
-    const result = await pool.query('SELECT * FROM tenants WHERE id = $1', [id]);
+    const result = await pool.query('SELECT id, name, slug, plan, status, settings, api_keys, stripe_customer_id, stripe_subscription_id, created_at, updated_at FROM tenants WHERE id = $1', [id]);
     if (result.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
     return result.rows[0];
   }
 
   async getBySlug(slug) {
-    const result = await pool.query('SELECT * FROM tenants WHERE slug = $1', [slug]);
+    const result = await pool.query('SELECT id, name, slug, plan, status, settings, api_keys, stripe_customer_id, stripe_subscription_id, created_at, updated_at FROM tenants WHERE slug = $1', [slug]);
     if (result.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
     return result.rows[0];
   }
@@ -30,7 +30,7 @@ class TenantsService {
 
     const result = await pool.query(
       `UPDATE tenants SET ${fields.join(', ')} WHERE id = $${idx}
-       RETURNING *`,
+       RETURNING id, name, slug, plan, status, settings, api_keys, stripe_customer_id, stripe_subscription_id, created_at, updated_at`,
       [...values]
     );
 

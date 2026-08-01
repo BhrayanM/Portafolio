@@ -1,5 +1,6 @@
-const config = require('../config');
-
+// Las credenciales de Twilio se leen de process.env directamente (no via config/):
+// dotenv ya esta cargado cuando se alcanza este servicio, porque app.js requiere
+// ./config antes de montar las rutas.
 class VoiceService {
   getAccountSid() {
     return process.env.TWILIO_ACCOUNT_SID;

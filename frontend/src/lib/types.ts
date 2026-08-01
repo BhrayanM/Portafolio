@@ -6,6 +6,21 @@ export interface User {
   tenantId: string;
 }
 
+/** Enum de clasificación de lead. `value` canónico; el label visible se deriva aparte. */
+export type LeadCategory = 'HOT' | 'WARM' | 'COLD';
+
+export const LEAD_CATEGORIES: { value: LeadCategory; label: string }[] = [
+  { value: 'HOT', label: 'Hot' },
+  { value: 'WARM', label: 'Warm' },
+  { value: 'COLD', label: 'Cold' },
+];
+
+export const LEAD_CATEGORY_LABEL: Record<LeadCategory, string> = {
+  HOT: 'Hot',
+  WARM: 'Warm',
+  COLD: 'Cold',
+};
+
 export interface Lead {
   id: number;
   email: string;
@@ -14,7 +29,10 @@ export interface Lead {
   phone: string | null;
   source: string | null;
   ai_score: number | null;
-  ai_category: 'Hot' | 'Warm' | 'Cold' | null;
+  /** Clasificación. Canónico en mayúsculas: es lo que n8n escribe en la columna. */
+  ai_category: LeadCategory | null;
+  /** Sector de negocio. Texto libre emitido por el LLM, no un enum cerrado. */
+  ai_business_category: string | null;
   status: string;
   message: string | null;
   created_at: string;

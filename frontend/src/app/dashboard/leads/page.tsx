@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { leadsApi } from '@/lib/api';
-import type { Lead } from '@/lib/types';
+import { LEAD_CATEGORIES, LEAD_CATEGORY_LABEL } from '@/lib/types';
+import type { Lead, LeadCategory } from '@/lib/types';
 
 export default function LeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([]);
@@ -22,11 +23,11 @@ export default function LeadsPage() {
       .finally(() => setLoading(false));
   }, [filter, search]);
 
-  const categoryColor = (cat: string | null) => {
+  const categoryColor = (cat: LeadCategory | null) => {
     switch (cat) {
-      case 'Hot': return 'bg-red-100 text-red-800';
-      case 'Warm': return 'bg-yellow-100 text-yellow-800';
-      case 'Cold': return 'bg-gray-100 text-gray-800';
+      case 'HOT': return 'bg-red-100 text-red-800';
+      case 'WARM': return 'bg-yellow-100 text-yellow-800';
+      case 'COLD': return 'bg-gray-100 text-gray-800';
       default: return 'bg-blue-100 text-blue-800';
     }
   };
@@ -56,9 +57,9 @@ export default function LeadsPage() {
           className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none"
         >
           <option value="">Todas las categorías</option>
-          <option value="Hot">Hot</option>
-          <option value="Warm">Warm</option>
-          <option value="Cold">Cold</option>
+          {LEAD_CATEGORIES.map((c) => (
+            <option key={c.value} value={c.value}>{c.label}</option>
+          ))}
         </select>
       </div>
 
@@ -97,7 +98,7 @@ export default function LeadsPage() {
                     <td className="px-4 py-3">
                       {lead.ai_category && (
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${categoryColor(lead.ai_category)}`}>
-                          {lead.ai_category}
+                          {LEAD_CATEGORY_LABEL[lead.ai_category]}
                         </span>
                       )}
                     </td>

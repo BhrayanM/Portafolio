@@ -16,6 +16,14 @@ const nodeGlobals = {
   setInterval: 'readonly',
   clearInterval: 'readonly',
   setImmediate: 'readonly',
+  // Globales de la Fetch API, nativas en Node >=18 (aqui corre Node 24).
+  // Faltaban en esta lista, que se mantiene a mano: no era un fallo del codigo.
+  fetch: 'readonly',
+  Response: 'readonly',
+  Request: 'readonly',
+  Headers: 'readonly',
+  FormData: 'readonly',
+  AbortController: 'readonly',
 };
 
 module.exports = [
