@@ -24,12 +24,10 @@
 
 ## What I do
 
-I connect your tools so that repetitive work is done by an automation.
-
-When a lead arrives through your website or WhatsApp, the system **qualifies it automatically**,
-stores it in your **CRM** and notifies your team — no manual work. When a customer writes
-outside business hours, an AI agent responds, and if the conversation requires it, it
-escalates to a person. Every step is logged so nothing gets lost.
+Every lead that would otherwise go unanswered is captured, qualified by priority and
+saved to your CRM — without manual work and without duplicates. Customers who reach out
+outside business hours still get a response, 24/7, in English or Spanish, with a handoff
+to a person when it matters. You stop chasing paperwork and focus on the jobs that pay.
 
 Everything in this repository is **backed by evidence**: end-to-end verified flows, 113
 automated tests passing and CI on GitHub Actions.
