@@ -2,7 +2,7 @@
 
 # Bilingual Voice Receptionist (EN / ES)
 
-**Recepcionista de voz 24/7 que detecta idioma, entiende intención y gestiona el calendario.**
+**A 24/7 voice receptionist that detects language, understands intent and manages the calendar.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](#)
 [![Voice AI](https://img.shields.io/badge/Voice_AI-6f42c1?style=flat-square&logo=audiomack&logoColor=white)](#)
@@ -10,71 +10,71 @@
 [![Shopify](https://img.shields.io/badge/Shopify-7AB55C?style=flat-square&logo=shopify&logoColor=white)](#)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](#)
 
-[![Estado](https://img.shields.io/badge/estado-en_producción-2ea44f?style=flat-square)](#)
-[![Bilingüe](https://img.shields.io/badge/EN%20%2F%20ES-nativo-0aa?style=flat-square)](#)
-[![Latencia](https://img.shields.io/badge/diseñado_para-baja_latencia-orange?style=flat-square)](#)
+[![State](https://img.shields.io/badge/state-verified-2ea44f?style=flat-square)](#)
+[![Bilingual](https://img.shields.io/badge/EN%20%2F%20ES-native-0aa?style=flat-square)](#)
+[![Latency](https://img.shields.io/badge/designed_for-low_latency-orange?style=flat-square)](#)
 
 </div>
 
-![Arquitectura del Bilingual Voice Receptionist](../../assets/diagrams/voice-receptionist-architecture.png)
+![Bilingual Voice Receptionist architecture](../../assets/diagrams/voice-receptionist-architecture.png)
 
 ---
 
-## El problema
+## The problem
 
-Un negocio con base de clientes mixta EN/ES recibe llamadas fuera de horario. Dos pérdidas
-simultáneas:
+A business with a mixed EN/ES customer base receives calls outside business hours. Two
+simultaneous losses:
 
-- **La llamada perdida** — nadie contesta a las 20:00, y la llamada no vuelve.
-- **El idioma equivocado** — atender solo en un idioma convierte a media base de clientes
-  en clientes de segunda.
+- **The lost call** — nobody answers at 8 PM, and the call does not come back.
+- **The wrong language** — serving in only one language turns half the customer base
+  into second-class customers.
 
-Un contestador automático no resuelve ninguna de las dos: el cliente cuelga.
-
----
-
-## La solución en una frase
-
-Un agente de voz que **detecta el idioma en la propia llamada**, **valida la intención con
-reglas deterministas**, **enruta a la herramienta correcta** y **gestiona el calendario de
-punta a punta** — con escalado a humano cuando hace falta.
+An answering machine solves neither: the customer hangs up.
 
 ---
 
-## Arquitectura conceptual
+## The solution in one sentence
+
+A voice agent that **detects the language within the call itself**, **validates intent
+with deterministic rules**, **routes to the right tool** and **manages the calendar end
+to end** — with human escalation when needed.
+
+---
+
+## Conceptual architecture
 
 ```mermaid
 flowchart TD
-    A["📞 Llamada entrante"] --> B["🎙️ Voice Webhook"]
-    B --> C["🌐 Detección de idioma<br/><i>EN / ES</i>"]
-    C --> D["✅ Validación<br/>y motor de reglas<br/><i>intención + entidades</i>"]
-    D --> E{"¿Intención<br/>reconocida?"}
-    E -- No --> E1["Re-preguntar acotado<br/>· tras N intentos → humano"]
-    E -- Sí --> F{"🔀 Tool Router"}
+    A["📞 Incoming call"] --> B["🎙️ Voice Webhook"]
+    B --> C["🌐 Language detection<br/><i>EN / ES</i>"]
+    C --> D["✅ Validation<br/>and rule engine<br/><i>intent + entities</i>"]
+    D --> E{"Intent<br/>recognized?"}
+    E -- No --> E1["Scoped re-ask<br/>· after N attempts → human"]
+    E -- Yes --> F{"🔀 Tool Router"}
 
-    F -- "Disponibilidad" --> G["📆 Consultar huecos"]
-    F -- "Agendar" --> H["📆 Crear cita"]
-    F -- "Consultar cita" --> I["📆 Buscar cita"]
-    F -- "Cancelar" --> J["📆 Cancelar"]
-    F -- "Reagendar" --> K["📆 Reagendar"]
-    F -- "Pedido" --> L["🛒 Consulta de pedido<br/><i>Shopify</i>"]
-    F -- "Fuera de alcance" --> M["🙋 Escalar a humano"]
+    F -- "Availability" --> G["📆 Check slots"]
+    F -- "Book" --> H["📆 Create appointment"]
+    F -- "Check appointment" --> I["📆 Look up appointment"]
+    F -- "Cancel" --> J["📆 Cancel"]
+    F -- "Reschedule" --> K["📆 Reschedule"]
+    F -- "Order" --> L["🛒 Order lookup<br/><i>Shopify</i>"]
+    F -- "Out of scope" --> M["🙋 Escalate to human"]
 
-    G --> N["🗣️ Respuesta hablada<br/><i>en el idioma detectado</i>"]
+    G --> N["🗣️ Spoken response<br/><i>in the detected language</i>"]
     H --> N
     I --> N
     J --> N
     K --> N
     L --> N
 
-    H --> O["🔔 Confirmación<br/>por WhatsApp / email"]
+    H --> O["🔔 Confirmation<br/>via WhatsApp / email"]
     K --> O
     J --> O
 
-    N --> P[("🗄️ Registro de<br/>la interacción")]
+    N --> P[("🗄️ Interaction<br/>record")]
     M --> P
 
-    Q["🚨 Error Workflow global"] -.captura fallos.-> R[("Tabla de errores<br/>en PostgreSQL")]
+    Q["🚨 Global Error Workflow"] -.captures failures.-> R[("Error table<br/>in PostgreSQL")]
 
     style C fill:#0F9D58,color:#fff
     style D fill:#e07b00,color:#fff
@@ -87,130 +87,130 @@ flowchart TD
 
 ---
 
-## Lo que hace difícil un agente de voz
+## What makes a voice agent hard
 
-### 1. La latencia no se negocia
+### 1. Latency is non-negotiable
 
-En chat, dos segundos de espera son aceptables. En voz, dos segundos de silencio hacen que
-la persona diga *"¿hola?"* — y ahí la conversación ya se rompió.
+In chat, two seconds of wait are acceptable. In voice, two seconds of silence make the
+person say *"hello?"* — and the conversation is already broken.
 
-Consecuencias de diseño:
+Design consequences:
 
-| Restricción | Cómo se aborda |
+| Constraint | How it is addressed |
 |---|---|
-| Cada herramienta debe caber en el presupuesto de tiempo de la llamada | Herramientas de un solo propósito, sin encadenamientos largos |
-| Ninguna herramienta puede colgar la conversación | Límite de tiempo por herramienta con degradación a respuesta genérica |
-| El router no puede añadir latencia propia | Enrutamiento determinista por reglas, no una segunda pasada por el modelo |
-| No hay tiempo para reintentos silenciosos | El fallo se convierte en una frase útil, no en un silencio |
+| Every tool must fit in the call's time budget | Single-purpose tools, no long chains |
+| No tool can hang the conversation | Per-tool time limit with degradation to a generic response |
+| The router cannot add its own latency | Deterministic rule-based routing, not a second model pass |
+| No time for silent retries | A failure becomes a useful phrase, not silence |
 
-**Decisión clave:** el motor de reglas resuelve lo determinista *antes* de involucrar al
-modelo para lo ambiguo. Lo barato y rápido primero.
+**Key decision:** the rule engine resolves the deterministic part *before* involving the
+model for the ambiguous part. Cheap and fast first.
 
-### 2. Bilingüe de verdad, no traducido
+### 2. Truly bilingual, not translated
 
-El idioma se detecta **dentro de la llamada** y toda la conversación —incluidas las
-confirmaciones posteriores— ocurre en ese idioma.
+The language is detected **within the call**, and the whole conversation —including
+subsequent confirmations— happens in that language.
 
 ```mermaid
 flowchart LR
-    A["🎙️ Entrada<br/>de voz"] --> B{"Detección<br/>de idioma"}
-    B -- "🇺🇸 EN" --> C["Contexto EN<br/>· formatos de fecha/hora EN<br/>· confirmaciones EN"]
-    B -- "🇪🇸 ES" --> D["Contexto ES<br/>· formatos de fecha/hora ES<br/>· confirmaciones ES"]
-    C --> E["Mismas herramientas<br/>· misma lógica de negocio"]
+    A["🎙️ Voice<br/>input"] --> B{"Language<br/>detection"}
+    B -- "🇺🇸 EN" --> C["EN context<br/>· EN date/time formats<br/>· EN confirmations"]
+    B -- "🇪🇸 ES" --> D["ES context<br/>· ES date/time formats<br/>· ES confirmations"]
+    C --> E["Same tools<br/>· same business logic"]
     D --> E
-    E --> F["Respuesta hablada<br/>en el idioma del cliente"]
+    E --> F["Spoken response<br/>in the customer's language"]
 
     style C fill:#1f4e8c,color:#fff
     style D fill:#1a6b2a,color:#fff
     style E fill:#412991,color:#fff
 ```
 
-**Detalle que casi siempre se rompe:** las fechas. *"El tres de abril"* y *"April third"* no
-se dicen igual, y una cita confirmada con el formato equivocado es una cita a la que el
-cliente no va a llegar. La localización se aplica a la **salida hablada** y a la
-**confirmación escrita**, no solo al idioma del texto.
+**Detail that almost always breaks:** dates. *"April third"* and *"el tres de abril"* are
+not said the same way, and an appointment confirmed with the wrong format is an
+appointment the customer will not show up to. Localization applies to the **spoken
+output** and the **written confirmation**, not just to the text language.
 
-### 3. Validación antes que generación
+### 3. Validation before generation
 
-Una cita mal agendada es peor que una cita no agendada: ocupa un hueco real y genera una
-ausencia.
+A badly booked appointment is worse than a non-booked one: it occupies a real slot and
+generates a no-show.
 
-Por eso el motor de reglas valida **antes** de escribir en el calendario: que la fecha
-exista, que caiga en horario de atención, que el hueco siga libre, que la intención esté
-confirmada. Solo entonces se ejecuta la escritura.
+That is why the rule engine validates **before** writing to the calendar: the date
+exists, it falls within business hours, the slot is still free, the intent is confirmed.
+Only then is the write executed.
 
 ---
 
-## Motor de calendario
+## Calendar engine
 
-Cubre el ciclo completo, no solo el caso feliz de "agendar":
+It covers the complete cycle, not just the happy-path "book":
 
-| Operación | Qué resuelve |
+| Operation | What it solves |
 |---|---|
-| **Disponibilidad** | *"¿Tienen algo el jueves por la tarde?"* |
-| **Crear** | Agenda con validación previa de que el hueco sigue libre |
-| **Buscar** | *"¿A qué hora era mi cita?"* — sin pasar por una persona |
-| **Cancelar** | Libera el hueco de inmediato en vez de generar una ausencia |
-| **Reagendar** | Cancela y crea de forma atómica, sin dejar la cita en limbo |
-| **Escalar** | Cuando el caso no cabe en ninguna de las anteriores |
+| **Availability** | *"Do you have anything Thursday afternoon?"* |
+| **Create** | Books with prior validation that the slot is still free |
+| **Look up** | *"What time was my appointment?"* — without going through a person |
+| **Cancel** | Frees the slot immediately instead of creating a no-show |
+| **Reschedule** | Cancels and creates atomically, without leaving the appointment in limbo |
+| **Escalate** | When the case does not fit any of the above |
 
-**Por qué el ciclo completo importa comercialmente:** un agente que solo agenda deja el
-trabajo aburrido —cancelaciones y cambios— a una persona. Y ese trabajo aburrido es
-justamente el que consume más tiempo del equipo.
+**Why the full cycle matters commercially:** an agent that only books leaves the boring
+work —cancellations and changes— to a person. And that boring work is exactly what
+consumes the most team time.
 
-La cancelación y el reagendado son, además, los que más valor devuelven: **un hueco liberado
-a tiempo se puede volver a vender.**
-
----
-
-## Integración con comercio
-
-Además del calendario, el router puede resolver **consultas de pedido** contra la tienda.
-El cliente que llama para preguntar por su pedido no necesita hablar con nadie.
-
-La confirmación de cita se envía por **WhatsApp o email**, en el idioma detectado — el
-cliente cuelga y ya tiene el comprobante escrito.
+Cancellation and rescheduling are also the ones that return the most value: **a slot
+freed in time can be sold again.**
 
 ---
 
-## Decisiones de ingeniería
+## Commerce integration
 
-| Decisión | Alternativa descartada | Razón |
+In addition to the calendar, the router can resolve **order lookups** against the store.
+The customer who calls to ask about their order does not need to talk to anyone.
+
+The appointment confirmation is sent via **WhatsApp or email**, in the detected
+language — the customer hangs up and already has the written confirmation.
+
+---
+
+## Engineering decisions
+
+| Decision | Rejected alternative | Reason |
 |---|---|---|
-| Motor de reglas antes del modelo | Todo resuelto por el modelo | Lo determinista es más rápido, más barato y auditable. El modelo se reserva para lo ambiguo. |
-| Router determinista | Router basado en modelo | Añadir una pasada de modelo para enrutar cuesta latencia que la voz no tiene |
-| Validar antes de escribir en calendario | Escribir y corregir después | Una cita errónea ocupa un hueco real y genera una ausencia |
-| Herramientas de propósito único | Herramientas compuestas | Cada llamada cabe en el presupuesto de tiempo; el fallo se aísla |
-| Detección de idioma en la llamada | Idioma fijo por número o por región | La misma línea atiende a ambos públicos sin fragmentar la operación |
-| Localización en salida y confirmación | Traducir solo el texto | Fechas y horas mal localizadas producen ausencias |
-| Reagendar como operación atómica | Cancelar y crear por separado | Evita el estado intermedio donde el cliente se queda sin cita |
-| Escalado tras N intentos fallidos | Insistir indefinidamente | Un bucle de re-preguntas es la peor experiencia posible en voz |
+| Rule engine before the model | Everything resolved by the model | Deterministic parts are faster, cheaper and auditable. The model is reserved for ambiguity. |
+| Deterministic router | Model-based router | Adding a model pass for routing costs latency that voice does not have |
+| Validate before writing to calendar | Write and correct later | A wrong appointment occupies a real slot and creates a no-show |
+| Single-purpose tools | Composite tools | Each call fits in the time budget; failures are isolated |
+| In-call language detection | Fixed language by number or region | The same line serves both audiences without fragmenting operations |
+| Localization in output and confirmation | Translating text only | Poorly localized dates and times produce no-shows |
+| Reschedule as an atomic operation | Cancel and create separately | Avoids the intermediate state where the customer is left without an appointment |
+| Escalation after N failed attempts | Insist indefinitely | A re-ask loop is the worst possible voice experience |
 
-📄 Contexto adicional en el [registro de ADRs](../../docs/adr/README.md).
+📄 Additional context in the [ADR registry](../../docs/adr/README.md).
 
 ---
 
-## Comportamiento operativo
+## Operational behavior
 
-| Propiedad | Comportamiento |
+| Property | Behavior |
 |---|---|
-| **Disponibilidad** | 24/7, incluidos fines de semana y festivos |
-| **Cobertura de idioma** | EN y ES en la misma línea, detectado por llamada |
-| **Ciclo de calendario completo** | Consultar · crear · buscar · cancelar · reagendar |
-| **Degradación controlada** | Herramienta lenta o caída → respuesta útil + escalado, nunca silencio |
-| **Trazabilidad** | Cada llamada deja registro de idioma, intención y acción ejecutada |
-| **Sin citas fantasma** | La validación previa impide escribir citas inválidas |
+| **Availability** | 24/7, including weekends and holidays |
+| **Language coverage** | EN and ES on the same line, detected per call |
+| **Full calendar cycle** | Look up · create · book · cancel · reschedule |
+| **Controlled degradation** | Slow or down tool → useful response + escalation, never silence |
+| **Traceability** | Every call leaves a record of language, intent and executed action |
+| **No ghost appointments** | Pre-validation prevents writing invalid appointments |
 
 ---
 
-## Fragmento ilustrativo
+## Illustrative fragment
 
-> ⚠️ **Genérico y no funcional de extremo a extremo.** Muestra la *forma* del presupuesto de
-> latencia por herramienta. No contiene los tiempos reales, el catálogo de intenciones, las
-> reglas de validación ni el prompt del agente de voz.
+> ⚠️ **Generic and not end-to-end functional.** It shows the *shape* of the per-tool
+> latency budget. It contains no real timings, no intent catalog, no validation rules and
+> no voice agent prompt.
 
 ```js
-// ILUSTRATIVO — en voz, una herramienta lenta es peor que una herramienta ausente.
+// ILLUSTRATIVE — in voice, a slow tool is worse than a missing tool.
 
 async function callToolWithBudget(tool, args, budgetMs, locale) {
   const timeout = new Promise((_, reject) =>
@@ -220,10 +220,10 @@ async function callToolWithBudget(tool, args, budgetMs, locale) {
   try {
     return { ok: true, data: await Promise.race([tool.run(args), timeout]) };
   } catch (err) {
-    // Nunca devolver silencio: siempre una frase hablable en el idioma detectado.
+    // Never return silence: always a speakable phrase in the detected language.
     return {
       ok: false,
-      spoken: fallbackPhrase(locale),   // catálogo de frases no publicado
+      spoken: fallbackPhrase(locale),   // phrase catalog not published
       shouldEscalate: err.message === 'tool_budget_exceeded',
     };
   }
@@ -232,23 +232,23 @@ async function callToolWithBudget(tool, args, budgetMs, locale) {
 
 ---
 
-## Qué NO encontrarás en este repositorio
+## What you will NOT find in this repository
 
-- El workflow n8n exportado ni el grafo real de nodos y conexiones.
-- El prompt del agente de voz ni el catálogo de frases habladas.
-- El catálogo de intenciones ni las reglas del motor de validación.
-- Los presupuestos de latencia reales por herramienta.
-- Credenciales, IDs de calendario, números de teléfono, URLs de webhook, claves de tienda.
+- The exported n8n workflow or the real node/connection graph.
+- The voice agent prompt or the spoken phrase catalog.
+- The intent catalog or the validation engine rules.
+- The real per-tool latency budgets.
+- Credentials, calendar IDs, phone numbers, webhook URLs, store keys.
 
-Ver [SECURITY.md](../../SECURITY.md).
+See [SECURITY.md](../../SECURITY.md).
 
 ---
 
 <div align="center">
 
-**¿Cuántas llamadas pierdes fuera de horario — y en cuántos idiomas?**
+**How many calls do you lose outside business hours — and in how many languages?**
 [bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)
 
-[⬅️ Volver al portafolio](../../README.md) · [Patrón reutilizable](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
+[⬅️ Back to the portfolio](../../README.md) · [Reusable pattern](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
 
 </div>

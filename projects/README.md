@@ -1,24 +1,24 @@
 # Projects — Automation Case Studies
 
-Documentación de arquitectura, diagramas conceptuales y ejemplos sanitizados de los
-sistemas de automatización. Cada proyecto incluye el problema de negocio, la solución
-técnica y las decisiones de ingeniería relevantes.
+Architecture documentation, conceptual diagrams and sanitized examples of the
+automation systems. Each project covers the business problem, the technical solution
+and the relevant engineering decisions.
 
-| Proyecto | Qué resuelve | Documentación |
+| Project | What it solves | Documentation |
 |---|---|---|
-| [Lead Qualification](lead-qualification/README.md) | Calificación automática de leads con puntuación LLM, aprobación humana para leads calientes y upsert en CRM | [docs](lead-qualification/) · [ejemplos](lead-qualification/examples/) |
-| [WhatsApp Agent](whatsapp-agent/README.md) | Agente conversacional con memoria y herramientas sobre WhatsApp Business API | [README](whatsapp-agent/README.md) |
-| [WhatsApp E-commerce Agent](whatsapp-ecommerce-agent/README.md) | Variante comercial del agente: consulta de pedidos y atención bilingüe | [docs](whatsapp-ecommerce-agent/docs/) |
-| [Voice Receptionist](voice-receptionist/README.md) | Recepcionista de voz bilingüe (EN/ES) con gestión de calendario | [docs](voice-receptionist/docs/) |
-| [Appointment Automation](appointment-automation/README.md) | Automatización post-cita: sincronización con CRM, registro auditable y notificación | [README](appointment-automation/README.md) |
-| [Examples](../examples/README.md) | Ejemplos sanitizados de workflows n8n (educativos, sin credenciales) | [README](../examples/README.md) |
+| [Lead Qualification](lead-qualification/README.md) | Automatic lead scoring with LLM, human approval for hot leads and CRM upsert | [docs](lead-qualification/) · [examples](lead-qualification/examples/) |
+| [WhatsApp Agent](whatsapp-agent/README.md) | Conversational agent with memory and tools on the WhatsApp Business API | [README](whatsapp-agent/README.md) |
+| [WhatsApp E-commerce Agent](whatsapp-ecommerce-agent/README.md) | Commerce variant of the agent: order lookup and bilingual support | [docs](whatsapp-ecommerce-agent/docs/) |
+| [Voice Receptionist](voice-receptionist/README.md) | Bilingual voice receptionist (EN/ES) with calendar management | [docs](voice-receptionist/docs/) |
+| [Appointment Automation](appointment-automation/README.md) | Post-appointment automation: CRM sync, auditable record and notification | [README](appointment-automation/README.md) |
+| [Examples](../examples/README.md) | Sanitized n8n workflow examples (educational, no credentials) | [README](../examples/README.md) |
 
-## Nota sobre los ejemplos
+## Note on the examples
 
-Los workflows exportados de producción, prompts y parámetros internos **no se publican**
-(ver [SECURITY.md](../SECURITY.md)). Los ejemplos en `examples/` son representaciones
-sanitizadas con fines educativos.
+Production workflow exports, prompts and internal parameters are **not published**
+(see [SECURITY.md](../SECURITY.md)). The examples in `examples/` are sanitized
+representations for educational purposes.
 
 ---
 
-[⬅️ Volver al repositorio](../README.md) · [Índice de documentación](../docs/README.md)
+[⬅️ Back to the repository](../README.md) · [Documentation index](../docs/README.md)

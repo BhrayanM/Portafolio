@@ -29,7 +29,7 @@ describe('STRIPE_WEBHOOK_SECRET — rechazo sin secreto', () => {
     // Con clave vacia, cualquiera puede calcular el mismo HMAC-SHA256 y forjar una
     // firma valida: por eso "no configurado" tiene que ser un rechazo, no un pase.
     expect(() => billingService.constructEvent(Buffer.from('{}'), 't=1,v1=deadbeef')).toThrow(
-      /Webhook de Stripe no configurado/
+      /Stripe webhook not configured/
     );
   });
 
@@ -76,9 +76,8 @@ describe('config — arranque en produccion (fail fast)', () => {
     expect(() => loadConfigWith({ STRIPE_WEBHOOK_SECRET: '' })).toThrow(/STRIPE_WEBHOOK_SECRET/);
   });
 
-  it('el mensaje deja claro que no se usan valores por defecto para secretos', () => {
-    expect(() => loadConfigWith({ STRIPE_WEBHOOK_SECRET: '' })).toThrow(
-      /No se usan valores por defecto para secretos/
+    it('deja claro en el mensaje que no se usan valores por defecto para secretos', () => {    expect(() => loadConfigWith({ STRIPE_WEBHOOK_SECRET: '' })).toThrow(
+      /No default values are used for secrets/
     );
   });
 

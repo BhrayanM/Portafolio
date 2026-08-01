@@ -1,91 +1,91 @@
 # Development Environment Setup
 
-Guía para ejecutar la plataforma completa en local: infraestructura, migraciones, API y
+Guide for running the full platform locally: infrastructure, migrations, API and
 dashboard.
 
-## Servicios y URLs
+## Services and URLs
 
-| Servicio | URL |
+| Service | URL |
 |---|---|
 | Frontend (dev) | `http://localhost:3000` |
 | Login | `http://localhost:3000/login` |
-| API (directa) | `http://localhost:3001` |
-| API (vía nginx, stack dev) | `http://localhost:8080` |
+| API (direct) | `http://localhost:3001` |
+| API (via nginx, dev stack) | `http://localhost:8080` |
 | Health check | `http://localhost:3001/health` |
 | Swagger / OpenAPI | `http://localhost:3001/api-docs` |
 | n8n | `http://localhost:5678` |
 
-## Usuarios de prueba
+## Test users
 
-Credenciales de demo sembradas por `database/seeds/` — solo para entorno local.
+Demo credentials seeded by `database/seeds/` — local environment only.
 
-| Rol | Email | Contraseña |
+| Role | Email | Password |
 |---|---|---|
-| Admin (acceso completo) | `admin@example.com` | `kWkryenHoYUQLk5NdicqhDGJ` |
-| Member (acceso limitado) | `member.prueba@example.com` | `MemberPrueba2026` |
+| Admin (full access) | `admin@example.com` | `kWkryenHoYUQLk5NdicqhDGJ` |
+| Member (limited access) | `member.prueba@example.com` | `MemberPrueba2026` |
 
-> No son credenciales de producción. En un despliegue real se cambian o se sustituyen por
-> usuarios creados por registro.
+> Not production credentials. In a real deployment they are changed or replaced by
+> users created through registration.
 
-## Inicio rápido
+## Quick start
 
-### 1. Infraestructura (n8n + PostgreSQL + Redis + RabbitMQ)
+### 1. Infrastructure (n8n + PostgreSQL + Redis + RabbitMQ)
 
 ```bash
-cp .env.example .env      # editar; nunca se commitea
+cp .env.example .env      # edit; never commit
 docker compose up -d      # → http://localhost:5678 (n8n)
 ```
 
-### 2. Esquema y datos iniciales
+### 2. Schema and initial data
 
-Las migraciones se aplican **una a una con `ON_ERROR_STOP=1`**: el `cat *.sql | psql`
-típico no sirve aquí, porque un fallo no detiene el flujo y el operador ve un código de
-salida 0.
+Migrations are applied **one by one with `ON_ERROR_STOP=1`**: the typical
+`cat *.sql | psql` does not work here, because a failure does not stop the flow and the
+operator sees exit code 0.
 
 ```bash
 for f in database/migrations/*.sql database/seeds/*.sql; do
   docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-    -v ON_ERROR_STOP=1 -f - < "$f" || { echo "fallo en $f"; break; }
+    -v ON_ERROR_STOP=1 -f - < "$f" || { echo "failed on $f"; break; }
 done
 ```
 
-### 3. Rol de aplicación (RLS)
+### 3. Application role (RLS)
 
-El aislamiento multi-tenant exige conectar con un rol sin privilegios de propietario
-(migración `016_rls_force.sql`). Habilitar el rol `app` una sola vez en el despliegue:
+Multi-tenant isolation requires connecting with a role without owner privileges
+(migration `016_rls_force.sql`). Enable the `app` role once per deployment:
 
 ```bash
 docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
-  -c "ALTER ROLE app LOGIN PASSWORD '<generada>';"
-# y en .env:  DB_USER=app  ·  DB_PASSWORD=<la misma>
+  -c "ALTER ROLE app LOGIN PASSWORD '<generated>';"
+# and in .env:  DB_USER=app  ·  DB_PASSWORD=<the same>
 ```
 
-### 4. Backend y dashboard
+### 4. Backend and dashboard
 
 ```bash
 cd backend  && npm ci && npm run dev     # API   → http://localhost:3000
 cd frontend && npm ci && npm run dev     # Panel → http://localhost:3001
 ```
 
-### 5. Verificación
+### 5. Verification
 
 ```bash
-cd backend  && npm run lint && npm test        # 103 tests
+cd backend  && npm run lint && npm test        # 113 tests
 cd frontend && npx tsc --noEmit && npm run build
 docker compose -f docker-compose.prod.yml build
 ```
 
-## Notas
+## Notes
 
-1. **SSL self-signed en el stack de producción** (`docker-compose.prod.yml`): aceptar el
-   aviso del navegador para continuar.
-2. **Health check:** si la API no responde, visitar `http://localhost:3001/health` primero
-   para confirmar que el backend está corriendo.
-3. **Stack local con nginx:** `docker compose -f docker-compose.dev.yml up -d --build`
-   levanta nginx + backend detrás de `http://localhost:8080`.
+1. **Self-signed SSL in the production stack** (`docker-compose.prod.yml`): accept the
+   browser warning to continue.
+2. **Health check:** if the API does not respond, visit `http://localhost:3001/health`
+   first to confirm the backend is running.
+3. **Local stack with nginx:** `docker compose -f docker-compose.dev.yml up -d --build`
+   starts nginx + backend behind `http://localhost:8080`.
 
-## Documentación relacionada
+## Related documentation
 
-- [Índice de documentación](./README.md)
-- [Despliegue a producción](./deployment-guide.md)
-- [Plataforma SaaS](./platform.md)
+- [Documentation index](./README.md)
+- [Production deployment](./deployment-guide.md)
+- [SaaS platform](./platform.md)

@@ -73,7 +73,7 @@ function resolveCorsOrigins() {
       missing.push("CORS_ORIGINS no puede ser '*' en produccion");
     }
     if (origins.some((o) => /localhost|127\.0\.0\.1/.test(o))) {
-      missing.push('CORS_ORIGINS no puede incluir localhost en produccion');
+      missing.push('CORS_ORIGINS cannot include localhost in production');
     }
   }
   return origins;
@@ -141,9 +141,9 @@ const config = {
 
 if (missing.length > 0) {
   throw new Error(
-    'Arranque abortado: faltan variables de entorno obligatorias en produccion -> ' +
+    'Startup aborted: missing required environment variables in production -> ' +
       missing.join(', ') +
-      '. No se usan valores por defecto para secretos.'
+      '. No default values are used for secrets.'
   );
 }
 

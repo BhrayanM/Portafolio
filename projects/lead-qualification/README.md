@@ -2,7 +2,7 @@
 
 # Lead Qualification Engine
 
-**Calificación de leads con IA, enrutamiento por categoría, aprobación humana y doble persistencia.**
+**AI lead scoring, category-based routing, human approval and dual persistence.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](#)
@@ -11,71 +11,72 @@
 [![Slack](https://img.shields.io/badge/Slack-4A154B?style=flat-square&logo=slack&logoColor=white)](#)
 [![Google Sheets](https://img.shields.io/badge/Sheets-0F9D58?style=flat-square&logo=googlesheets&logoColor=white)](#)
 
-[![Estado](https://img.shields.io/badge/estado-en_producción-2ea44f?style=flat-square)](#)
-[![Human in the loop](https://img.shields.io/badge/human--in--the--loop-sí-blueviolet?style=flat-square)](#)
-[![Error handling](https://img.shields.io/badge/error_handling-persistente-critical?style=flat-square)](#)
+[![State](https://img.shields.io/badge/state-verified-2ea44f?style=flat-square)](#)
+[![Human in the loop](https://img.shields.io/badge/human--in--the--loop-yes-blueviolet?style=flat-square)](#)
+[![Error handling](https://img.shields.io/badge/error_handling-persistent-critical?style=flat-square)](#)
 
 </div>
 
-![Arquitectura del Lead Qualification Engine](../../assets/diagrams/lead-qualification-architecture.png)
+![Lead Qualification Engine architecture](../../assets/diagrams/lead-qualification-architecture.png)
 
 ---
 
-## El problema
+## The problem
 
-Una empresa recibe leads por formulario, campañas y referidos. El equipo comercial los
-atiende **por orden de llegada**, no por valor. Consecuencias medibles:
+A company receives leads through forms, campaigns and referrals. The sales team works
+**first-come, first-served**, not by value. Measurable consequences:
 
-- El lead con presupuesto y urgencia espera lo mismo que el que pregunta por curiosidad.
-- Nadie sabe cuántos leads entraron realmente: la fuente de verdad es la bandeja de entrada.
-- El mismo contacto entra tres veces y se convierte en tres registros en el CRM.
-- Cuando algo falla, se descubre porque un cliente reclama.
-
----
-
-## La solución en una frase
-
-Un pipeline autenticado que **sanea**, **puntúa con IA**, **enruta por categoría**, **pide
-aprobación humana para lo caliente** y **escribe en dos sistemas de registro** — con
-seguimiento programado para lo tibio y un workflow de error que persiste todo fallo.
+- The lead with budget and urgency waits the same as the one asking out of curiosity.
+- Nobody knows how many leads really came in: the source of truth is the inbox.
+- The same contact enters three times and becomes three CRM records.
+- When something fails, it is discovered because a client complains.
 
 ---
 
-## Arquitectura conceptual
+## The solution in one sentence
+
+An authenticated pipeline that **sanitizes**, **scores with AI**, **routes by
+category**, **asks for human approval on hot leads** and **writes to two systems of
+record** — with scheduled follow-up for warm leads and an error workflow that persists
+every failure.
+
+---
+
+## Conceptual architecture
 
 ```mermaid
 flowchart TD
-    A["📥 Webhook de entrada<br/><i>autenticado por API key</i>"] --> B{"¿Clave válida?"}
-    B -- No --> B1["401 · descartar<br/>y registrar intento"]
-    B -- Sí --> C["🧼 Saneamiento<br/>y normalización<br/><i>+ defensa anti-inyección</i>"]
-    C --> D{"¿Payload<br/>válido?"}
-    D -- No --> D1["422 · registrar<br/>como rechazo"]
-    D -- Sí --> E["🧠 Capa de puntuación IA<br/><i>score · Hot/Warm/Cold · categoría</i>"]
-    E --> F{"Router<br/>por categoría"}
+    A["📥 Inbound webhook<br/><i>authenticated by API key</i>"] --> B{"Valid key?"}
+    B -- No --> B1["401 · discard<br/>and log attempt"]
+    B -- Yes --> C["🧼 Sanitization<br/>and normalization<br/><i>+ anti-injection defense</i>"]
+    C --> D{"Valid<br/>payload?"}
+    D -- No --> D1["422 · log<br/>as rejection"]
+    D -- Yes --> E["🧠 AI scoring layer<br/><i>score · Hot/Warm/Cold · category</i>"]
+    E --> F{"Category<br/>router"}
 
-    F -- "🔥 Hot" --> G["✋ Gate de aprobación<br/>humana en Slack"]
-    F -- "🌤️ Warm" --> H["Cola de<br/>seguimiento"]
+    F -- "🔥 Hot" --> G["✋ Human approval<br/>gate in Slack"]
+    F -- "🌤️ Warm" --> H["Follow-up<br/>queue"]
     F -- "❄️ Cold" --> H
-    F -- "Soporte / Info" --> I["Desvío al<br/>canal correspondiente"]
+    F -- "Support / Info" --> I["Route to the<br/>matching channel"]
 
-    G --> J{"¿Aprobado?"}
-    J -- No --> J1["Descartar con<br/>motivo registrado"]
-    J -- Sí --> K
+    G --> J{"Approved?"}
+    J -- No --> J1["Discard with<br/>recorded reason"]
+    J -- Yes --> K
 
     H --> K
     I --> K
 
-    K["🔍 Deduplicación<br/><i>por identidad de negocio: email</i>"] --> L[("🗄️ PostgreSQL<br/>sistema de registro")]
-    K --> M[("📊 Google Sheets<br/>capa operativa")]
-    L --> N["🔗 Upsert en CRM<br/><i>HubSpot</i>"]
-    N --> O["🔔 Notificación<br/>al equipo"]
+    K["🔍 Deduplication<br/><i>by business identity: email</i>"] --> L[("🗄️ PostgreSQL<br/>system of record")]
+    K --> M[("📊 Google Sheets<br/>operational layer")]
+    L --> N["🔗 CRM upsert<br/><i>HubSpot</i>"]
+    N --> O["🔔 Team<br/>notification"]
 
-    P["⏰ Cron de seguimiento"] --> Q["Selecciona Warm/Cold<br/>pendientes"]
-    Q --> R["Genera y envía<br/>seguimiento"]
-    R --> S["Marca como<br/>contactado"]
+    P["⏰ Follow-up cron"] --> Q["Selects pending<br/>Warm/Cold"]
+    Q --> R["Generates and sends<br/>follow-up"]
+    R --> S["Marks as<br/>contacted"]
     S --> L
 
-    T["🚨 Error Workflow global"] -.captura cualquier<br/>fallo del pipeline.-> U[("Tabla de errores<br/>en PostgreSQL")]
+    T["🚨 Global Error Workflow"] -.captures any<br/>pipeline failure.-> U[("Error table<br/>in PostgreSQL")]
 
     style E fill:#412991,color:#fff
     style G fill:#4A154B,color:#fff
@@ -88,140 +89,140 @@ flowchart TD
 
 ---
 
-## Recorrido por etapas
+## Stage-by-stage walkthrough
 
-### 1. Borde autenticado
+### 1. Authenticated edge
 
-La entrada es un webhook **protegido por API key**. Una petición sin clave válida no
-consume recursos del pipeline: se corta en el borde y se registra el intento.
+The entry point is a webhook **protected by an API key**. A request without a valid key
+consumes no pipeline resources: it is cut at the edge and the attempt is logged.
 
-**Por qué importa:** un webhook público sin autenticación es un endpoint que cualquiera
-puede inundar. Y en este caso, inundar significa **gastar llamadas a un LLM**.
+**Why it matters:** an unauthenticated public webhook is an endpoint anyone can flood.
+And in this case, flooding means **burning LLM calls**.
 
-### 2. Saneamiento y defensa anti-inyección
+### 2. Sanitization and anti-injection defense
 
-El contenido lo escribe un desconocido y termina llegando a un modelo de lenguaje. Antes de
-eso, la entrada se **normaliza, se acota y se neutraliza** para que el texto del lead se
-trate como *dato a evaluar*, no como *instrucción a obedecer*.
+The content is written by a stranger and ends up reaching a language model. Before that,
+the input is **normalized, scoped and neutralized** so the lead's text is treated as
+*data to evaluate*, not *instructions to obey*.
 
-> **Principio de diseño, no receta.** La lógica concreta de neutralización forma parte del
-> método comercial y no se publica. Lo relevante aquí es la decisión: *el saneamiento ocurre
-> antes del modelo, no después.*
+> **Design principle, not recipe.** The concrete neutralization logic is part of the
+> commercial method and is not published. What matters here is the decision:
+> *sanitization happens before the model, not after.*
 
-**Qué previene:** que un lead escriba en el campo "mensaje" algo diseñado para que el
-modelo lo clasifique como máxima prioridad, escale a un humano o filtre el contexto del
-sistema.
+**What it prevents:** a lead writing in the "message" field something designed to make
+the model classify it as maximum priority, escalate to a human, or leak the system
+context.
 
-### 3. Puntuación con IA
+### 3. AI scoring
 
-La capa de IA devuelve **salida estructurada**, no prosa:
+The AI layer returns **structured output**, not prose:
 
-| Campo | Tipo | Uso posterior |
+| Field | Type | Used for |
 |---|---|---|
-| `score` | numérico | Prioriza dentro de la misma temperatura |
-| `temperature` | `Hot` · `Warm` · `Cold` | Decide si hay gate humano o cola de seguimiento |
-| `category` | enum de negocio | Decide a qué destino se enruta |
-| `rationale` | texto breve | Contexto para la persona que aprueba |
+| `score` | numeric | Prioritizes within the same temperature |
+| `temperature` | `Hot` · `Warm` · `Cold` | Decides between human gate and follow-up queue |
+| `category` | business enum | Decides the routing destination |
+| `rationale` | short text | Context for the person approving |
 
-**Decisión clave:** el modelo **propone**, no ejecuta. Su salida es un campo tipado que
-alimenta un router determinista. Si el modelo devuelve algo fuera del esquema, el registro
-cae al camino de error en vez de contaminar el CRM.
+**Key decision:** the model **proposes**, it does not execute. Its output is a typed
+field that feeds a deterministic router. If the model returns something out of schema,
+the record goes to the error path instead of corrupting the CRM.
 
-### 4. Enrutamiento por categoría
+### 4. Category routing
 
-Un router determinista — no el modelo — decide el destino. Cada categoría tiene su camino:
-comercial, soporte, informativo. Las categorías de negocio y sus destinos concretos no se
-publican.
+A deterministic router — not the model — decides the destination. Each category has its
+path: sales, support, informational. The business categories and their concrete
+destinations are not published.
 
-### 5. Human-in-the-loop para leads calientes
+### 5. Human-in-the-loop for hot leads
 
-Los leads **Hot** no entran solos al CRM. Se envía una tarjeta a Slack con el resumen y la
-justificación del modelo, y una persona **aprueba o rechaza**.
+**Hot** leads do not enter the CRM alone. A card is sent to Slack with the summary and
+the model's rationale, and a person **approves or rejects**.
 
-**Por qué:** un falso positivo caliente hace que un comercial invierta su hora más valiosa
-en un lead que no lo era. El coste de una aprobación de 5 segundos es mucho menor que el
-coste de esa hora.
+**Why:** a hot false positive makes a salesperson spend their most valuable hour on a
+lead that was not. The cost of a 5-second approval is much lower than the cost of that
+hour.
 
-El flujo **espera** la decisión de forma persistente: si el contenedor se reinicia mientras
-alguien decide, la aprobación pendiente sigue viva.
+The flow **waits** for the decision persistently: if the container restarts while
+someone decides, the pending approval stays alive.
 
-### 6. Doble persistencia con deduplicación
+### 6. Dual persistence with deduplication
 
-| Destino | Rol | Por qué |
+| Destination | Role | Why |
 |---|---|---|
-| **PostgreSQL** | Sistema de registro | Concurrencia real, durabilidad, consultas históricas |
-| **Google Sheets** | Capa operativa | El equipo comercial trabaja donde ya sabe trabajar |
+| **PostgreSQL** | System of record | Real concurrency, durability, historical queries |
+| **Google Sheets** | Operational layer | The sales team works where it already knows how to work |
 
-La deduplicación usa **email como identidad de negocio**. El mismo contacto reenviando el
-formulario actualiza su registro; no crea uno nuevo.
+Deduplication uses **email as business identity**. The same contact re-submitting the
+form updates its record; it does not create a new one.
 
-> La ventana temporal y la estrategia exacta de dedup no se publican.
+> The time window and the exact dedup strategy are not published.
 
-### 7. Upsert en HubSpot
+### 7. HubSpot upsert
 
-Escritura **idempotente**: si el contacto existe se actualiza, si no se crea. Ejecutar el
-mismo evento dos veces deja el CRM en el mismo estado.
+**Idempotent** write: if the contact exists it is updated, if not it is created. Running
+the same event twice leaves the CRM in the same state.
 
-**Por qué importa:** un CRM con contactos duplicados deja de ser confiable, y cuando el
-equipo deja de confiar en el CRM, vuelve a la hoja de cálculo personal. Ahí muere la
-automatización.
+**Why it matters:** a CRM with duplicate contacts stops being trustworthy, and when the
+team stops trusting the CRM it goes back to personal spreadsheets. That is where the
+automation dies.
 
-### 8. Seguimiento programado (Warm / Cold)
+### 8. Scheduled follow-up (Warm / Cold)
 
-Un cron selecciona los leads tibios y fríos pendientes, genera el seguimiento y **marca el
-registro como contactado** — la marca es lo que impide que el mismo lead reciba el mismo
-mensaje en la siguiente ejecución.
+A cron selects pending warm and cold leads, generates the follow-up and **marks the
+record as contacted** — the mark is what prevents the same lead from receiving the same
+message on the next run.
 
-### 9. Error Workflow global
+### 9. Global Error Workflow
 
-Todo fallo — de cualquier etapa — se captura en un workflow de error dedicado que **escribe
-en una tabla de errores en PostgreSQL** con contexto suficiente para reproducirlo.
+Every failure — from any stage — is captured by a dedicated error workflow that
+**writes to an error table in PostgreSQL** with enough context to reproduce it.
 
-**Por qué persistente y no un log:** los logs de un contenedor se pierden al recrearlo. Una
-tabla sobrevive, se puede consultar, se puede agregar por tipo de fallo y muestra si un
-error es puntual o sistemático.
+**Why persistent and not a log:** container logs are lost when recreated. A table
+survives, can be queried, can be aggregated by failure type and shows whether an error
+is one-off or systematic.
 
 ---
 
-## Decisiones de ingeniería
+## Engineering decisions
 
-| Decisión | Alternativa descartada | Razón |
+| Decision | Rejected alternative | Reason |
 |---|---|---|
-| PostgreSQL como sistema de registro | SQLite | Concurrencia y durabilidad. SQLite bloquea con escrituras simultáneas y no tolera bien reinicios del contenedor. |
-| Doble persistencia (BD + Sheets) | Solo base de datos | El equipo comercial necesita una superficie editable; ingeniería necesita una fuente de verdad. Se dan las dos sin que compitan. |
-| Dedup por identidad de negocio (email) | Dedup por ID de ejecución | El ID de ejecución cambia en cada reintento; el email identifica a la persona real. |
-| Gate humano solo en Hot | Aprobar todo · aprobar nada | Aprobar todo genera fatiga y la gente aprueba en automático. Aprobar nada deja pasar falsos positivos caros. |
-| Router determinista tras la IA | Que el modelo decida el destino | Un router en código es auditable y reproducible; el modelo no siempre es lo segundo. |
-| Salida IA con esquema tipado | Texto libre parseado | Un esquema falla ruidosamente y va al camino de error. Un parseo de texto libre falla en silencio y contamina el CRM. |
-| Error Workflow con persistencia | Notificación por Slack únicamente | Una notificación se lee y se olvida. Una tabla se consulta y se agrega. |
-| Red Docker dedicada prod ↔ PostgreSQL | Conexión por IP del host | Elimina fallos intermitentes por IPs efímeras tras un reinicio. |
+| PostgreSQL as system of record | SQLite | Concurrency and durability. SQLite locks under simultaneous writes and tolerates container restarts poorly. |
+| Dual persistence (DB + Sheets) | Database only | The sales team needs an editable surface; engineering needs a source of truth. Both are provided without competing. |
+| Dedup by business identity (email) | Dedup by execution ID | The execution ID changes on every retry; the email identifies the real person. |
+| Human gate only on Hot | Approve everything · approve nothing | Approving everything creates fatigue and people approve on autopilot. Approving nothing lets expensive false positives through. |
+| Deterministic router after AI | Model decides the destination | A router in code is auditable and reproducible; the model is not always the latter. |
+| Typed-schema AI output | Parsed free text | A schema fails loudly and goes to the error path. Free-text parsing fails silently and corrupts the CRM. |
+| Error workflow with persistence | Slack notification only | A notification is read and forgotten. A table can be queried and aggregated. |
+| Dedicated Docker network prod ↔ PostgreSQL | Host IP connection | Eliminates intermittent failures from ephemeral IPs after a restart. |
 
-📄 Contexto adicional en el [registro de ADRs](../../docs/adr/README.md).
+📄 Additional context in the [ADR registry](../../docs/adr/README.md).
 
 ---
 
-## Comportamiento operativo
+## Operational behavior
 
-| Propiedad | Comportamiento |
+| Property | Behavior |
 |---|---|
-| **Idempotencia** | Reprocesar el mismo lead no duplica en CRM ni en la base de datos |
-| **Resiliencia a reinicios** | El estado vive fuera del contenedor; las aprobaciones pendientes sobreviven |
-| **Trazabilidad** | Cada lead tiene registro de score, categoría, decisión humana y destino |
-| **Observabilidad de fallos** | Tabla de errores consultable y agregable por tipo |
-| **Degradación controlada** | Payload inválido o salida IA fuera de esquema → camino de error, nunca escritura parcial |
-| **Superficie de ataque** | Un único endpoint autenticado; nada más expuesto |
+| **Idempotency** | Reprocessing the same lead does not duplicate in CRM or database |
+| **Restart resilience** | State lives outside the container; pending approvals survive |
+| **Traceability** | Every lead has records of score, category, human decision and destination |
+| **Failure observability** | Queryable error table, aggregatable by type |
+| **Controlled degradation** | Invalid payload or out-of-schema AI output → error path, never a partial write |
+| **Attack surface** | One authenticated endpoint; nothing else exposed |
 
 ---
 
-## Fragmento ilustrativo
+## Illustrative fragment
 
-> ⚠️ **Genérico y no funcional de extremo a extremo.** Muestra la *forma* de la validación
-> de contrato entre la IA y el resto del pipeline. No contiene el prompt, ni las categorías
-> de negocio, ni los umbrales, ni la lógica de saneamiento.
+> ⚠️ **Generic and not end-to-end functional.** It shows the *shape* of the contract
+> validation between the AI and the rest of the pipeline. It contains no prompt, no
+> business categories, no thresholds and no sanitization logic.
 
 ```js
-// ILUSTRATIVO — validación de contrato de la capa de decisión.
-// Principio: si el modelo no cumple el esquema, el registro NO avanza.
+// ILLUSTRATIVE — contract validation of the decision layer.
+// Principle: if the model does not meet the schema, the record does NOT proceed.
 
 const ALLOWED_TEMPERATURES = ['Hot', 'Warm', 'Cold'];
 
@@ -234,7 +235,7 @@ function isValidDecision(decision) {
   return true;
 }
 
-// El router es determinista: la IA propone, el código decide el destino.
+// The router is deterministic: the AI proposes, the code decides the destination.
 function route(decision) {
   if (!isValidDecision(decision)) {
     return { destination: 'error_path', reason: 'schema_violation' };
@@ -247,24 +248,24 @@ function route(decision) {
 
 ---
 
-## Qué NO encontrarás en este repositorio
+## What you will NOT find in this repository
 
-- El workflow n8n exportado ni el grafo real de nodos y conexiones.
-- El prompt de puntuación (texto literal) ni su esquema de salida completo.
-- Los umbrales de score que separan Hot / Warm / Cold.
-- La ventana y la estrategia de deduplicación.
-- Las reglas concretas de saneamiento anti-inyección.
-- Credenciales, URLs de webhook, IDs de hoja o de canal, cadenas de conexión.
+- The exported n8n workflow or the real node/connection graph.
+- The scoring prompt (literal text) or its complete output schema.
+- The score thresholds separating Hot / Warm / Cold.
+- The deduplication window and strategy.
+- The concrete anti-injection sanitization rules.
+- Credentials, webhook URLs, sheet or channel IDs, connection strings.
 
-Esa es la parte replicable y es el método comercial. Ver [SECURITY.md](../../SECURITY.md).
+That is the replicable part and the commercial method. See [SECURITY.md](../../SECURITY.md).
 
 ---
 
 <div align="center">
 
-**¿Quieres este motor operando sobre tu CRM?**
+**Do you want this engine running against your CRM?**
 [bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)
 
-[⬅️ Volver al portafolio](../../README.md) · [Patrón reutilizable](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
+[⬅️ Back to the portfolio](../../README.md) · [Reusable pattern](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
 
 </div>

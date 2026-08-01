@@ -1,61 +1,61 @@
-# Documentación
+# Documentation
 
-Índice de la documentación técnica del repositorio.
+Index of the repository's technical documentation.
 
-## Estructura del repositorio
+## Repository structure
 
 ```
-├── README.md          # Presentación del portfolio (orientada a clientes)
-├── projects/          # Casos de estudio: problema → solución → resultado
-├── examples/          # Ejemplos sanitizados de workflows n8n (JSON educativos)
-├── assets/            # Diagramas de arquitectura (diagrams/) y capturas (screenshots/)
-├── docs/              # Esta documentación
-├── backend/           # API REST (Express): controllers, services, middleware, schemas, tests
-├── frontend/          # Dashboard SaaS (Next.js App Router, TypeScript)
-├── database/          # Migraciones SQL (001–016) + seeds — RLS con FORCE
+├── README.md          # Portfolio presentation (client-facing)
+├── projects/          # Case studies: problem → solution → result
+├── examples/          # Sanitized n8n workflow examples (educational JSON)
+├── assets/            # Architecture diagrams (diagrams/) and screenshots (screenshots/)
+├── docs/              # This documentation
+├── backend/           # REST API (Express): controllers, services, middleware, schemas, tests
+├── frontend/          # SaaS dashboard (Next.js App Router, TypeScript)
+├── database/          # SQL migrations (001–016) + seeds — RLS with FORCE
 ├── monitoring/        # Prometheus, Grafana, Loki, Uptime Kuma
-├── scripts/           # Backup, hooks de git, pruebas de webhook
-├── docker/            # Config de NGINX (dev y prod)
+├── scripts/           # Backup, git hooks, webhook testing
+├── docker/            # NGINX config (dev and prod)
 └── docker-compose*.yml
 ```
 
-## Arquitectura e ingeniería
+## Architecture and engineering
 
-| Documento | Contenido |
+| Document | Content |
 |---|---|
-| [architecture.md](./architecture.md) | Arquitectura del Lead Qualification Engine (n8n): flujo, persistencia, estado verificado |
-| [platform.md](./platform.md) | Plataforma SaaS multi-tenant: capas, seguridad, verificación y roadmap |
-| [engineering-practices.md](./engineering-practices.md) | Patrones de fiabilidad, integración de LLM, multi-tenancy, seguridad y lecciones |
-| [adr/README.md](./adr/README.md) | Registro de decisiones de arquitectura (ADRs) — qué se eligió, contra qué y por qué |
-| [patterns/webhook-ai-crm-notify.md](./patterns/webhook-ai-crm-notify.md) | El patrón reutilizable detrás de los cuatro sistemas de automatización |
+| [architecture.md](./architecture.md) | Lead Qualification Engine architecture (n8n): flow, persistence, verified state |
+| [platform.md](./platform.md) | Multi-tenant SaaS platform: layers, security, verification and roadmap |
+| [engineering-practices.md](./engineering-practices.md) | Reliability, LLM integration, multi-tenancy, security and lessons learned |
+| [adr/README.md](./adr/README.md) | Architecture Decision Records — what was chosen, against what, and why |
+| [patterns/webhook-ai-crm-notify.md](./patterns/webhook-ai-crm-notify.md) | The reusable pattern behind the four automation systems |
 
-## Guías
+## Guides
 
-| Documento | Contenido |
+| Document | Content |
 |---|---|
-| [development-setup.md](./development-setup.md) | Entorno de desarrollo local: URLs, usuarios de prueba, migraciones y verificación |
-| [deployment-guide.md](./deployment-guide.md) | Despliegue a producción: prerequisitos, TLS, stack Docker, monitoreo, backups y rollback |
+| [development-setup.md](./development-setup.md) | Local development environment: URLs, test users, migrations and verification |
+| [deployment-guide.md](./deployment-guide.md) | Production deployment: prerequisites, TLS, Docker stack, monitoring, backups and rollback |
 
-## Proyectos
+## Projects
 
-| Documento | Contenido |
+| Document | Content |
 |---|---|
-| [projects/README.md](../projects/README.md) | Índice de casos de estudio de automatización y ejemplos sanitizados |
+| [projects/README.md](../projects/README.md) | Index of automation case studies and sanitized examples |
 | [projects/lead-qualification/README.md](../projects/lead-qualification/README.md) | Lead Qualification Engine |
 | [projects/whatsapp-agent/README.md](../projects/whatsapp-agent/README.md) | WhatsApp Conversational Agent |
 | [projects/voice-receptionist/README.md](../projects/voice-receptionist/README.md) | Bilingual Voice Receptionist |
 | [projects/appointment-automation/README.md](../projects/appointment-automation/README.md) | Appointment Automation |
 | [projects/whatsapp-ecommerce-agent/README.md](../projects/whatsapp-ecommerce-agent/README.md) | WhatsApp E-commerce Agent |
-| [examples/README.md](../examples/README.md) | Ejemplos sanitizados de workflows n8n (JSON educativos) |
+| [examples/README.md](../examples/README.md) | Sanitized n8n workflow examples (educational JSON) |
 
-## Otros
+## Other
 
-| Documento | Contenido |
+| Document | Content |
 |---|---|
-| [CHANGELOG.md](./CHANGELOG.md) | Línea de tiempo del proyecto |
-| [SECURITY.md](../SECURITY.md) | Política de seguridad y alcance de publicación |
-| [CONTACT.md](../CONTACT.md) | Vías de contacto |
+| [CHANGELOG.md](./CHANGELOG.md) | Project timeline |
+| [SECURITY.md](../SECURITY.md) | Security policy and publication scope |
+| [CONTACT.md](../CONTACT.md) | Contact options |
 
 ---
 
-[⬅️ Volver al repositorio](../README.md)
+[⬅️ Back to repository](../README.md)

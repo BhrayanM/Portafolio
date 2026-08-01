@@ -1,22 +1,22 @@
 # Scripts
 
-Utilidades para desarrollo, despliegue y pruebas.
+Utilities for development, deployment and testing.
 
-| Script | Uso |
+| Script | Usage |
 |---|---|
-| `backup.sh` | Respaldo de la base de datos (programar con cron) |
-| `test-lead-webhook.sh` | Prueba el webhook de lead qualification (`hot`, `warm`, `cold`, `invalid`) |
-| `setup-cloudflare.sh` | Configuración de Cloudflare para el despliegue |
-| `setup-firewall.sh` | Reglas de firewall para el servidor de producción |
-| `githooks/pre-commit` | Barrera contra publicación de secretos y material interno |
+| `backup.sh` | Database backup (schedule with cron) |
+| `test-lead-webhook.sh` | Tests the lead qualification webhook (`hot`, `warm`, `cold`, `invalid`) |
+| `setup-cloudflare.sh` | Cloudflare configuration for deployment |
+| `setup-firewall.sh` | Firewall rules for the production server |
+| `githooks/pre-commit` | Barrier against accidental publication of secrets and internal material |
 
-## Instalación de hooks
+## Installing hooks
 
 ```bash
 git config core.hooksPath scripts/githooks
 ```
 
-## Documentación relacionada
+## Related documentation
 
-- [Política de seguridad y alcance de publicación](../SECURITY.md)
-- [Guía de despliegue](../docs/deployment-guide.md)
+- [Security policy and publication scope](../SECURITY.md)
+- [Deployment guide](../docs/deployment-guide.md)

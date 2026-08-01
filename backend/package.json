@@ -1,7 +1,7 @@
 {
   "name": "portafolio-backend",
   "version": "1.0.0",
-  "description": "Portafolio SaaS — Backend API REST",
+  "description": "AI Automation Platform — REST API backend",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

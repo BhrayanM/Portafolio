@@ -17,7 +17,7 @@ class ApiKeysService {
        RETURNING api_keys`,
       [JSON.stringify([{ name, key, created_at: new Date().toISOString(), active: true }]), tenantId]
     );
-    if (result.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('Tenant not found');
     return { key, name };
   }
 
@@ -26,7 +26,7 @@ class ApiKeysService {
       'SELECT api_keys FROM tenants WHERE id = $1',
       [tenantId]
     );
-    if (result.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('Tenant not found');
     return result.rows[0].api_keys || [];
   }
 

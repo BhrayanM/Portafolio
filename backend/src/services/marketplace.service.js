@@ -4,9 +4,9 @@ const { NotFoundError } = require('../utils/errors');
 class MarketplaceService {
   getCatalog() {
     return [
-      { id: 'lead-qualification', name: 'Lead Qualification', description: 'Calificación automática de leads con IA', price: 'included', file: 'lead-qualification.json' },
+      { id: 'lead-qualification', name: 'Lead Qualification', description: 'Automatic AI lead qualification', price: 'included', file: 'lead-qualification.json' },
       { id: 'whatsapp-agent', name: 'WhatsApp Agent', description: 'Agente de soporte conversacional por WhatsApp', price: 'pro', file: 'ai-whatsapp-agent.json' },
-      { id: 'voice-receptionist', name: 'Voice Receptionist', description: 'Recepcionista virtual bilingüe 24/7', price: 'pro', file: 'ai-voice-agent.json' },
+      { id: 'voice-receptionist', name: 'Voice Receptionist', description: 'Bilingual 24/7 virtual receptionist', price: 'pro', file: 'ai-voice-agent.json' },
       { id: 'sales-chat', name: 'Sales Chat', description: 'Chat de ventas con IA para sitio web', price: 'included', file: 'ai-sales-agent.json' },
     ];
   }
@@ -14,7 +14,7 @@ class MarketplaceService {
   async install(tenantId, workflowId) {
     const catalog = this.getCatalog();
     const item = catalog.find((w) => w.id === workflowId);
-    if (!item) throw new NotFoundError('Automatización no encontrada');
+    if (!item) throw new NotFoundError('Automation not found');
 
     // Verificar plan
     const tenant = await pool.query('SELECT plan FROM tenants WHERE id = $1', [tenantId]);
@@ -23,7 +23,7 @@ class MarketplaceService {
     const plan = tenant.rows[0].plan;
     const proPlans = ['growth', 'enterprise'];
     if (item.price === 'pro' && !proPlans.includes(plan)) {
-      throw new Error('Plan Starter no incluye esta automatización. Actualiza a Growth o Enterprise.');
+      throw new Error('The Starter plan does not include this automation. Upgrade to Growth or Enterprise.');
     }
 
     // Registrar instalación

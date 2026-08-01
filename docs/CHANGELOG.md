@@ -1,26 +1,26 @@
 # Changelog — Portafolio-Publico
 
-> Línea de tiempo profesional del proyecto.
+> Professional project timeline.
 
 ---
 
 ## 2026-07-26 — Product Experience Polish
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Dashboard: métricas demo con iconos (leads capturados, calificados por IA, automatizaciones activas, tasa de conversión) + distribución + resumen rápido
-- Leads: 8 leads demo profesionales con tabla enriquecida (fuente visual, score con dot indicator, fecha) + filtro con icono
-- Activity: 8 entradas demo + timeline visual con status dots + source badges + CTA recargar en empty
-- Analytics: leads por periodo (barras semanales) + embudo de conversión (5 etapas) + stat cards con trend indicators
-- Marketplace: 3 workflows demo inline (Lead Qualification, WhatsApp Sales Assistant, Voice Receptionist) con badges Pro, icons diferenciados, border hover
-- Billing: demo subscription fallback + card con icono + notificación amber
-- Integrations: demo status fallback + mejoras visuales en headers de card
-- Usage: 4 métricas con iconos contextuales + promedio ejecuciones por lead
-- Settings: iconos en headers de sección + empty state pulido para API keys
-- Patrón de fallback: cada página intenta fetch real por 3s, si falla → demo data con aviso amber
+**Changes:**
+- Dashboard: demo metrics with icons (leads captured, AI-qualified, active automations, conversion rate) + distribution + quick summary
+- Leads: 8 professional demo leads with enriched table (visual source, score with dot indicator, date) + icon filter
+- Activity: 8 demo entries + visual timeline with status dots + source badges + reload CTA on empty state
+- Analytics: leads per period (weekly bars) + conversion funnel (5 stages) + stat cards with trend indicators
+- Marketplace: 3 inline demo workflows (Lead Qualification, WhatsApp Sales Assistant, Voice Receptionist) with Pro badges, differentiated icons, border hover
+- Billing: demo subscription fallback + card with icon + amber notification
+- Integrations: demo status fallback + visual improvements in card headers
+- Usage: 4 metrics with contextual icons + average runs per lead
+- Settings: icons in section headers + polished empty state for API keys
+- Fallback pattern: every page tries a real fetch for 3 s; on failure → demo data with an amber notice
 
-**Archivos modificados:**
+**Modified files:**
 - `frontend/src/app/dashboard/page.tsx`
 - `frontend/src/app/dashboard/leads/page.tsx`
 - `frontend/src/app/dashboard/activity/page.tsx`
@@ -31,27 +31,27 @@
 - `frontend/src/app/dashboard/usage/page.tsx`
 - `frontend/src/app/dashboard/settings/page.tsx`
 
-**Validación:**
-- Build: ✅ 0 errores
-- Tests: N/A (cambios exclusivamente de UI/demo data)
-- Lint: ✅ Compiled successfully
+**Validation:**
+- Build: ✅ 0 errors
+- Tests: N/A (UI/demo data only)
+- Lint: ✅
 
 ---
 
 ## 2026-07-26 — Visual QA and Documentation
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Auditoría visual de todas las rutas del dashboard
-- Corrección de inconsistencias de color (`gray` → `slate`) en 4 archivos
-- URLs hardcodeadas en login reemplazadas por variable de entorno dinámica
-- Error states extraídos del bloque loading en activity y analytics
-- Skeleton loaders preservados en flujo principal
-- Creación de `docs/DEVELOPMENT_SETUP.md` con URLs, usuarios de prueba y comandos de inicio rápido
+**Changes:**
+- Visual audit of all dashboard routes
+- Color consistency fixes (`gray` → `slate`) in 4 files
+- Hardcoded URLs in login replaced with dynamic environment variable
+- Error states extracted from the loading block in activity and analytics
+- Skeleton loaders preserved in the main flow
+- Created `docs/DEVELOPMENT_SETUP.md` with URLs, test users and quick-start commands
 
-**Archivos modificados:**
-- `docs/DEVELOPMENT_SETUP.md` (creado)
+**Modified files:**
+- `docs/DEVELOPMENT_SETUP.md` (created)
 - `frontend/src/app/dashboard/layout.tsx`
 - `frontend/src/app/error.tsx`
 - `frontend/src/app/not-found.tsx`
@@ -60,89 +60,72 @@
 - `frontend/src/app/dashboard/activity/page.tsx`
 - `frontend/src/app/dashboard/analytics/page.tsx`
 
-**Validación:**
-- Build: ✅ 0 errores
-- Problemas corregidos: 4 (color inconsistency, hardcoded URL, error in loading, outdated DEVELOPMENT_SETUP)
+**Validation:**
+- Build: ✅ 0 errors
+- Fixed issues: 4 (color inconsistency, hardcoded URL, loading error, outdated setup doc)
 
 ---
 
 ## 2026-07-25 — UI Overhaul
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Login corregido: inputs visibles, manejo de error SSL, branding profesional
-- Swagger actualizado con servidor HTTPS
-- Eliminación de problemas de dark mode heredado
-- Body configurado con `bg-slate-50` y `text-slate-900`
-- Dashboard completo actualizado con estilo SaaS consistente
+**Changes:**
+- Login fixed: visible inputs, SSL error handling, professional branding
+- Swagger updated with HTTPS server
+- Removed inherited dark-mode issues
+- Body configured with `bg-slate-50` and `text-slate-900`
+- Dashboard fully updated with consistent SaaS style
 - Cards: `bg-white border border-slate-200 rounded-xl shadow-sm`
 - Headers: `text-3xl font-bold text-slate-900`
-- Sidebar activo con indigo
-- Inputs consistentes en todo el dashboard
-- Skeleton loaders en todas las páginas
-- Tablas mejoradas con header bg-slate-50
+- Active sidebar with indigo
+- Consistent inputs across the dashboard
+- Skeleton loaders on all pages
+- Improved tables with `bg-slate-50` header
 
-**Rutas aplicadas:**
-- `/dashboard`, `/leads`, `/activity`, `/analytics`, `/billing`, `/integrations`, `/marketplace`, `/usage`, `/settings`
+**Routes applied:**
+- `/dashboard`, `/leads`, `/activity`, `/analytics`, `/billing`, `/integrations`,
+  `/marketplace`, `/usage`, `/settings`
 - Sidebar, Header, Login
 
-**Archivos modificados:**
-- `frontend/src/app/globals.css`
-- `frontend/src/app/dashboard/page.tsx`
-- `frontend/src/app/dashboard/layout.tsx`
-- `frontend/src/app/dashboard/Sidebar.tsx`
-- `frontend/src/app/dashboard/Header.tsx`
-- `frontend/src/app/dashboard/leads/page.tsx`
-- `frontend/src/app/dashboard/activity/page.tsx`
-- `frontend/src/app/dashboard/analytics/page.tsx`
-- `frontend/src/app/dashboard/billing/page.tsx`
-- `frontend/src/app/dashboard/integrations/page.tsx`
-- `frontend/src/app/dashboard/marketplace/page.tsx`
-- `frontend/src/app/dashboard/usage/page.tsx`
-- `frontend/src/app/dashboard/settings/page.tsx`
-- `frontend/src/app/login/page.tsx`
-- `frontend/src/lib/api.ts`
-- `frontend/src/lib/types.ts`
-
-**Validación:**
+**Validation:**
 - Build: ✅
 
 ---
 
 ## 2026-07-24 — Final Audit and Release
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Auditoría integral del sistema (security, deployment, testing)
-- Reportes de recuperación, diff y smoke test
-- Reparación de migraciones de hardening 011-015
-- Sanitización completa de datos reales del repositorio público
-- Reporte de preparación para publicación
-- Corrección de Dockerfiles y estructura frontend
-- Activación de aislamiento multi-tenant real (RLS efectivo)
-- Reparación de 3 workflows de ejemplo n8n
-- README actualizado para describir la plataforma real
+**Changes:**
+- Full system audit (security, deployment, testing)
+- Recovery reports, diff and smoke test
+- Repair of hardening migrations 011–015
+- Full sanitization of real data from the public repository
+- Publication readiness report
+- Dockerfile fixes and frontend structure
+- Real multi-tenant isolation enabled (effective RLS)
+- Repair of 3 example n8n workflows
+- README updated to describe the real platform
 
-**Validación:**
+**Validation:**
 - Build: ✅
 - Smoke test: ✅
-- Sanitización: ✅
+- Sanitization: ✅
 
 ---
 
 ## 2026-07-23 — Deployment Preparation
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Auditoría y preparación para despliegue
-- Corrección de configuraciones de Docker y nginx
-- Verificación de variables de entorno y secrets
-- Documentación de despliegue actualizada
+**Changes:**
+- Deployment audit and preparation
+- Docker and nginx configuration fixes
+- Environment variable and secret verification
+- Deployment documentation updated
 
-**Validación:**
+**Validation:**
 - Build: ✅
 - Deployment checklist: ✅
 
@@ -150,16 +133,16 @@
 
 ## 2026-07-22 — Security Hardening
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
+**Changes:**
 - Backend hardening (middleware, validation, rate limiting)
 - Infrastructure hardening (nginx, Docker, network)
-- Database hardening (migrations 011-016, RLS, roles, grants, indexes, validation)
+- Database hardening (migrations 011–016, RLS, roles, grants, indexes, validation)
 - Frontend hardening (API security, CORS enforcement, HTTP-only cookies)
-- Sincronización de documentación de arquitectura
+- Architecture documentation sync
 
-**Componentes hardening:**
+**Hardening components:**
 - `backend/src/middleware/security.js`
 - `backend/src/middleware/auth.js`
 - `backend/src/middleware/rateLimit.js`
@@ -168,42 +151,42 @@
 - `docker/nginx.conf`
 - `docker-compose.yml`
 
-**Validación:**
+**Validation:**
 - Build: ✅
-- Seguridad: ✅ Middleware, auth, rate limiting, CORS, cookies HttpOnly
+- Security: ✅ Middleware, auth, rate limiting, CORS, HttpOnly cookies
 
 ---
 
 ## 2026-07-21 — Billing and Proxy Normalization
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Normalización billing plans — marketplace pro items para growth/enterprise
-- Alineación enums lead clasificación e intención
-- Limpieza lint backend
-- Redis verificado y documentado
-- nginx reverse proxy + trust proxy backend
-- E2E HOT cerrado: exec 48 success, lead_log id=4 approved, HubSpot verificado
+**Changes:**
+- Billing plan normalization — marketplace pro items for growth/enterprise
+- Lead classification and intent enums alignment
+- Backend lint cleanup
+- Redis verified and documented
+- nginx reverse proxy + backend trust proxy
+- HOT E2E closed: exec 48 success, lead_log id=4 approved, HubSpot verified
 
-**Validación:**
-- E2E: ✅ HOT + WARM paths verificados
-- Lint: ✅ Backend limpio
+**Validation:**
+- E2E: ✅ HOT + WARM paths verified
+- Lint: ✅ Backend clean
 
 ---
 
 ## 2026-07-20 — Scalability, SaaS, Observability and Testing
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Escalabilidad del sistema multi-tenant
-- Mejoras SaaS (billing, planes, API keys)
-- Observabilidad con Grafana + Prometheus + Loki
-- Suite de tests: 48 tests en backend
-- CI/CD con GitHub Actions (lint, tests, security scan)
+**Changes:**
+- Multi-tenant system scalability
+- SaaS improvements (billing, plans, API keys)
+- Observability with Grafana + Prometheus + Loki
+- Test suite: 48 backend tests
+- CI/CD with GitHub Actions (lint, tests, secret scan)
 
-**Validación:**
+**Validation:**
 - Tests: ✅ 48 tests
 - CI: ✅ GitHub Actions
 
@@ -211,15 +194,15 @@
 
 ## 2026-07-19 — WhatsApp, Voice AI and Marketplace
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
+**Changes:**
 - WhatsApp Business API integration (routes, controller, service)
 - Voice AI Receptionist (Twilio integration)
-- Marketplace de automatizaciones (catalog, install)
-- Endpoints REST documentados en Swagger
+- Automation marketplace (catalog, install)
+- REST endpoints documented in Swagger
 
-**Archivos creados:**
+**Created files:**
 - `backend/src/routes/whatsapp.routes.js`
 - `backend/src/routes/voice.routes.js`
 - `backend/src/routes/marketplace.routes.js`
@@ -227,22 +210,22 @@
 - `backend/src/controllers/voice.controller.js`
 - `backend/src/controllers/marketplace.controller.js`
 
-**Validación:**
+**Validation:**
 - Build: ✅
 
 ---
 
 ## 2026-07-18 — Stripe Integration
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Stripe webhook con raw body parsing
-- Checkout session creation y manejo de suscripciones
-- Frontend billing page con selección de planes
-- Corrección de orden de middlewares para webhook
+**Changes:**
+- Stripe webhook with raw body parsing
+- Checkout session creation and subscription handling
+- Frontend billing page with plan selection
+- Middleware order fix for the webhook
 
-**Validación:**
+**Validation:**
 - Build: ✅
 - Webhook: ✅ Raw body fix
 
@@ -250,53 +233,53 @@
 
 ## 2026-07-17 — Backend and Frontend
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Backend robusto con Express, middleware, controladores, servicios
-- Frontend Next.js con App Router, Tailwind CSS, dashboard completo
-- Autenticación con cookies HttpOnly
-- CRUD de leads con filtros y búsqueda
-- Panel de analytics y actividad
+**Changes:**
+- Robust Express backend: middleware, controllers, services
+- Next.js frontend with App Router, Tailwind CSS, complete dashboard
+- HttpOnly cookie authentication
+- Leads CRUD with filters and search
+- Analytics and activity panel
 
-**Validación:**
+**Validation:**
 - Build: ✅
 
 ---
 
 ## 2026-07-16 — Foundation
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Motor de automatización core (n8n)
-- Base de datos PostgreSQL con esquema multi-tenant
-- Backend Node.js/Express profesional
-- Dashboard web Next.js
-- Sistema multi-tenant + RLS + API Keys
-- Agentes IA (Sales, WhatsApp, Voice)
+**Changes:**
+- Core automation engine (n8n)
+- PostgreSQL with multi-tenant schema
+- Professional Node.js/Express backend
+- Next.js web dashboard
+- Multi-tenant system + RLS + API keys
+- AI agents (Sales, WhatsApp, Voice)
 
-**Arquitectura:**
-- n8n 2.31.6 como orquestador de workflows
-- PostgreSQL 15 con RLS por tenant
-- Express API REST con autenticación JWT
-- Next.js 14 App Router + Tailwind CSS
+**Architecture:**
+- n8n 2.31.6 as workflow orchestrator
+- PostgreSQL 15 with per-tenant RLS
+- Express REST API with JWT authentication
+- Next.js App Router + Tailwind CSS
 
-**Validación:**
-- Infraestructura Docker: ✅
+**Validation:**
+- Docker infrastructure: ✅
 
 ---
 
-## 2026-07-15 — Inicio del Proyecto
+## 2026-07-15 — Project Start
 
-**Estado:** Completed
+**State:** Completed
 
-**Cambios realizados:**
-- Inicialización del repositorio
-- Configuración inicial de Docker Compose
-- Estructura base del proyecto
-- Licencia y configuración de seguridad inicial
-- Primer commit: `de0a09d portafolio base`
+**Changes:**
+- Repository initialization
+- Initial Docker Compose configuration
+- Base project structure
+- Initial license and security configuration
+- First commit: `de0a09d portafolio base`
 
-**Validación:**
-- Repo: ✅ Inicializado y configurado
+**Validation:**
+- Repo: ✅ Initialized and configured

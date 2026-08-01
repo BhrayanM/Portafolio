@@ -42,7 +42,7 @@ function IntegrationCard({
       {loading ? (
         <div className="flex items-center gap-2 text-sm text-slate-400">
           <Loader2 className="w-4 h-4 animate-spin" />
-          Verificando...
+          Checking...
         </div>
       ) : (
         <div className="space-y-2">
@@ -53,13 +53,13 @@ function IntegrationCard({
               <XCircle className="w-4 h-4 text-slate-300" />
             )}
             <span className={status?.configured ? 'text-green-700 font-medium' : 'text-slate-500'}>
-              {status?.configured ? 'Configurado' : 'No configurado'}
+              {status?.configured ? 'Configured' : 'Not configured'}
             </span>
           </div>
 
           {!status?.configured && (
             <div className="mt-3 p-3 bg-slate-50 rounded-lg text-xs text-slate-500">
-              <p className="font-medium mb-1">Variables requeridas:</p>
+              <p className="font-medium mb-1">Required variables:</p>
               <code className="block text-xs text-slate-600 font-mono">{requiredVars.join(', ')}</code>
             </div>
           )}
@@ -113,14 +113,14 @@ export default function IntegrationsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Integraciones</h1>
-        <p className="text-sm text-slate-500 mt-1">Configura las integraciones con canales externos</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Integrations</h1>
+        <p className="text-sm text-slate-500 mt-1">Configure external channel integrations</p>
       </div>
 
       {useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando estado de demostración.</span>
+          <span>Could not connect to the server. Showing demo status.</span>
         </div>
       )}
 
@@ -128,7 +128,7 @@ export default function IntegrationsPage() {
         <IntegrationCard
           icon={MessageSquare}
           name="WhatsApp"
-          description="Agente conversacional por WhatsApp Business API"
+          description="Conversational agent on the WhatsApp Business API"
           status={displayWhatsapp}
           loading={loading}
           requiredVars={['WHATSAPP_TOKEN', 'WHATSAPP_PHONE_NUMBER_ID', 'WHATSAPP_VERIFY_TOKEN']}
@@ -137,7 +137,7 @@ export default function IntegrationsPage() {
         <IntegrationCard
           icon={Phone}
           name="Voice AI"
-          description="Recepcionista virtual bilingüe vía Twilio"
+          description="Bilingual virtual receptionist via Twilio"
           status={displayVoice}
           loading={loading}
           requiredVars={['TWILIO_ACCOUNT_SID', 'TWILIO_AUTH_TOKEN', 'TWILIO_PHONE_NUMBER']}
@@ -148,11 +148,11 @@ export default function IntegrationsPage() {
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800">
           <div className="flex items-center gap-2 mb-1">
             <Plug className="w-4 h-4 text-amber-600" />
-            <p className="font-medium text-amber-900">Entorno local</p>
+            <p className="font-medium text-amber-900">Local environment</p>
           </div>
           <p>
-            Las integraciones con servicios externos (WhatsApp Cloud API, Twilio) requieren
-            un túnel como ngrok para recibir webhooks. En producción, apuntan al dominio público.
+            External service integrations (WhatsApp Cloud API, Twilio) require
+            a tunnel like ngrok to receive webhooks. In production they point to the public domain.
           </p>
         </div>
       </div>

@@ -15,7 +15,7 @@ class UsersService {
       'SELECT id, email, name, role, is_active, last_login_at, created_at FROM users WHERE id = $1 AND tenant_id = $2',
       [id, tenantId]
     );
-    if (result.rows.length === 0) throw new NotFoundError('Usuario no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('User not found');
     return result.rows[0];
   }
 
@@ -39,7 +39,7 @@ class UsersService {
       [...values]
     );
 
-    if (result.rows.length === 0) throw new NotFoundError('Usuario no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('User not found');
     return result.rows[0];
   }
 }

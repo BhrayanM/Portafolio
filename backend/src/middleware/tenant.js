@@ -28,7 +28,7 @@ const resolveTenant = (req, res, next) => {
     return runWithTenant(req.tenantId, () => next());
   }
 
-  next(new ForbiddenError('Tenant no identificado'));
+  next(new ForbiddenError('Tenant not identified'));
 };
 
 module.exports = { resolveTenant };

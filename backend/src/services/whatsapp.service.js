@@ -18,7 +18,7 @@ class WhatsAppService {
 
   async sendMessage(to, body) {
     if (!this.isConfigured()) {
-      throw new Error('WhatsApp no configurado. Define WHATSAPP_TOKEN y WHATSAPP_PHONE_NUMBER_ID en .env');
+      throw new Error('WhatsApp not configured. Set WHATSAPP_TOKEN and WHATSAPP_PHONE_NUMBER_ID in .env');
     }
 
     const response = await fetch(`${WHATSAPP_API}/${this.getPhoneNumberId()}/messages`, {

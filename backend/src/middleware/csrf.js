@@ -3,40 +3,39 @@ const config = require('../config');
 const { ForbiddenError } = require('../utils/errors');
 
 /**
- * Protección CSRF para sesiones basadas en cookie (JWT en cookie HttpOnly).
+ * CSRF protection for cookie-based sessions (JWT in HttpOnly cookie).
  *
- * CSRF es un ataque exclusivo de navegador: un sitio malicioso dispara peticiones
- * contra la API con las cookies de la víctima. Defensa por capas:
+ * CSRF is a browser-only attack: a malicious site triggers state-changing
+ * requests against the API carrying the victim's cookies. Defense in depth:
  *
- *   1. SameSite=Lax en la cookie de sesión (config.cookie.sameSite): el navegador
- *      no envía la cookie en POST cross-site. Cubre el caso normal.
- *   2. Doble envío de token (OWASP): el servidor emite una cookie `csrf-token`
- *      legible por JS; el frontend la devuelve en la cabecera `x-csrf-token` en
- *      toda petición mutante. Un sitio externo no puede leer la cookie (Same
- *      Origin Policy) ni fijar la cabecera (CORS). Cubre los despliegues con
- *      SameSite=None (frontend y API en subdominios distintos).
- *   3. Validación de Origin: la petición debe ser same-origin o venir de un
- *      origen de CORS_ORIGINS.
+ *   1. SameSite=Lax on the session cookie (config.cookie.sameSite): the browser
+ *      does not send the cookie on cross-site POSTs. Covers the default case.
+ *   2. OWASP double-submit token: the server issues a JS-readable `csrf-token`
+ *      cookie; every mutating request (POST/PUT/PATCH/DELETE) with a session
+ *      cookie must echo it in the `x-csrf-token` header. A third-party site
+ *      cannot read the cookie (Same-Origin Policy) nor set the header (CORS).
+ *      Covers deployments with SameSite=None (frontend and API on separate
+ *      subdomains).
+ *   3. Origin validation: the request must be same-origin or come from an
+ *      origin in CORS_ORIGINS.
  *
- * Solo se validan peticiones mutantes (POST/PUT/PATCH/DELETE) con cookie de
- * sesión. Los clientes no-navegador usan Authorization: Bearer sin cookie, y los
- * webhooks externos (WhatsApp, Twilio, Stripe) se autentican por otros medios:
- * este middleware los ignora. Se elige el doble envío sobre librerías como
- * `csurf` (sin mantenimiento, con CVEs conocidos) porque no añade estado en el
- * servidor y no cambia el contrato de la API para clientes Bearer.
+ * Only mutating requests with a session cookie are validated. Non-browser
+ * clients use Authorization: Bearer without cookies, and external webhooks
+ * (WhatsApp, Twilio, Stripe) authenticate through other means: this middleware
+ * ignores them. Double-submit is preferred over libraries like `csurf`
+ * (unmaintained, known CVEs) because it adds no server-side state and does not
+ * change the API contract for Bearer clients.
  */
 
 const MUTATING_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
-const CSRF_COOKIE = 'csrf-token';
-const CSRF_HEADER = 'x-csrf-token';
 
 function isSameOrigin(origin, req) {
   return origin === `${req.protocol}://${req.headers.host}`;
 }
 
 function issueCsrfToken(res) {
-  res.cookie(CSRF_COOKIE, crypto.randomBytes(32).toString('hex'), {
-    // No HttpOnly a propósito: el SPA debe leerla para devolverla en x-csrf-token.
+  res.cookie('csrf-token', crypto.randomBytes(32).toString('hex'), {
+    // Not HttpOnly on purpose: the SPA must read it to echo it in x-csrf-token.
     httpOnly: false,
     secure: config.isProd,
     sameSite: config.cookie.sameSite || 'lax',
@@ -48,27 +47,27 @@ function issueCsrfToken(res) {
 function csrfProtection(req, res, next) {
   const hasSessionCookie = Boolean(req.cookies && req.cookies[config.cookie.name]);
 
-  // Peticiones seguras y peticiones sin sesión (login, clientes Bearer, webhooks
-  // externos): se emite el token si falta, sin validar.
+  // Safe requests and requests without a session (login, Bearer clients,
+  // external webhooks): issue the token if missing, without validating.
   if (!MUTATING_METHODS.has(req.method) || !hasSessionCookie) {
-    if (!req.cookies || !req.cookies[CSRF_COOKIE]) issueCsrfToken(res);
+    if (!req.cookies || !req.cookies['csrf-token']) issueCsrfToken(res);
     return next();
   }
 
-  // Petición mutante con sesión: validación de Origin (capa 3).
+  // Mutating request with a session: Origin validation (layer 3).
   const origin = req.headers.origin;
   if (origin && !isSameOrigin(origin, req) && !config.corsOrigins.includes(origin)) {
     return next(
-      new ForbiddenError('Origen rechazado: petición con cookie de sesión desde un origen no autorizado')
+      new ForbiddenError('Origin rejected: session request from an unauthorized origin')
     );
   }
 
-  // Doble envío (capa 2): la cabecera debe reproducir la cookie emitida.
-  if (!req.cookies[CSRF_COOKIE] || !req.headers[CSRF_HEADER]) {
-    return next(new ForbiddenError('Token CSRF ausente'));
+  // Double-submit (layer 2): the header must reproduce the issued cookie.
+  if (!req.cookies['csrf-token'] || !req.headers['x-csrf-token']) {
+    return next(new ForbiddenError('CSRF token missing'));
   }
-  if (req.headers[CSRF_HEADER] !== req.cookies[CSRF_COOKIE]) {
-    return next(new ForbiddenError('Token CSRF inválido'));
+  if (req.headers['x-csrf-token'] !== req.cookies['csrf-token']) {
+    return next(new ForbiddenError('CSRF token invalid'));
   }
 
   return next();

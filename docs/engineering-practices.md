@@ -1,185 +1,183 @@
 # Engineering Practices
 
-Patrones, trade-offs y lecciones aprendidas al construir sistemas de automatización y
-plataformas orientados a producción. Documentación de alto nivel: el *cómo* operativo de
-cada sistema —parámetros, umbrales, esquemas— no se publica (ver [SECURITY.md](../SECURITY.md)).
+Patterns, trade-offs and lessons learned while building production-oriented automation
+systems and platforms. High-level documentation: the operational *how* of each system
+—parameters, thresholds, schemas— is not published (see [SECURITY.md](../SECURITY.md)).
 
 ---
 
-## Patrones de fiabilidad
+## Reliability patterns
 
-### Fast ACK + deduplicación son innegociables en webhooks
+### Fast ACK + deduplication are non-negotiable for webhooks
 
-Todo proveedor que reintenta (WhatsApp, Twilio, calendarios, formularios) volverá a enviar
-el mismo evento si el handler excede su presupuesto de tiempo. La secuencia que evita
-respuestas duplicadas al usuario:
+Every provider that retries (WhatsApp, Twilio, calendars, forms) will send the same
+event twice if your handler exceeds their timeout budget. The sequence that prevents
+duplicate user-facing responses:
 
-1. Validar autenticación → 2. ACK 200 inmediato → 3. Deduplicar por ID del proveedor → 4. Procesar
+1. Validate auth → 2. ACK 200 immediately → 3. Deduplicate by provider event ID → 4. Process
 
-Invertir los pasos 2 y 3 no funciona: el reintento llega antes de que la primera ejecución
-termine la deduplicación. El presupuesto de reintento del proveedor se mide en segundos; una
-llamada a un LLM lo excede por defecto.
+Reversing steps 2 and 3 does not work: the retry arrives before the first execution
+finishes deduplication. The provider's retry budget is measured in seconds; an LLM call
+exceeds it by default.
 
-### El estado externo debe sobrevivir a los reinicios del contenedor
+### External state must survive container restarts
 
-Conversaciones, aprobaciones pendientes, registros de deduplicación, estado de ejecución de
-workflows: todo lo que un usuario o un sistema aguas abajo necesita debe vivir fuera del
-contenedor. Un despliegue, una actualización o un fallo del host no puede costar datos ni
-dejar una aprobación huérfana.
+Conversations, pending approvals, deduplication registries, workflow execution state —
+anything a user or a downstream system cares about must live outside the container. A
+deployment, update or host failure cannot cost data or orphan an approval.
 
-**Implicación:** todo workflow que retenga estado necesita almacenamiento externo
-(PostgreSQL, Redis o la base de datos del propio orquestador configurada para persistencia).
-Los sistemas que solo usan memoria son prototipos, no sistemas de producción.
+**Implication:** every workflow that holds state needs external storage (PostgreSQL,
+Redis, or the orchestrator's own database configured for persistence). Memory-only
+systems are prototypes, not production systems.
 
-### La captura global de errores vence al try/catch por workflow
+### Global error capture beats per-workflow try/catch
 
-Un workflow de error único que se suscribe a todos los fallos, escribe en una tabla
-persistente con contexto completo (entrada, nodo, error, stack) y alerta sobre umbrales
-críticos responde la única pregunta que importa en operación: *¿esto pasó una vez o es un
-patrón?*
+A single error workflow that subscribes to all failures, writes to a persistent table
+with full context (input, node, error, stack) and alerts on critical thresholds answers
+the only question that matters in operations: *is this a one-off or a pattern?*
 
-Los logs del contenedor desaparecen al recrearlo. Las alertas de Slack se leen y se olvidan.
-Una tabla de errores consultable, agrupable por tipo y fecha, es el único artefacto que
-sobrevive a una revisión de incidente.
+Container logs disappear on recreate. Slack alerts are read and forgotten. A queryable
+error table, groupable by type and date, is the only artifact that survives an incident
+review.
 
 ---
 
-## Patrones de integración de LLM
+## LLM integration patterns
 
-### El modelo propone, el código dispone
+### The model proposes, code disposes
 
-El LLM debe devolver salida estructurada y tipada (score, categoría, entidades, rationale).
-Un router determinista en código decide el destino. Esto vence a dejar que el modelo elija
-el destino porque es:
+The LLM must return structured, typed output (score, category, entities, rationale). A
+deterministic router in code decides the destination. This beats letting the model pick
+the destination because it is:
 
-- **Auditable:** la lógica del router se lee, se versiona y se prueba
-- **Reproducible:** la misma entrada produce siempre el mismo destino
-- **Barato:** no cuesta una llamada adicional al modelo
-- **Rápido:** crítico para presupuestos de latencia (voz)
-- **Fail-loud:** una salida fuera de esquema va al camino de error en lugar de contaminar
-  el CRM en silencio
+- **Auditable:** router logic can be read, versioned and tested
+- **Reproducible:** the same input always produces the same destination
+- **Cheap:** no extra model call
+- **Fast:** critical for voice latency budgets
+- **Fail-loud:** out-of-schema output goes to the error path instead of silently
+  corrupting the CRM
 
-### Sanear en la puerta de entrada, no en el prompt
+### Sanitize at the gateway, not in the prompt
 
-La entrada desde internet abierta llega al LLM. Debe tratarse como *dato a evaluar*, no
-como *instrucción a obedecer*. El saneamiento y la normalización en el punto de entrada del
-workflow son defensa determinista; las instrucciones del prompt son probabilísticas y
-bypasseables.
+Input from the open internet reaches the LLM. Treat it as *data to evaluate*, not
+*instructions to obey*. Sanitization and normalization at the workflow entry point are
+deterministic defense; prompt instructions are probabilistic and bypassable.
 
-**Principio, no receta:** las reglas concretas de saneamiento son parte del método
-operativo y no se publican. Lo público es la decisión de arquitectura: la puerta de entrada
-es dueña de la seguridad, el modelo es dueño de la clasificación.
+**Principle, not recipe:** the concrete sanitization rules are part of the operational
+method and are not published. What is public is the architectural decision: the gateway
+owns safety, the model owns classification.
 
-### Human-in-the-loop solo donde el falso positivo es caro
+### Human-in-the-loop only where false positives are expensive
 
-Aprobar todo provoca fatiga de aprobación → aprobación automática → el gate se vuelve
-teatro. Aprobar nada deja pasar falsos positivos costosos. El punto óptimo: gate solo en el
-segmento donde un error tiene coste real de negocio (por ejemplo, los leads Hot que
-consumen la hora más valiosa de un comercial).
+Approving everything causes approval fatigue → auto-approve → the gate becomes theater.
+Approving nothing lets costly false positives through. The sweet spot: gate only the
+segment where a mistake has real business cost (e.g., Hot leads that consume a
+salesperson's prime hour).
 
-La espera debe ser persistente: el reinicio del contenedor durante la deliberación humana
-no puede perder la aprobación pendiente.
-
----
-
-## Arquitectura multi-tenant
-
-### Esquema compartido + RLS > bases de datos separadas
-
-Elegido por simplicidad operativa (una sola base para respaldar, migrar y monitorear),
-eficiencia de recursos (pools compartidos) y aislamiento garantizado: las políticas de RLS
-hacen cumplir `tenant_id = current_setting('app.current_tenant')` a nivel de motor,
-inbypasseable incluso por SQL crudo.
-
-Los tenants de alto volumen pueden migrar a esquemas dedicados sin reescribir la aplicación.
-
-### API keys como autenticación de primera clase
-
-Keys con prefijo `pk_` para comunicación servidor-a-servidor, generadas con
-`crypto.randomBytes`, validadas vía middleware dedicado y con rotación y revocación desde
-el día uno. Distintas de las sesiones JWT de usuario (cortas, en cookie `HttpOnly`).
+The wait must be persistent: a container restart during human deliberation must not lose
+the pending approval.
 
 ---
 
-## Integración de pagos
+## Multi-tenant architecture
 
-### La verificación del webhook requiere el cuerpo crudo
+### Shared schema + RLS over separate databases
 
-La verificación de firma de Stripe falla si Express parsea el JSON antes de que el handler
-del webhook lea el cuerpo crudo. La ruta del webhook necesita un parser dedicado
-`express.raw()` aplicado **antes** del `express.json()` global.
+Chosen for operational simplicity (one database to back up, migrate and monitor),
+resource efficiency (shared pools) and guaranteed isolation: RLS policies enforce
+`tenant_id = current_setting('app.current_tenant')` at the engine level, unbypassable
+even by raw SQL.
 
-### Idempotencia de eventos
+High-volume tenants can migrate to dedicated schemas later without application rewrites.
 
-Cada evento de Stripe se procesa exactamente una vez mediante idempotencia en dos capas:
-clave de idempotencia por evento y upsert en CRM por identidad de contacto. La composición
-exacta de las claves es parte del método operativo y no se publica.
+### API keys as first-class auth
 
----
-
-## Observabilidad
-
-- **Prometheus** scrapea `/metrics` de la API, n8n, exportador de PostgreSQL y node-exporter
-- **Loki** agrega logs estructurados JSON (`tenant_id`, `trace_id`, `level`)
-- **OpenTelemetry** con W3C TraceContext vía middleware de request ID
-- **Grafana** con reglas de alerta para tasa de error, p99, saturación y conexiones de BD
-- **Uptime Kuma** con checks sintéticos de `/health` cada 30 s
-
-### Los dashboards multi-tenant requieren la etiqueta de tenant
-
-Todas las métricas y logs llevan `tenant_id`. Los dashboards filtran por ella y las alertas
-pueden ser por tenant o globales.
+`pk_`-prefixed keys for server-to-server communication, generated with
+`crypto.randomBytes`, validated via dedicated middleware, with rotation and revocation
+built in from day one. Distinct from user JWT sessions (short-lived, HttpOnly cookie).
 
 ---
 
-## Seguridad
+## Payment integration
 
-### Cero secretos en código, fallo rápido en producción
+### Webhook verification requires the raw body
 
-El arranque en producción aborta si falta un secreto crítico: `JWT_SECRET`,
-`STRIPE_WEBHOOK_SECRET`, `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY`. Sin valores por
-defecto, sin fallbacks silenciosos.
+Stripe signature verification fails if Express parses JSON before the webhook handler
+reads the raw body. The webhook route needs a dedicated `express.raw()` parser applied
+**before** the global `express.json()`.
 
-### Defensa en profundidad
+### Event idempotency
 
-| Capa | Controles |
+Every Stripe event is processed exactly once through two-layer idempotency: a
+per-event key and a CRM upsert by contact identity. The exact composition of the
+idempotency keys is part of the operational method and is not published.
+
+---
+
+## Observability
+
+- **Prometheus** scrapes `/metrics` from the API, n8n, PostgreSQL exporter and
+  node-exporter
+- **Loki** aggregates structured JSON logs (`tenant_id`, `trace_id`, `level`)
+- **OpenTelemetry** readiness with W3C TraceContext via the request ID middleware
+- **Grafana** with alert rules for error rate, p99, saturation and DB connections
+- **Uptime Kuma** with synthetic `/health` checks every 30 s
+
+### Multi-tenant dashboards require the tenant label
+
+All metrics and logs carry `tenant_id`. Dashboards filter by it, and alerts can be
+tenant-scoped or global.
+
+---
+
+## Security
+
+### Zero secrets in code, fail-fast in production
+
+Production startup aborts if a critical secret is missing: `JWT_SECRET`,
+`STRIPE_WEBHOOK_SECRET`, `POSTGRES_PASSWORD`, `N8N_ENCRYPTION_KEY`. No defaults, no
+silent fallbacks.
+
+### Defense in depth
+
+| Layer | Controls |
 |---|---|
-| Red | Redes Docker privadas, TLS 1.2+ en el borde, HSTS, cabeceras de seguridad; puertos internos nunca expuestos |
-| Aplicación | Helmet (CSP, HSTS, X-Frame), CORS por entorno con lista blanca, rate limit por niveles (global, auth, API key), CSRF por doble envío de token + validación de Origin en peticiones mutantes con cookie |
-| Autenticación | bcrypt cost 12, JWT HS256 (24 h, sin refresh tokens), rotación de API keys |
-| Autorización | Roles (admin/manager/member), middleware por tenant, RLS como refuerzo final |
-| Datos | `.env` en `.gitignore`, patrones de secreto en `.gitignore` (`*.secret`, `*.key`, `*.pem`) |
+| Network | Private Docker networks, TLS 1.2+ at the edge, HSTS, security headers; internal ports never exposed |
+| Application | Helmet (CSP, HSTS, X-Frame), per-environment CORS allowlist, tiered rate limits (global, auth, API key), CSRF via double-submit token + Origin validation on cookie-authenticated mutating requests |
+| Authentication | bcrypt cost 12, JWT HS256 (24 h, no refresh tokens), API key rotation |
+| Authorization | Roles (admin/manager/member), tenant-scoped middleware, RLS as final enforcement |
+| Data | `.env` in `.gitignore`, secret patterns in `.gitignore` (`*.secret`, `*.key`, `*.pem`) |
 
 ---
 
-## Lecciones aprendidas
+## Lessons learned
 
-1. **El primer reintento no es un edge case: es el camino feliz.** Diseña para reintentos
-   desde la primera línea del código de webhooks.
-2. **El estado en memoria es deuda.** Se paga de inmediato o se agrava en el peor momento.
-3. **Una tabla de errores consultable vale más que mil alertas de Slack.** Constrúyela
-   antes de necesitarla.
-4. **La salida del LLM es una propuesta, no una orden.** Valida el esquema, enruta en
-   código, falla con ruido ante la violación.
-5. **El saneamiento es responsabilidad de la puerta de entrada.** No lo empujes al prompt
-   donde es probabilístico.
-6. **Gates de aprobación solo donde el coste del falso positivo es medible.** Todo lo
-   demás sigue directo.
-7. **El upsert es el único patrón de escritura seguro.** Crear + deduplicar después es
-   deuda operativa que nunca se paga.
-8. **Un handoff sin pausa es peor que no automatizar.** El bot y el humano no deben
-   competir por responder.
-9. **RLS es la última línea de defensa.** Los bugs de aplicación ocurren; la base de datos
-   debe seguir imponiendo el aislamiento.
-10. **La configuración fail-fast previene malas configuraciones silenciosas en
-    producción.** Si falta un secreto, el proceso no debe arrancar.
+1. **The first retry is not an edge case — it is the happy path.** Design for retries
+   from the first line of webhook code.
+2. **State in memory is debt.** Pay it immediately or it compounds at the worst moment.
+3. **A queryable error table is worth a thousand Slack alerts.** Build it before you
+   need it.
+4. **LLM output is a proposal, not a command.** Validate the schema, route in code,
+   fail loudly on violation.
+5. **Sanitization is a gateway responsibility.** Do not push it into the prompt where
+   it is probabilistic.
+6. **Approval gates only where the cost of a false positive is measurable.** Everything
+   else proceeds.
+7. **Upsert is the only safe write pattern.** Create + dedupe-later is operational debt
+   that is never repaid.
+8. **A handoff without pause is worse than no automation.** The bot and the human must
+   never race.
+9. **RLS is your last line of defense.** Application bugs happen; the database must
+   still enforce isolation.
+10. **Fail-fast configuration prevents silent misconfigurations in production.** If a
+    secret is missing, the process must not start.
 
 ---
 
-## Documentos relacionados
+## Related documents
 
-- [Registro de decisiones de arquitectura (ADRs)](./adr/README.md)
-- [Patrón: Webhook → IA → CRM → Notificación](./patterns/webhook-ai-crm-notify.md)
-- [Arquitectura del Lead Qualification Engine](./architecture.md)
-- [Plataforma SaaS](./platform.md)
-- [Política de seguridad](../SECURITY.md)
+- [Architecture Decision Records (ADRs)](./adr/README.md)
+- [Pattern: Webhook → AI → CRM → Notification](./patterns/webhook-ai-crm-notify.md)
+- [Lead Qualification Engine architecture](./architecture.md)
+- [SaaS platform](./platform.md)
+- [Security policy](../SECURITY.md)

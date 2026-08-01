@@ -1,397 +1,399 @@
-# Registro de decisiones de arquitectura (ADRs)
+# Architecture Decision Records (ADRs)
 
-**Cada decisión estructural queda escrita: qué se eligió, qué se descartó y cómo se
-vuelve atrás.**
-
----
-
-## Por qué mantengo ADRs en automatizaciones
-
-Un workflow visual es fácil de cambiar. Ese es su superpoder y su trampa: seis meses
-después nadie recuerda **por qué** ese nodo está donde está, y alguien lo "arregla"
-reintroduciendo el bug que ese nodo existía para prevenir.
-
-Un ADR responde tres preguntas que ningún diagrama responde:
-
-1. ¿Qué alternativa se descartó y por qué?
-2. ¿Qué se rompe si se revierte esta decisión?
-3. ¿Cuál es el procedimiento de vuelta atrás?
-
-**Consecuencia práctica:** el rollback es un procedimiento escrito, no una improvisación a
-las 23:00 con un cliente esperando.
+**Every structural decision is written down: what was chosen, what was rejected and
+how to roll back.**
 
 ---
 
-## Nota sobre el alcance publicado
+## Why I keep ADRs in automations
 
-> Los ADRs completos son documentos internos. Aquí se publica el **nivel decisión**: qué se
-> eligió, contra qué y por qué. **El "cómo" interno —parámetros, umbrales, esquemas,
-> consultas, prompts— no se publica**, porque es la parte replicable y constituye el método
-> comercial.
+A visual workflow is easy to change. That is its superpower and its trap: six months
+later nobody remembers **why** that node is where it is, and someone "fixes" it by
+reintroducing the bug that node existed to prevent.
+
+An ADR answers three questions that no diagram answers:
+
+1. Which alternative was rejected, and why?
+2. What breaks if this decision is reverted?
+3. What is the rollback procedure?
+
+**Practical consequence:** rollback is a written procedure, not an improvisation at
+11 PM with a client waiting.
+
+---
+
+## Note on published scope
+
+> The complete ADRs are internal documents. What is published here is the **decision
+> level**: what was chosen, against what, and why. The internal "how" —parameters,
+> thresholds, schemas, queries, prompts— is **not published**, because it is the
+> replicable part and constitutes the commercial method.
 >
-> Ejemplo de la reducción aplicada:
-> *"Elegí PostgreSQL sobre SQLite por concurrencia y durabilidad"* — sin el esquema, sin los
-> índices, sin la estrategia de particionado.
+> Example of the applied reduction:
+> *"I chose PostgreSQL over SQLite for concurrency and durability"* — without the
+> schema, the indexes, or the partitioning strategy.
 
 ---
 
-## Índice de decisiones
+## Decision index
 
-| # | Decisión | Estado | Ámbito |
+| # | Decision | State | Scope |
 |---|---|---|---|
-| [001](#adr-001) | PostgreSQL como sistema de registro, no SQLite | ✅ Aceptada | Todos |
-| [002](#adr-002) | Red Docker dedicada y permanente entre producción y base de datos | ✅ Aceptada | Infraestructura |
-| [003](#adr-003) | Saneamiento de entrada antes de la capa de IA | ✅ Aceptada | Todos |
-| [004](#adr-004) | Deduplicación por identidad de negocio, no por ID de ejecución | ✅ Aceptada | Todos |
-| [005](#adr-005) | Human-in-the-loop solo donde el error es caro | ✅ Aceptada | Lead Qualification |
-| [006](#adr-006) | Router determinista en código tras la salida de la IA | ✅ Aceptada | Todos |
-| [007](#adr-007) | Error Workflow global con persistencia en base de datos | ✅ Aceptada | Todos |
-| [008](#adr-008) | ACK inmediato en canales que reintentan | ✅ Aceptada | WhatsApp, Voz |
-| [009](#adr-009) | Doble persistencia: base de datos + capa operativa | ✅ Aceptada | Lead Qualification |
-| [010](#adr-010) | Estado fuera del contenedor y resiliencia a reinicios | ✅ Aceptada | Infraestructura |
-| [011](#adr-011) | Toda escritura externa es idempotente (upsert) | ✅ Aceptada | Todos |
-| [012](#adr-012) | El handoff a humano pausa la automatización del hilo | ✅ Aceptada | WhatsApp, Voz |
-| [013](#adr-013) | Mitigación de CSRF: doble envío de token + Origin + SameSite | ✅ Aceptada | Backend |
+| [001](#adr-001) | PostgreSQL as the system of record, not SQLite | ✅ Accepted | All |
+| [002](#adr-002) | Dedicated permanent Docker network between production and the database | ✅ Accepted | Infrastructure |
+| [003](#adr-003) | Input sanitization before the AI layer | ✅ Accepted | All |
+| [004](#adr-004) | Deduplication by business identity, not execution ID | ✅ Accepted | All |
+| [005](#adr-005) | Human-in-the-loop only where errors are expensive | ✅ Accepted | Lead Qualification |
+| [006](#adr-006) | Deterministic router in code after AI output | ✅ Accepted | All |
+| [007](#adr-007) | Global error workflow with database persistence | ✅ Accepted | All |
+| [008](#adr-008) | Immediate ACK on channels that retry | ✅ Accepted | WhatsApp, Voice |
+| [009](#adr-009) | Dual persistence: database + operational layer | ✅ Accepted | Lead Qualification |
+| [010](#adr-010) | State outside the container and restart resilience | ✅ Accepted | Infrastructure |
+| [011](#adr-011) | Every external write is idempotent (upsert) | ✅ Accepted | All |
+| [012](#adr-012) | Human handoff pauses the thread's automation | ✅ Accepted | WhatsApp, Voice |
+| [013](#adr-013) | CSRF mitigation: double-submit token + Origin + SameSite | ✅ Accepted | Backend |
 
 ---
 
 <a id="adr-001"></a>
-## ADR-001 · PostgreSQL como sistema de registro, no SQLite
+## ADR-001 · PostgreSQL as the system of record, not SQLite
 
-**Contexto.** La orquestación necesita persistir ejecuciones, registros de negocio y
-errores, con varios flujos escribiendo a la vez.
+**Context.** The orchestration needs to persist executions, business records and errors,
+with several flows writing concurrently.
 
-**Decisión.** PostgreSQL como sistema de registro.
+**Decision.** PostgreSQL as the system of record.
 
-**Alternativa descartada.** SQLite (opción por defecto y más simple de arrancar).
+**Rejected alternative.** SQLite (the default and simplest option to start).
 
-**Razón.** Concurrencia y durabilidad. SQLite bloquea el archivo bajo escrituras
-simultáneas —y aquí las hay: webhook, cron de seguimiento y error workflow pueden coincidir—
-y su modelo de archivo único no tolera bien el ciclo de vida de un contenedor.
+**Reason.** Concurrency and durability. SQLite locks the file under simultaneous writes
+—and there are many here: webhook, follow-up cron and error workflow can coincide— and
+its single-file model does not tolerate a container's lifecycle well.
 
-**Consecuencias.** Un servicio más que operar y respaldar, a cambio de escrituras
-concurrentes seguras, historia consultable y datos que sobreviven a recrear el contenedor.
+**Consequences.** One more service to operate and back up, in exchange for safe
+concurrent writes, queryable history and data that survives container recreation.
 
-**Rollback.** Documentado. Migración inversa del esquema, con la advertencia explícita de
-que revertir reintroduce el bloqueo bajo concurrencia.
+**Rollback.** Documented. Reverse schema migration, with the explicit warning that
+reverting reintroduces locking under concurrency.
 
 ---
 
 <a id="adr-002"></a>
-## ADR-002 · Red Docker dedicada y permanente entre producción y base de datos
+## ADR-002 · Dedicated permanent Docker network between production and the database
 
-**Contexto.** Fallos intermitentes de conexión tras reinicios: la conectividad dependía de
-direcciones que cambiaban.
+**Context.** Intermittent connection failures after restarts: connectivity depended on
+addresses that changed.
 
-**Decisión.** Red Docker dedicada y permanente entre el contenedor de producción y el de
-base de datos, con resolución por nombre de servicio.
+**Decision.** Dedicated permanent Docker network between the production container and
+the database, resolved by service name.
 
-**Alternativa descartada.** Conexión por IP del host o red por defecto.
+**Rejected alternative.** Connection by host IP or default network.
 
-**Razón.** Elimina una clase entera de fallos intermitentes. Las IPs efímeras cambian tras
-un reinicio; el nombre de servicio no.
+**Reason.** Eliminates an entire class of intermittent failures. Ephemeral IPs change
+after a restart; the service name does not.
 
-**Consecuencias.** Un artefacto de infraestructura explícito que mantener, a cambio de
-conectividad estable e independiente del orden de arranque.
+**Consequences.** One explicit infrastructure artifact to maintain, in exchange for
+stable connectivity independent of startup order.
 
-**Rollback.** Documentado, con advertencia de que revertir reintroduce fallos intermitentes
-difíciles de diagnosticar (fallan de forma esporádica, no consistente).
+**Rollback.** Documented, with the warning that reverting reintroduces intermittent
+failures that are hard to diagnose (they fail sporadically, not consistently).
 
 ---
 
 <a id="adr-003"></a>
-## ADR-003 · Saneamiento de entrada antes de la capa de IA
+## ADR-003 · Input sanitization before the AI layer
 
-**Contexto.** Texto escrito por desconocidos llega a un modelo de lenguaje cuya salida
-dirige lógica de negocio.
+**Context.** Text written by strangers reaches a language model whose output drives
+business logic.
 
-**Decisión.** Sanear y acotar la entrada **antes** del modelo, tratando el texto del usuario
-como dato a evaluar y no como instrucción a obedecer.
+**Decision.** Sanitize and scope the input **before** the model, treating user text as
+*data to evaluate*, not *instructions to obey*.
 
-**Alternativa descartada.** Confiar en las instrucciones del sistema del prompt para que el
-modelo ignore intentos de manipulación.
+**Rejected alternative.** Relying on system prompt instructions for the model to ignore
+manipulation attempts.
 
-**Razón.** La defensa dentro del prompt es probabilística; el saneamiento en la entrada es
-determinista. Un lead no debe poder escribir en un campo de texto algo que lo clasifique
-como máxima prioridad o que revele el contexto del sistema.
+**Reason.** Defense inside the prompt is probabilistic; sanitization at the input is
+deterministic. A lead must not be able to write something in a text field that classifies
+it as maximum priority or reveals the system context.
 
-**Consecuencias.** Una etapa adicional que mantener, a cambio de una superficie de ataque
-mucho menor.
+**Consequences.** One more stage to maintain, in exchange for a much smaller attack
+surface.
 
-**Rollback.** No recomendado. Revertir reabre el vector de inyección de prompt.
+**Rollback.** Not recommended. Reverting reopens the prompt injection vector.
 
-> Las reglas concretas de saneamiento no se publican.
+> The concrete sanitization rules are not published.
 
 ---
 
 <a id="adr-004"></a>
-## ADR-004 · Deduplicación por identidad de negocio, no por ID de ejecución
+## ADR-004 · Deduplication by business identity, not execution ID
 
-**Contexto.** El mismo evento real llega más de una vez: reintentos del proveedor, doble
-envío del formulario, reprocesos tras incidente.
+**Context.** The same real event arrives more than once: provider retries, double form
+submissions, reprocessing after an incident.
 
-**Decisión.** Deduplicar por la identidad de la **cosa real** (email del lead, message ID
-del proveedor, clave de idempotencia del evento).
+**Decision.** Deduplicate by the identity of the **real thing** (lead email, provider
+message ID, event idempotency key).
 
-**Alternativa descartada.** Deduplicar por identificador de ejecución del orquestador.
+**Rejected alternative.** Deduplicating by orchestrator execution ID.
 
-**Razón.** El ID de ejecución cambia en cada reintento, así que no deduplica nada. La
-identidad de negocio es estable entre entregas del mismo evento.
+**Reason.** The execution ID changes on every retry, so it deduplicates nothing.
+Business identity is stable across deliveries of the same event.
 
-**Consecuencias.** Hay que elegir y mantener una clave de identidad por sistema, a cambio de
-que el reprocesamiento sea seguro.
+**Consequences.** An identity key must be chosen and maintained per system, in exchange
+for safe reprocessing.
 
-**Rollback.** Documentado. Revertir reintroduce duplicados en el CRM.
+**Rollback.** Documented. Reverting reintroduces CRM duplicates.
 
-> La ventana temporal y el backend de almacenamiento del registro de dedup no se publican.
+> The time window and dedup registry storage backend are not published.
 
 ---
 
 <a id="adr-005"></a>
-## ADR-005 · Human-in-the-loop solo donde el error es caro
+## ADR-005 · Human-in-the-loop only where errors are expensive
 
-**Contexto.** La calificación por IA acierta la mayoría de las veces, pero un falso positivo
-"Hot" hace que un comercial invierta su hora más valiosa en un lead que no lo era.
+**Context.** AI qualification is right most of the time, but a false "Hot" positive makes
+a salesperson spend their most valuable hour on a lead that was not.
 
-**Decisión.** Gate de aprobación humana **solo** para leads calientes.
+**Decision.** Human approval gate **only** for hot leads.
 
-**Alternativas descartadas.** (a) Aprobar todo. (b) No aprobar nada.
+**Rejected alternatives.** (a) Approve everything. (b) Approve nothing.
 
-**Razón.** Aprobar todo genera fatiga: la gente empieza a aprobar sin leer y el gate deja de
-proteger. No aprobar nada deja pasar falsos positivos caros. Aprobar solo el segmento donde
-el error tiene coste real mantiene el gate barato y significativo.
+**Reason.** Approving everything creates fatigue: people start approving without reading
+and the gate stops protecting. Approving nothing lets expensive false positives through.
+Gating only the segment where a mistake has real cost keeps the gate cheap and
+meaningful.
 
-**Consecuencias.** Los leads calientes tienen una latencia adicional acotada por la
-respuesta humana, a cambio de que el equipo confíe en la clasificación.
+**Consequences.** Hot leads have additional latency bounded by human response time, in
+exchange for the team trusting the classification.
 
-**Rollback.** Documentado y de bajo riesgo: es un cambio de configuración, no estructural.
+**Rollback.** Documented and low risk: a configuration change, not structural.
 
 ---
 
 <a id="adr-006"></a>
-## ADR-006 · Router determinista en código tras la salida de la IA
+## ADR-006 · Deterministic router in code after AI output
 
-**Contexto.** Hay que decidir el destino de cada registro según lo que devuelve el modelo.
+**Context.** Each record's destination must be decided from what the model returns.
 
-**Decisión.** El modelo devuelve **campos tipados**; un router en código decide el destino.
+**Decision.** The model returns **typed fields**; a router in code decides the
+destination.
 
-**Alternativa descartada.** Que el modelo decida directamente el destino.
+**Rejected alternative.** Letting the model decide the destination directly.
 
-**Razón.** Auditabilidad y reproducibilidad. Un router en código se lee, se versiona y se
-prueba; la misma entrada produce siempre el mismo destino. Además, una salida fuera de
-esquema falla de forma ruidosa y va al camino de error, en vez de contaminar el CRM en
-silencio.
+**Reason.** Auditability and reproducibility. A router in code can be read, versioned
+and tested; the same input always produces the same destination. Additionally,
+out-of-schema output fails loudly and goes to the error path instead of silently
+corrupting the CRM.
 
-**Consecuencias.** Hay que mantener un contrato explícito entre IA y pipeline, a cambio de
-comportamiento predecible.
+**Consequences.** An explicit contract between AI and pipeline must be maintained, in
+exchange for predictable behavior.
 
-**Rollback.** No recomendado. Revertir hace el enrutamiento no reproducible.
+**Rollback.** Not recommended. Reverting makes routing non-reproducible.
 
 ---
 
 <a id="adr-007"></a>
-## ADR-007 · Error Workflow global con persistencia en base de datos
+## ADR-007 · Global error workflow with database persistence
 
-**Contexto.** Los fallos se descubrían porque un cliente reclamaba.
+**Context.** Failures were discovered because a client complained.
 
-**Decisión.** Un workflow de error global que captura fallos de cualquier flujo y los
-**escribe en una tabla de errores** con contexto suficiente para reproducirlos.
+**Decision.** A global error workflow that captures failures from any flow and **writes
+them to an error table** with enough context to reproduce them.
 
-**Alternativas descartadas.** (a) Logs del contenedor. (b) Solo notificación a Slack.
+**Rejected alternatives.** (a) Container logs. (b) Slack notification only.
 
-**Razón.** Los logs se pierden al recrear el contenedor. Una notificación se lee y se
-olvida. Una tabla se consulta, se agrupa por tipo de fallo y responde la pregunta que
-importa: *¿esto pasó una vez o pasa todos los días?*
+**Reason.** Logs are lost when the container is recreated. A notification is read and
+forgotten. A table can be queried, grouped by failure type and answers the question that
+matters: *did this happen once or every day?*
 
-**Consecuencias.** Una tabla más que mantener y depurar periódicamente, a cambio de
-observabilidad real de fallos.
+**Consequences.** One more table to maintain and review periodically, in exchange for
+real failure observability.
 
-**Rollback.** Documentado y no recomendado: revertir deja la operación a ciegas.
+**Rollback.** Documented and not recommended: reverting leaves operations blind.
 
 ---
 
 <a id="adr-008"></a>
-## ADR-008 · ACK inmediato en canales que reintentan
+## ADR-008 · Immediate ACK on channels that retry
 
-**Contexto.** Los proveedores de mensajería y voz reintentan el webhook si no responde
-dentro de su presupuesto de tiempo. Procesar con un LLM excede ese presupuesto casi siempre.
+**Context.** Messaging and voice providers retry the webhook if it does not respond
+within their time budget. Processing with an LLM exceeds that budget almost always.
 
-**Decisión.** Confirmar la recepción de inmediato y procesar después, con deduplicación
-como red de seguridad.
+**Decision.** Acknowledge receipt immediately and process afterwards, with deduplication
+as the safety net.
 
-**Alternativa descartada.** Procesar y responder al final.
+**Rejected alternative.** Process and respond at the end.
 
-**Razón.** Sin ACK inmediato, el proveedor reintenta y el usuario recibe la misma respuesta
-varias veces. Es el fallo más visible y más dañino para la confianza del cliente final.
+**Reason.** Without an immediate ACK, the provider retries and the user receives the
+same response several times. It is the most visible and most damaging failure for
+customer trust.
 
-**Consecuencias.** El flujo pierde la capacidad de devolver el resultado en la misma
-respuesta HTTP, lo que obliga a que la deduplicación sea sólida.
+**Consequences.** The flow loses the ability to return the result in the same HTTP
+response, which forces deduplication to be solid.
 
-**Rollback.** No recomendado. Revertir reintroduce respuestas duplicadas.
+**Rollback.** Not recommended. Reverting reintroduces duplicate responses.
 
 ---
 
 <a id="adr-009"></a>
-## ADR-009 · Doble persistencia: base de datos + capa operativa
+## ADR-009 · Dual persistence: database + operational layer
 
-**Contexto.** Ingeniería necesita una fuente de verdad; el equipo comercial necesita una
-superficie donde pueda trabajar y anotar.
+**Context.** Engineering needs a source of truth; the business team needs a surface
+where they can work and annotate.
 
-**Decisión.** Escribir en PostgreSQL (sistema de registro) **y** en una hoja de cálculo
-(capa operativa), con la base de datos como autoridad.
+**Decision.** Write to PostgreSQL (system of record) **and** to a spreadsheet
+(operational layer), with the database as the authority.
 
-**Alternativas descartadas.** (a) Solo base de datos. (b) Solo hoja de cálculo.
+**Rejected alternatives.** (a) Database only. (b) Spreadsheet only.
 
-**Razón.** Solo base de datos obliga al equipo comercial a pedir consultas para todo, y
-terminan llevando su propia hoja paralela —ahí muere la automatización—. Solo hoja de
-cálculo no soporta concurrencia ni historia fiable.
+**Reason.** Database only forces the business team to request queries for everything,
+and they end up keeping their own parallel spreadsheet — that is where the automation
+dies. Spreadsheet only does not support concurrency or reliable history.
 
-**Consecuencias.** Hay dos destinos que mantener sincronizados, y se define explícitamente
-cuál manda cuando divergen (la base de datos).
+**Consequences.** Two destinations to keep in sync, and it is explicitly defined which
+one wins when they diverge (the database).
 
-**Rollback.** Documentado y de bajo riesgo: retirar la capa operativa no afecta al sistema
-de registro.
+**Rollback.** Documented and low risk: removing the operational layer does not affect
+the system of record.
 
 ---
 
 <a id="adr-010"></a>
-## ADR-010 · Estado fuera del contenedor y resiliencia a reinicios
+## ADR-010 · State outside the container and restart resilience
 
-**Contexto.** Un contenedor se reinicia: por despliegue, por actualización o por fallo del
-host. Si el estado vive en su memoria, se pierde.
+**Context.** A container restarts: deployment, update or host failure. If state lives
+in its memory, it is lost.
 
-**Decisión.** Todo estado significativo —ejecuciones, aprobaciones pendientes, registro de
-dedup, hilos conversacionales— vive fuera del contenedor, con políticas de reinicio
-automático.
+**Decision.** All significant state —executions, pending approvals, dedup registry,
+conversation threads— lives outside the container, with automatic restart policies.
 
-**Alternativa descartada.** Estado en memoria del proceso.
+**Rejected alternative.** In-process memory state.
 
-**Razón.** Un reinicio no puede costar datos ni dejar una aprobación pendiente huérfana. Es
-la diferencia entre una demo y un sistema en producción.
+**Reason.** A restart cannot cost data or orphan a pending approval. It is the
+difference between a demo and a production system.
 
-**Consecuencias.** Más piezas de infraestructura que operar, a cambio de que reiniciar sea
-una operación rutinaria y no un incidente.
+**Consequences.** More infrastructure pieces to operate, in exchange for restart being a
+routine operation and not an incident.
 
-**Rollback.** No recomendado.
+**Rollback.** Not recommended.
 
 ---
 
 <a id="adr-011"></a>
-## ADR-011 · Toda escritura externa es idempotente (upsert)
+## ADR-011 · Every external write is idempotent (upsert)
 
-**Contexto.** Con reintentos y reprocesos, la misma escritura va a ejecutarse más de una vez.
+**Context.** With retries and reprocessing, the same write will execute more than once.
 
-**Decisión.** Toda escritura a un sistema externo se hace por **upsert** contra una
-identidad estable: si existe se actualiza, si no se crea.
+**Decision.** Every write to an external system is an **upsert** against a stable
+identity: update if it exists, create if it does not.
 
-**Alternativa descartada.** Crear siempre y limpiar duplicados después.
+**Rejected alternative.** Always create and clean duplicates later.
 
-**Razón.** Un CRM con duplicados deja de ser confiable, y cuando el equipo deja de confiar
-en el CRM vuelve a su hoja personal. Limpiar después es trabajo manual recurrente que nunca
-se hace.
+**Reason.** A CRM with duplicates stops being trustworthy, and when the team stops
+trusting the CRM they go back to their personal spreadsheet. Cleaning up later is
+recurring manual work that is never done.
 
-**Consecuencias.** Hay que definir una identidad estable por entidad y por sistema.
+**Consequences.** A stable identity must be defined per entity and per system.
 
-**Rollback.** No recomendado.
+**Rollback.** Not recommended.
 
 ---
 
 <a id="adr-012"></a>
-## ADR-012 · El handoff a humano pausa la automatización del hilo
+## ADR-012 · Human handoff pauses the thread's automation
 
-**Contexto.** Cuando un agente escala una conversación, notificar al equipo no es suficiente.
+**Context.** When an agent escalates a conversation, notifying the team is not enough.
 
-**Decisión.** El escalado hace tres cosas: notifica con contexto, **pausa la automatización
-en ese hilo** y registra que hubo intervención.
+**Decision.** Escalation does three things: notifies with context, **pauses the
+automation on that thread** and records that there was an intervention.
 
-**Alternativa descartada.** Escalar notificando únicamente.
+**Rejected alternative.** Escalate by notification only.
 
-**Razón.** Sin pausa, la persona y el bot responden a la vez al mismo cliente. Eso destruye
-la confianza más rápido que no haber automatizado nada.
+**Reason.** Without a pause, the person and the bot reply at the same time to the same
+customer. That destroys trust faster than not automating anything.
 
-**Consecuencias.** Hace falta un estado de "hilo intervenido" y un criterio explícito para
-devolverlo a la automatización.
+**Consequences.** A "thread intervened" state and an explicit criterion to return the
+thread to automation are needed.
 
-**Rollback.** No recomendado.
+**Rollback.** Not recommended.
 
 ---
 
 <a id="adr-013"></a>
-## ADR-013 · Mitigación de CSRF para sesiones por cookie (doble envío + Origin + SameSite)
+## ADR-013 · CSRF mitigation for cookie sessions (double-submit + Origin + SameSite)
 
-**Contexto.** La API autentica por cookie HttpOnly (`access_token`) para navegadores y
-por `Authorization: Bearer` para clientes no-navegador. CSRF es un ataque exclusivo de
-navegador: un sitio malicioso dispara peticiones mutantes con las cookies de la víctima.
+**Context.** The API authenticates via an HttpOnly cookie (`access_token`) for browsers
+and via `Authorization: Bearer` for non-browser clients. CSRF is a browser-only attack:
+a malicious site triggers mutating requests carrying the victim's cookies.
 
-**Decisión.** Defensa por capas sin cambiar el contrato de la API para clientes Bearer:
+**Decision.** Defense in depth without changing the API contract for Bearer clients:
 
-1. **SameSite=Lax** en la cookie de sesión: el navegador no envía la cookie en POST
-   cross-site. Cubre el caso normal.
-2. **Doble envío de token (OWASP)** en `middleware/csrf.js`: el servidor emite una
-   cookie `csrf-token` legible por JS; toda petición mutante (POST/PUT/PATCH/DELETE)
-   con cookie de sesión debe repetir el token en la cabecera `x-csrf-token`. Un sitio
-   externo no puede leer la cookie (Same Origin Policy) ni fijar la cabecera (CORS).
-3. **Validación de Origin**: la petición debe ser same-origin o venir de un origen de
+1. **SameSite=Lax** on the session cookie: the browser does not send the cookie on
+   cross-site POSTs. Covers the default case.
+2. **OWASP double-submit token** in `middleware/csrf.js`: the server issues a
+   JS-readable `csrf-token` cookie; every mutating request (POST/PUT/PATCH/DELETE) with
+   a session cookie must echo the token in the `x-csrf-token` header. A third-party
+   site cannot read the cookie (Same-Origin Policy) nor set the header (CORS).
+3. **Origin validation**: the request must be same-origin or come from an origin in
    `CORS_ORIGINS`.
 
-Las peticiones sin cookie de sesión —login, clientes Bearer, webhooks externos
-(WhatsApp, Twilio, Stripe)— no se validan: se autentican por otros medios.
+Requests without a session cookie —login, Bearer clients, external webhooks (WhatsApp,
+Twilio, Stripe)— are not validated: they authenticate through other means.
 
-**Alternativas descartadas.**
-- **`csurf`:** sin mantenimiento y con CVEs conocidos.
-- **`tiny-csrf`:** mantenida y compatible, pero diseñada para formularios servidor
-  (cookie HttpOnly firmada de 5 minutos, token de un solo uso por `req.csrfToken()`),
-  no para una SPA JSON con clientes server-to-server.
-- **Confiar solo en SameSite:** no cubre los despliegues con `SameSite=None`
-  (frontend y API en subdominios distintos, como documenta `.env.example`).
+**Rejected alternatives.**
+- **`csurf`:** unmaintained, with known CVEs.
+- **`tiny-csrf`:** maintained and compatible, but designed for server-rendered forms
+  (signed HttpOnly cookie with a 5-minute TTL, single-use token via `req.csrfToken()`),
+  not for a JSON SPA with server-to-server clients.
+- **Relying only on SameSite:** does not cover deployments with `SameSite=None`
+  (frontend and API on separate subdomains, as `.env.example` documents).
 
-**Razón.** El doble envío sin estado en servidor, combinado con SameSite y Origin,
-bloquea el vector real (navegador con cookie de sesión) sin requerir sesión de
-servidor ni cambiar el flujo Bearer.
+**Reason.** Stateless double-submit combined with SameSite and Origin blocks the real
+vector (browser with session cookie) without requiring a server session or changing the
+Bearer flow.
 
-**Consecuencias.** El frontend repite la cookie en la cabecera en toda petición
-mutante (una línea en el cliente HTTP centralizado). Los clientes que usen cookie de
-sesión fuera de navegador deben repetir el token igual que un navegador.
+**Consequences.** The frontend echoes the cookie in the header on every mutating request
+(one line in the centralized HTTP client). Clients using the session cookie outside a
+browser must echo the token like a browser does.
 
-**Rollback.** Documentado y de bajo riesgo: retirar el middleware deja la protección
-en manos de SameSite únicamente.
+**Rollback.** Documented and low risk: removing the middleware leaves protection to
+SameSite alone.
 
 ---
 
-## Formato interno de un ADR
+## Internal ADR format
 
-Los ADRs completos siguen esta plantilla. **Los campos de implementación no se publican.**
+Complete ADRs follow this template. **Implementation fields are not published.**
 
 ```
-# ADR-NNN · <Título de la decisión>
+# ADR-NNN · <Decision title>
 
-Estado:        Propuesta | Aceptada | Sustituida por ADR-NNN | Obsoleta
-Fecha:         YYYY-MM-DD
-Ámbito:        <sistemas afectados>
+Status:        Proposed | Accepted | Superseded by ADR-NNN | Obsolete
+Date:          YYYY-MM-DD
+Scope:         <affected systems>
 
-## Contexto
-<qué situación forzó la decisión>
+## Context
+<what situation forced the decision>
 
-## Decisión
-<qué se eligió>
+## Decision
+<what was chosen>
 
-## Alternativas consideradas
-<qué se descartó y por qué>
+## Alternatives considered
+<what was rejected and why>
 
-## Consecuencias
-<qué se gana, qué cuesta, qué queda pendiente>
+## Consequences
+<what is gained, what it costs, what remains pending>
 
-## Procedimiento de rollback
-<pasos concretos para revertir + qué se rompe al revertir>
+## Rollback procedure
+<concrete steps to revert + what breaks when reverting>
 
-## Detalle de implementación        ← NO SE PUBLICA
-<parámetros, esquemas, umbrales, consultas, prompts>
+## Implementation detail        ← NOT PUBLISHED
+<parameters, schemas, thresholds, queries, prompts>
 ```
 
 ---
 
 <div align="center">
 
-[⬅️ Volver al portafolio](../../README.md) · [Patrón reutilizable](../patterns/webhook-ai-crm-notify.md) · [SECURITY](../../SECURITY.md)
+[⬅️ Back to the portfolio](../../README.md) · [Reusable pattern](../patterns/webhook-ai-crm-notify.md) · [SECURITY](../../SECURITY.md)
 
 </div>

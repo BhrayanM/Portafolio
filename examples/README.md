@@ -116,8 +116,8 @@ endpoints. `lead-scoring-demo` was exercised across the three routing branches:
 | Score returned by the model | Branch taken | CRM `status` | Slack notification |
 |---|---|---|---|
 | 12 | Cold | `cold` | none, by design |
-| 55 | Warm | `warm` | *Lead templado — Demo (score 55)* |
-| 87 | Hot | `hot` | *Lead caliente — Demo (score 87)* |
+| 55 | Warm | `warm` | *Warm lead — Demo (score 55)* |
+| 87 | Hot | `hot` | *Hot lead — Demo (score 87)* |
 
 Also verified: the webhook returns `202 {"received":true}` before scoring (fast-ACK), a request
 without `x-webhook-secret` reaches no downstream node, an invalid `severity` is rejected by the

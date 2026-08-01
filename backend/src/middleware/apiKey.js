@@ -9,7 +9,7 @@ const authenticateApiKey = async (req, res, next) => {
 
     const tenant = await apiKeysService.validate(apiKey);
     if (!tenant) {
-      return res.status(401).json({ error: { code: 'INVALID_API_KEY', message: 'API Key inválida o revocada' } });
+      return res.status(401).json({ error: { code: 'INVALID_API_KEY', message: 'Invalid or revoked API key' } });
     }
 
     req.tenantId = tenant.id;

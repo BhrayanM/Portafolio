@@ -16,20 +16,20 @@ const DEMO_STATS: LeadStats = {
 };
 
 const PERIOD_DATA = [
-  { label: 'Sem 1', leads: 180, scored: 165 },
-  { label: 'Sem 2', leads: 210, scored: 190 },
-  { label: 'Sem 3', leads: 195, scored: 178 },
-  { label: 'Sem 4', leads: 240, scored: 220 },
-  { label: 'Sem 5', leads: 225, scored: 205 },
-  { label: 'Sem 6', leads: 260, scored: 238 },
+  { label: 'Wk 1', leads: 180, scored: 165 },
+  { label: 'Wk 2', leads: 210, scored: 190 },
+  { label: 'Wk 3', leads: 195, scored: 178 },
+  { label: 'Wk 4', leads: 240, scored: 220 },
+  { label: 'Wk 5', leads: 225, scored: 205 },
+  { label: 'Wk 6', leads: 260, scored: 238 },
 ];
 
 const CONVERSION_DATA = [
-  { label: 'Visitantes', value: 3650, color: 'bg-slate-200' },
+  { label: 'Visitors', value: 3650, color: 'bg-slate-200' },
   { label: 'Leads', value: 1247, color: 'bg-indigo-400' },
-  { label: 'Calificados', value: 892, color: 'bg-indigo-500' },
-  { label: 'Oportunidades', value: 412, color: 'bg-indigo-600' },
-  { label: 'Clientes', value: 156, color: 'bg-green-500' },
+  { label: 'Qualified', value: 892, color: 'bg-indigo-500' },
+  { label: 'Opportunities', value: 412, color: 'bg-indigo-600' },
+  { label: 'Customers', value: 156, color: 'bg-green-500' },
 ];
 
 export default function AnalyticsPage() {
@@ -58,7 +58,7 @@ export default function AnalyticsPage() {
       .catch((e) => {
         if (!cancelled) {
           clearTimeout(timer);
-          setError(e instanceof Error ? e.message : 'Error al cargar analytics');
+          setError(e instanceof Error ? e.message : 'Error loading analytics');
           setUseDemo(true);
           setLoading(false);
         }
@@ -83,13 +83,13 @@ export default function AnalyticsPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Analytics</h1>
-        <p className="text-sm text-slate-500 mt-1">Métricas y distribución de leads</p>
+        <p className="text-sm text-slate-500 mt-1">Lead metrics and distribution</p>
       </div>
 
       {error && useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando datos de demostración.</span>
+          <span>Could not connect to the server. Showing demo data.</span>
         </div>
       )}
 
@@ -102,14 +102,14 @@ export default function AnalyticsPage() {
         <>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
             <StatCard label="Total Leads" value={displayStats?.total ?? 0} trend="+12%" up />
-            <StatCard label="Nuevos (Hoy)" value={displayStats?.today ?? 0} trend="+3" up />
-            <StatCard label="Score Promedio" value={displayStats?.avg_score ?? 0} trend={null} up={null} />
-            <StatCard label="Tasa Conversión" value={displayStats ? Math.round((displayStats.hot / Math.max(displayStats.total, 1)) * 100) + '%' : '0%'} trend="+5%" up />
+            <StatCard label="New (Today)" value={displayStats?.today ?? 0} trend="+3" up />
+            <StatCard label="Average Score" value={displayStats?.avg_score ?? 0} trend={null} up={null} />
+            <StatCard label="Conversion Rate" value={displayStats ? Math.round((displayStats.hot / Math.max(displayStats.total, 1)) * 100) + '%' : '0%'} trend="+5%" up />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Leads por Periodo</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Leads per Period</h2>
               {useDemo ? (
                 <div className="space-y-2">
                   {PERIOD_DATA.map((p) => (
@@ -128,12 +128,12 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-8 text-sm">Conecta el backend para ver datos por periodo.</p>
+                <p className="text-slate-500 text-center py-8 text-sm">Connect the backend to see per-period data.</p>
               )}
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Embudo de Conversión</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Conversion Funnel</h2>
               {useDemo ? (
                 <div className="space-y-3">
                   {CONVERSION_DATA.map((step) => (
@@ -152,13 +152,13 @@ export default function AnalyticsPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-8 text-sm">Conecta el backend para ver el embudo de conversión.</p>
+                <p className="text-slate-500 text-center py-8 text-sm">Connect the backend to see the conversion funnel.</p>
               )}
             </div>
           </div>
 
           <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h2 className="text-lg font-semibold text-slate-900 mb-4">Distribución por Categoría</h2>
+            <h2 className="text-lg font-semibold text-slate-900 mb-4">Category Distribution</h2>
             {displayStats && displayStats.total > 0 ? (
               <div className="space-y-4">
                 {categories.map((cat) => (
@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
                 ))}
               </div>
             ) : (
-              <p className="text-slate-500 text-center py-8 text-sm">No hay datos suficientes para mostrar gráficos.</p>
+              <p className="text-slate-500 text-center py-8 text-sm">Not enough data to display charts.</p>
             )}
           </div>
         </>

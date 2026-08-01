@@ -1,24 +1,24 @@
 # Monitoring
 
-Observability stack para la plataforma: Prometheus, Grafana, Loki y Uptime Kuma.
+Observability stack for the platform: Prometheus, Grafana, Loki and Uptime Kuma.
 
-## Componentes
+## Components
 
-| Componente | Imagen | Rol |
+| Component | Image | Role |
 |---|---|---|
-| Prometheus | `prom/prometheus:v2.53.0` | Recopilación de métricas (`prometheus.yml`) |
-| Grafana | `grafana/grafana:11.1.0` | Dashboards (`grafana-dashboards/`) y alertas |
-| Loki | `grafana/loki:3.0.0` | Agregación de logs estructurados (`loki.yml`) |
-| Uptime Kuma | `louislam/uptime-kuma:1.23.13` | Checks sintéticos de disponibilidad |
+| Prometheus | `prom/prometheus:v2.53.0` | Metric collection (`prometheus.yml`) |
+| Grafana | `grafana/grafana:11.1.0` | Dashboards (`grafana-dashboards/`) and alerts |
+| Loki | `grafana/loki:3.0.0` | Structured log aggregation (`loki.yml`) |
+| Uptime Kuma | `louislam/uptime-kuma:1.23.13` | Synthetic availability checks |
 
-## Despliegue
+## Deployment
 
 ```bash
 docker compose -f monitoring/docker-compose.monitoring.yml up -d
-# Grafana → https://<dominio>/grafana  (admin / admin por defecto — cambiar)
+# Grafana → https://<domain>/grafana  (admin / admin by default — change it)
 ```
 
-## Documentación relacionada
+## Related documentation
 
-- [Prácticas de ingeniería: observabilidad](../docs/engineering-practices.md#observabilidad)
-- [Índice de documentación](../docs/README.md)
+- [Engineering practices: observability](../docs/engineering-practices.md#observability)
+- [Documentation index](../docs/README.md)

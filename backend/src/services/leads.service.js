@@ -31,7 +31,7 @@ class LeadsService {
       'SELECT * FROM leads WHERE id = $1 AND tenant_id = $2',
       [id, tenantId]
     );
-    if (result.rows.length === 0) throw new NotFoundError('Lead no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('Lead not found');
     return result.rows[0];
   }
 

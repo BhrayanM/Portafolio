@@ -31,7 +31,7 @@ export interface Lead {
   ai_score: number | null;
   /** Clasificación. Canónico en mayúsculas: es lo que n8n escribe en la columna. */
   ai_category: LeadCategory | null;
-  /** Sector de negocio. Texto libre emitido por el LLM, no un enum cerrado. */
+  /** Business sector. Free text emitted by the LLM, not a closed enum. */
   ai_business_category: string | null;
   status: string;
   message: string | null;

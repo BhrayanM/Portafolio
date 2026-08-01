@@ -20,7 +20,7 @@ class VoiceService {
 
   async makeCall(to, webhookUrl) {
     if (!this.isConfigured()) {
-      throw new Error('Voice AI no configurado. Define TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN y TWILIO_PHONE_NUMBER en .env');
+      throw new Error('Voice AI not configured. Set TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN and TWILIO_PHONE_NUMBER in .env');
     }
 
     const accountSid = this.getAccountSid();

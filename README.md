@@ -2,153 +2,153 @@
 
 # Bhrayan Márquez — AI Automation Engineer
 
-**Automatizo procesos de negocio: captación y calificación de leads, CRM, WhatsApp y agentes de IA conectados entre sí.**
+**I automate business processes: lead capture and qualification, CRM, WhatsApp and AI agents connected to each other.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?logo=n8n&logoColor=white)](#stack)
-[![IA](https://img.shields.io/badge/IA-412991?logo=openai&logoColor=white)](#stack)
-[![API REST](https://img.shields.io/badge/API_REST-000000?logo=express&logoColor=white)](#stack)
+[![AI](https://img.shields.io/badge/AI-412991?logo=openai&logoColor=white)](#stack)
+[![REST API](https://img.shields.io/badge/REST_API-000000?logo=express&logoColor=white)](#stack)
 [![CRM](https://img.shields.io/badge/CRM-FF7A59?logo=hubspot&logoColor=white)](#stack)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?logo=whatsapp&logoColor=white)](#stack)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](#stack)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#stack)
 
 [![CI](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml/badge.svg)](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-103_passing-2ea44f)](#evidencia)
+[![Tests](https://img.shields.io/badge/tests-113_passing-2ea44f)](#evidence)
 
 </div>
 
 ---
 
-## Qué hago
+## What I do
 
-Conecto tus herramientas para que el trabajo repetitivo lo haga una automatización.
+I connect your tools so that repetitive work is done by an automation.
 
-Cuando un lead llega por tu web o por WhatsApp, el sistema lo **califica automáticamente**,
-lo registra en tu **CRM** y avisa a tu equipo — sin intervención manual. Cuando un cliente
-escribe fuera de horario, un agente de IA responde, y si la conversación lo requiere,
-escala a una persona. Cada paso queda registrado para que nada se pierda.
+When a lead arrives through your website or WhatsApp, the system **qualifies it automatically**,
+stores it in your **CRM** and notifies your team — no manual work. When a customer writes
+outside business hours, an AI agent responds, and if the conversation requires it, it
+escalates to a person. Every step is logged so nothing gets lost.
 
-Todo lo que verás aquí está **demostrado con evidencia**: flujos ejecutados de extremo a
-extremo, 103 pruebas automatizadas en verde y documentación de arquitectura.
+Everything in this repository is **backed by evidence**: end-to-end verified flows, 113
+automated tests passing and CI on GitHub Actions.
 
-## Servicios
+## Services
 
-| Servicio | Qué resuelve | Dónde verlo |
+| Service | What it solves | Where to look |
 |---|---|---|
-| **Lead automation** | Captura, calificación y priorización automática de leads | [Lead Qualification Engine](./projects/lead-qualification/README.md) |
-| **CRM automation** | Sincronización con tu CRM sin duplicados | [Appointment Automation](./projects/appointment-automation/README.md) |
-| **AI workflows** | Flujos con IA: scoring, agentes con memoria, atención automática | [WhatsApp Agent](./projects/whatsapp-agent/README.md) |
-| **API integrations** | Integración de APIs y webhooks (Stripe, Twilio, WhatsApp, formularios) | [API de la plataforma](./docs/platform.md) |
-| **Data processing** | Registro, trazabilidad y análisis de actividad | [docs/platform.md](./docs/platform.md) |
-| **n8n automation** | Workflows n8n fiables: reintentos, deduplicación y errores persistentes | [Patrón reutilizable](./docs/patterns/webhook-ai-crm-notify.md) |
+| **Lead automation** | Automatic lead capture, qualification and prioritization | [Lead Qualification Engine](./projects/lead-qualification/README.md) |
+| **CRM automation** | CRM sync without duplicates | [Appointment Automation](./projects/appointment-automation/README.md) |
+| **AI workflows** | AI-powered flows: scoring, agents with memory, automated support | [WhatsApp Agent](./projects/whatsapp-agent/README.md) |
+| **API integrations** | API and webhook integrations (Stripe, Twilio, WhatsApp, forms) | [Platform API](./docs/platform.md) |
+| **Data processing** | Logging, traceability and activity analysis | [docs/platform.md](./docs/platform.md) |
+| **n8n automation** | Reliable n8n workflows: retries, deduplication, persistent errors | [Reusable pattern](./docs/patterns/webhook-ai-crm-notify.md) |
 
-## Casos de uso
+## Use cases
 
-### 1. Calificación automática de leads
+### 1. Automatic lead qualification
 
 ![Lead Qualification Engine](./assets/diagrams/lead-qualification-architecture.png)
 
 | | |
 |---|---|
-| **Problema** | Los leads llegan por varios canales sin priorizar: el equipo atiende por orden de llegada, no por valor. |
-| **Solución** | Cada lead se valida, se puntúa con IA (Hot / Warm / Cold) y se enruta automáticamente. Los leads calientes requieren aprobación humana en Slack antes de pasar al CRM. |
-| **Tecnologías** | n8n · IA (LLM con salida estructurada) · HubSpot · Slack · PostgreSQL |
-| **Resultado** | Flujo verificado de extremo a extremo: ejecuciones reales con leads Hot (con aprobación), Warm y Cold, cada uno registrado en la base de datos y el CRM sin duplicados. |
+| **Problem** | Leads arrive through multiple channels without prioritization: the team works first-come, first-served instead of by value. |
+| **Solution** | Every lead is validated, scored with AI (Hot / Warm / Cold) and routed automatically. Hot leads require human approval in Slack before they reach the CRM. |
+| **Technologies** | n8n · AI (structured LLM output) · HubSpot · Slack · PostgreSQL |
+| **Result** | End-to-end verified flow: real executions with Hot leads (with approval), Warm and Cold, each one recorded in the database and in the CRM without duplicates. |
 
-📄 [Documentación completa →](./projects/lead-qualification/README.md)
+📄 [Full documentation →](./projects/lead-qualification/README.md)
 
-### 2. Agente de WhatsApp que responde por ti
+### 2. WhatsApp agent that replies for you
 
 ![WhatsApp Conversational Agent](./assets/diagrams/whatsapp-agent-architecture.png)
 
 | | |
 |---|---|
-| **Problema** | Consultas por WhatsApp fuera de horario: respuestas tardías son leads perdidos. |
-| **Solución** | Webhook con confirmación inmediata (evita respuestas duplicadas), agente de IA con memoria de conversación y herramientas acotadas: calificar, consultar CRM y escalar a una persona. |
-| **Tecnologías** | n8n · WhatsApp Business API · IA con memoria y herramientas · CRM |
-| **Resultado** | Atención automática 24/7 con deduplicación por message ID: el cliente nunca recibe la misma respuesta dos veces. |
+| **Problem** | WhatsApp inquiries outside business hours: slow replies are lost leads. |
+| **Solution** | Webhook with immediate acknowledgment (prevents duplicate replies), AI agent with conversation memory and a scoped toolset: qualify, check the CRM and escalate to a person. |
+| **Technologies** | n8n · WhatsApp Business API · AI with memory and tools · CRM |
+| **Result** | 24/7 automated support with deduplication by message ID: the customer never receives the same answer twice. |
 
-📄 [Documentación completa →](./projects/whatsapp-agent/README.md)
+📄 [Full documentation →](./projects/whatsapp-agent/README.md)
 
-### 3. Recepcionista de voz bilingüe (EN/ES)
+### 3. Bilingual voice receptionist (EN/ES)
 
 ![Bilingual Voice Receptionist](./assets/diagrams/voice-receptionist-architecture.png)
 
 | | |
 |---|---|
-| **Problema** | Llamadas perdidas fuera de horario y clientes que hablan otro idioma. |
-| **Solución** | La llamada detecta el idioma, entiende la intención y gestiona el calendario (disponibilidad, agendar, cancelar, reagendar), con escalado a una persona cuando hace falta. |
-| **Tecnologías** | Voz IA · detección de idioma · API de calendario · router de herramientas |
-| **Resultado** | Cada paso de la llamada se diseña dentro del presupuesto de latencia: la conversación no se corta mientras el sistema procesa. |
+| **Problem** | Missed calls outside business hours and customers who speak another language. |
+| **Solution** | The call detects the language, understands the intent and manages the calendar (availability, book, cancel, reschedule), with escalation to a person when needed. |
+| **Technologies** | Voice AI · language detection · calendar API · tool router |
+| **Result** | Every step of the call is designed within the latency budget: the conversation does not break while the system processes. |
 
-📄 [Documentación completa →](./projects/voice-receptionist/README.md)
+📄 [Full documentation →](./projects/voice-receptionist/README.md)
 
-### 4. Automatización post-cita (CRM)
+### 4. Post-appointment automation (CRM)
 
 | | |
 |---|---|
-| **Problema** | Lo que pasaba después de una cita vivía en la cabeza de alguien: sin registro ni seguimiento. |
-| **Solución** | Al cerrarse la cita, el resultado se normaliza, se actualiza el CRM (nunca duplica contactos) y se notifica al equipo, con registro persistente de todo. |
-| **Tecnologías** | n8n · CRM (upsert idempotente) · PostgreSQL · Notificaciones |
-| **Resultado** | El mismo evento puede llegar dos veces y el CRM queda igual: el registro es fiable por diseño. |
+| **Problem** | What happened after an appointment lived in someone's head: no record, no follow-up. |
+| **Solution** | When the appointment closes, the outcome is normalized, the CRM is updated (contacts are never duplicated) and the team is notified, with everything persisted. |
+| **Technologies** | n8n · CRM (idempotent upsert) · PostgreSQL · Notifications |
+| **Result** | The same event can arrive twice and the CRM stays identical: the record is reliable by design. |
 
-📄 [Documentación completa →](./projects/appointment-automation/README.md)
+📄 [Full documentation →](./projects/appointment-automation/README.md)
 
-## Cómo funciona por dentro
+## How it works under the hood
 
-Todos los sistemas comparten la misma estructura probada:
+All systems share the same proven structure:
 
 ```mermaid
 flowchart LR
-    A["Canal de entrada<br/><i>formulario · WhatsApp · voz · evento</i>"] --> B["Validación<br/><i>solo datos legítimos</i>"]
-    B --> C["Capa de IA<br/><i>score · intención · categoría</i>"]
-    C --> D{"¿Necesita<br/>criterio humano?"}
-    D -- "Sí" --> E["Aprobación humana<br/><i>Slack</i>"]
-    D -- No --> F["CRM + base de datos<br/><i>sin duplicados</i>"]
+    A["Entry channel<br/><i>form · WhatsApp · voice · event</i>"] --> B["Validation<br/><i>only legitimate data</i>"]
+    B --> C["AI layer<br/><i>score · intent · category</i>"]
+    C --> D{"Needs human<br/>judgment?"}
+    D -- "Yes" --> E["Human approval<br/><i>Slack</i>"]
+    D -- No --> F["CRM + database<br/><i>no duplicates</i>"]
     E --> F
-    F --> G["Notificación al equipo"]
-    G --> H["Seguimiento programado"]
-    I["Error global"] -.-> J[("Errores<br/>persistentes")]
+    F --> G["Team notification"]
+    G --> H["Scheduled follow-up"]
+    I["Global error handler"] -.-> J[("Persistent<br/>errors")]
 ```
 
-📄 [El patrón completo, explicado capa por capa →](./docs/patterns/webhook-ai-crm-notify.md)
+📄 [The full pattern, explained layer by layer →](./docs/patterns/webhook-ai-crm-notify.md)
 
-## Evidencia
+## Evidence
 
-- **103 pruebas automatizadas en verde** (lint + tests + typecheck + build en CI).
-- **Flujos verificados de extremo a extremo** con ejecuciones reales registradas.
-- **API documentada** con Swagger/OpenAPI en `/api-docs` (9 grupos de rutas).
-- **Aislamiento de datos por cliente** impuesto por la base de datos (RLS con `FORCE`):
-  un tenant no puede leer los datos de otro ni por error de código.
-- **Ejemplos sanitizados de workflows n8n** en [`examples/`](./examples/README.md).
-- **Decisiones de ingeniería documentadas** con su alternativa descartada en los
+- **113 automated tests passing** (lint + tests + typecheck + build in CI).
+- **Flows verified end to end** with real recorded executions.
+- **Documented API** with Swagger/OpenAPI at `/api-docs` (9 route groups).
+- **Per-client data isolation** enforced by the database (RLS with `FORCE`):
+  one tenant cannot read another tenant's data, not even through a code bug.
+- **Sanitized n8n workflow examples** in [`examples/`](./examples/README.md).
+- **Engineering decisions documented** with their rejected alternatives in the
   [ADRs](./docs/adr/README.md).
 
-## Cómo trabajamos
+## How we work
 
-1. **Llamada de descubrimiento** — entiendo el proceso real, no el que está en el manual.
-2. **Documento de arquitectura** — qué se automatiza, qué queda con criterio humano y
-   dónde vive cada dato.
-3. **Construcción por fases** — primero el flujo principal, luego el endurecimiento.
-4. **Entrega con documentación** — diagrama, decisiones y procedimiento de reversión.
-5. **Operación y ajuste** — el sistema se mide y se corrige con datos reales.
+1. **Discovery call** — I understand the real process, not the one in the manual.
+2. **Architecture document** — what gets automated, what stays with human judgment and
+   where each piece of data lives.
+3. **Phased build** — the main flow first, hardening second.
+4. **Delivery with documentation** — diagrams, decisions and rollback procedure.
+5. **Operation and tuning** — the system is measured and corrected with real data.
 
-## ¿Eres técnico?
+## Are you technical?
 
-Este repositorio también contiene la **plataforma SaaS completa** que soporta estos
-sistemas: API REST multi-tenant, dashboard web, base de datos con 16 migraciones,
-Docker Compose para dev y prod, y CI. [Documentación técnica →](./docs/README.md)
+This repository also contains the **complete SaaS platform** behind these systems:
+multi-tenant REST API, web dashboard, database with 16 migrations, Docker Compose for
+dev and prod, and CI. [Technical documentation →](./docs/README.md)
 
 ---
 
 <div align="center">
 
-## ¿Tienes un proceso que repetir 100 veces a la semana?
+## Do you have a process you repeat 100 times a week?
 
 **[bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)**
 
-[![Contacto](https://img.shields.io/badge/Ver_vías_de_contacto-CONTACT.md-1f6feb?style=for-the-badge)](./CONTACT.md)
+[![Contact](https://img.shields.io/badge/View_contact_options-CONTACT.md-1f6feb?style=for-the-badge)](./CONTACT.md)
 
-<sub>© 2026 Bhrayan Márquez · Todos los derechos reservados · Portafolio técnico, no software de código abierto</sub>
+<sub>© 2026 Bhrayan Márquez · All rights reserved · Technical portfolio, not open-source software</sub>
 
 </div>

@@ -9,7 +9,7 @@ const authenticate = async (req, res, next) => {
     // Cookie HttpOnly primero; Bearer como respaldo para clientes no-navegador.
     const token = extractToken(req);
     if (!token) {
-      throw new UnauthorizedError('Token requerido');
+      throw new UnauthorizedError('Token required');
     }
 
     // Algoritmo fijado explicitamente, no el que declare el propio token.
@@ -21,7 +21,7 @@ const authenticate = async (req, res, next) => {
     );
 
     if (result.rows.length === 0) {
-      throw new UnauthorizedError('Usuario no encontrado o inactivo');
+      throw new UnauthorizedError('User not found or inactive');
     }
 
     req.user = result.rows[0];
@@ -29,7 +29,7 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
-      next(new UnauthorizedError('Token inválido o expirado'));
+      next(new UnauthorizedError('Invalid or expired token'));
     } else {
       next(error);
     }
@@ -39,7 +39,7 @@ const authenticate = async (req, res, next) => {
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return next(new ForbiddenError('No tienes permiso para esta acción'));
+      return next(new ForbiddenError('You do not have permission to perform this action'));
     }
     next();
   };

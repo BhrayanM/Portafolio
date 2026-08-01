@@ -6,7 +6,7 @@ const handleIncoming = async (req, res) => {
   try {
     const call = voiceService.parseIncoming(req.body);
     if (!call) {
-      return res.status(400).json({ error: 'Payload no válido' });
+      return res.status(400).json({ error: 'Invalid payload' });
     }
 
     // El telefono es PII: se enmascara. `callSid` ya permite correlacionar.

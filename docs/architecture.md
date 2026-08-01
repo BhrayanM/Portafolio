@@ -1,62 +1,61 @@
-# Arquitectura — Lead Qualification Engine
+# Architecture — Lead Qualification Engine
 
-Documento técnico del sistema de automatización de calificación de leads, con el estado
-real de cada pieza. Para la plataforma SaaS completa, ver [`platform.md`](./platform.md).
+Technical document of the lead qualification automation system, with the real state of
+each piece. For the full SaaS platform, see [`platform.md`](./platform.md).
 
-> **Estado global:** el flujo completo —ingesta, saneamiento, puntuación LLM, aprobación
-> humana, persistencia y upsert en CRM— está verificado de extremo a extremo (ejecuciones
-> HOT, WARM y COLD con registros en `lead_log`).
+> **Global state:** the complete flow — ingestion, sanitization, LLM scoring, human
+> approval, persistence and CRM upsert — is verified end to end (HOT, WARM and COLD
+> executions with `lead_log` records).
 
-## Propósito
+## Purpose
 
-Recibir leads desde cualquier canal (formulario web, integración, API) y convertirlos en
-contactos priorizados dentro del CRM, sin intervención manual salvo donde el criterio humano
-aporta valor.
+Receive leads from any channel (web form, integration, API) and turn them into
+prioritized contacts in the CRM, without manual work except where human judgment
+adds value.
 
-El sistema debe cumplir tres cosas que una automatización de demo no cumple:
+The system must do three things a demo automation does not:
 
-1. **No perder leads.** El emisor recibe confirmación inmediata (Fast ACK) antes de que
-   empiece el procesamiento pesado, de modo que un timeout aguas abajo no provoca
-   reintentos ni pérdidas.
-2. **No duplicar contactos.** El alta en CRM es un *upsert* por email, no un insert.
-3. **No perder errores.** Cualquier fallo, en cualquier nodo, queda escrito en PostgreSQL
-   con nodo, mensaje, código HTTP y execution ID.
+1. **Never lose leads.** The sender receives immediate confirmation (fast ACK) before
+   heavy processing starts, so a downstream timeout causes no retries or losses.
+2. **Never duplicate contacts.** CRM writes are an *upsert by email*, not an insert.
+3. **Never lose errors.** Any failure in any node is written to PostgreSQL with node,
+   message, HTTP code and execution ID.
 
 ## Stack
 
-| Capa | Tecnología | Notas |
+| Layer | Technology | Notes |
 |---|---|---|
-| Orquestación | n8n 2.31.6 (Docker) | Ver [aviso operativo](#aviso-operativo-n8n-2x) |
-| Base de datos | PostgreSQL 15 (Docker) | Compartida por n8n y la aplicación; RLS habilitado |
-| LLM | Groq (`llama-3.3-70b-versatile`) | Orquestación vía HTTP, salida estructurada |
-| CRM | HubSpot | Upsert de contactos por email |
-| Notificaciones | Slack | Aprobación humana para leads HOT |
-| Backend | Node.js + Express | API REST de la plataforma (ver `platform.md`) |
-| Infraestructura | Docker Compose | Imágenes pineadas a patch exacto |
+| Orchestration | n8n 2.31.6 (Docker) | See [operational note](#operational-note-n8n-2x) |
+| Database | PostgreSQL 15 (Docker) | Shared by n8n and the application; RLS enabled |
+| LLM | Groq (`llama-3.3-70b-versatile`) | HTTP orchestration, structured output |
+| CRM | HubSpot | Contact upsert by email |
+| Notifications | Slack | Human approval for HOT leads |
+| Backend | Node.js + Express | Platform REST API (see `platform.md`) |
+| Infrastructure | Docker Compose | Images pinned to exact patches |
 
-## Flujo
+## Flow
 
 ```mermaid
 flowchart TD
     W["Webhook<br/><small>POST /webhook/lead-qualification</small>"] --> ACK["Fast ACK<br/><small>200 {received:true}</small>"]
-    ACK --> SAN["Sanitize &amp; Validate<br/><small>valida email, acota campos</small>"]
-    SAN --> AI["LLM Score Lead<br/><small>score 1-100 + categoría</small>"]
+    ACK --> SAN["Sanitize &amp; Validate<br/><small>validates email, scopes fields</small>"]
+    SAN --> AI["LLM Score Lead<br/><small>score 1-100 + category</small>"]
     AI --> PARSE["Parse AI Response"]
     PARSE --> HOT{"Is Hot?"}
 
     HOT -- "HOT" --> SLACK["Human Approval<br/><small>Slack</small>"]
-    SLACK --> WAIT["Wait for Approval<br/><small>pausa hasta webhook</small>"]
+    SLACK --> WAIT["Wait for Approval<br/><small>pauses until webhook</small>"]
     WAIT --> CHECK["Check Approval"]
     CHECK --> APPR{"Is Approved?"}
     APPR -- "no" --> REJ["Done (Rejected)"]
-    APPR -- "sí" --> HUB["Upsert HubSpot<br/><small>por email</small>"]
+    APPR -- "yes" --> HUB["Upsert HubSpot<br/><small>by email</small>"]
 
     HOT -- "WARM / COLD" --> HUB
-    HUB --> LOG["Log to PostgreSQL<br/><small>tabla lead_log</small>"]
+    HUB --> LOG["Log to PostgreSQL<br/><small>lead_log table</small>"]
     LOG --> DONE["Done"]
 
-    ERR["Error Trigger<br/><small>captura global</small>"] --> FMT["Format Error"]
-    FMT --> ELOG["Log Global Error<br/><small>tabla error_log</small>"]
+    ERR["Error Trigger<br/><small>global capture</small>"] --> FMT["Format Error"]
+    FMT --> ELOG["Log Global Error<br/><small>error_log table</small>"]
 
     classDef ok fill:#1a7f37,stroke:#0d4a20,color:#fff
     classDef err fill:#8b1a1a,stroke:#5c0f0f,color:#fff
@@ -65,104 +64,104 @@ flowchart TD
     class ERR,FMT,ELOG err
 ```
 
-Detalle importante: **las dos ramas convergen en `Upsert HubSpot`**. El registro en
-`lead_log` solo ocurre después de la escritura en el CRM: no existe camino que
-"complete" un lead sin pasar por la persistencia.
+Important detail: **both branches converge on `Upsert HubSpot`**. The `lead_log` record
+only happens after the CRM write: no path "completes" a lead without passing through
+persistence.
 
-### Persistencia
+### Persistence
 
-| Tabla | Escrita por | Contenido |
+| Table | Written by | Content |
 |---|---|---|
-| `lead_log` | `Log to PostgreSQL` | Lead + score LLM + categoría + estado de aprobación |
-| `error_log` | `Log Global Error` | Nivel, mensaje, nodo, execution ID, código HTTP, stack |
+| `lead_log` | `Log to PostgreSQL` | Lead + LLM score + category + approval state |
+| `error_log` | `Log Global Error` | Level, message, node, execution ID, HTTP code, stack |
 
-Ambos nodos usan mapeo **explícito** de columnas. No se usa auto-mapeo: dependía de que
-las claves del JSON coincidieran con los nombres de columna y fallaba en silencio.
+Both nodes use **explicit** column mapping. Auto-mapping is not used: it depended on JSON
+keys matching column names and failed silently.
 
-## Estado verificado
+## Verified state
 
-El flujo se ha ejecutado de extremo a extremo contra el entorno de producción de este
-sistema, con credenciales reales cargadas vía variables de entorno (nunca en el repositorio):
+The flow has been executed end to end against the production environment of this system,
+with real credentials loaded via environment variables (never in the repository):
 
-| Ruta | Ejecución | Evidencia |
+| Path | Execution | Evidence |
 |---|---|---|
-| **WARM** → upsert → `lead_log` | ✅ Verificada | Ejecución 46 SUCCESS |
-| **HOT** → aprobación humana → upsert → `lead_log` | ✅ Verificada | Ejecución 48 SUCCESS · `lead_log` con estado `approved` |
-| **COLD** → upsert → `lead_log` | ✅ Verificada | `lead_log` con estado `OPEN` |
-| **Sanitize & Validate** | ✅ Verificada | Email inválido → error controlado, nunca llega al LLM |
-| **Error Workflow global** | ✅ Verificada | Fallos escritos en `error_log` con contexto completo |
-| **HubSpot upsert** | ✅ Verificada | Contacto creado/actualizado sin duplicados |
+| **WARM** → upsert → `lead_log` | ✅ Verified | Execution 46 SUCCESS |
+| **HOT** → human approval → upsert → `lead_log` | ✅ Verified | Execution 48 SUCCESS · `lead_log` with state `approved` |
+| **COLD** → upsert → `lead_log` | ✅ Verified | `lead_log` with state `OPEN` |
+| **Sanitize & Validate** | ✅ Verified | Invalid email → controlled error, never reaches the LLM |
+| **Global Error Workflow** | ✅ Verified | Failures written to `error_log` with full context |
+| **HubSpot upsert** | ✅ Verified | Contact created/updated without duplicates |
 
-## Arranque con Docker
+## Running with Docker
 
-### Requisitos
+### Requirements
 
-- Docker y Docker Compose v2+
-- Puertos libres: `5678` (n8n), `5432` (PostgreSQL)
+- Docker and Docker Compose v2+
+- Free ports: `5678` (n8n), `5432` (PostgreSQL)
 
-### Puesta en marcha
+### Getting started
 
 ```bash
-# 1. Variables de entorno
+# 1. Environment variables
 cp .env.example .env
-#    Editar .env con valores reales. Nunca se commitea (.gitignore + pre-commit hook).
+#    Edit .env with real values. Never committed (.gitignore + pre-commit hook).
 
-# 2. Levantar servicios
+# 2. Start services
 docker compose up -d
 
-# 3. Comprobar que responden
+# 3. Check they respond
 curl http://localhost:5678/healthz        # {"status":"ok"}
-docker compose ps                          # postgres debe estar (healthy)
+docker compose ps                          # postgres must be (healthy)
 ```
 
-### Probar el webhook
+### Testing the webhook
 
 ```bash
 curl -X POST http://localhost:5678/webhook/lead-qualification \
   -H "Content-Type: application/json" \
   -d '{"email":"ana@example.com","name":"Ana Ruiz","company":"Acme",
-       "message":"Necesito automatizar la captación","source":"web-form"}'
+       "message":"I need to automate lead capture","source":"web-form"}'
 # → {"received":true}
 ```
 
-El 200 confirma la ingesta, **no** el procesamiento completo: el ACK es deliberadamente
-anterior al trabajo pesado.
+The 200 confirms ingestion, **not** full processing: the ACK is deliberately issued
+before the heavy work.
 
-## Aviso operativo (n8n 2.x)
+## Operational note (n8n 2.x)
 
-n8n v2 distingue **borrador** de **versión publicada**. La ejecución usa la versión
-publicada (`activeVersionId`), no lo que hay guardado en el borrador.
+n8n v2 distinguishes **draft** from **published version**. Executions use the published
+version (`activeVersionId`), not what is saved in the draft.
 
-- `PATCH /rest/workflows/:id` **solo toca el borrador**: no cambia el comportamiento en
-  runtime.
-- `PATCH {"active": false}` es un **no-op silencioso** (responde `active: true`).
-- Reiniciar el contenedor **no** recarga el borrador.
+- `PATCH /rest/workflows/:id` **only touches the draft**: it does not change runtime
+  behavior.
+- `PATCH {"active": false}` is a **silent no-op** (responds `active: true`).
+- Restarting the container does **not** reload the draft.
 
-Después de cada edición hay que publicar:
+After every edit you must publish:
 
 ```bash
 POST /rest/workflows/{id}/deactivate    # body {}
-POST /rest/workflows/{id}/activate      # body {"versionId": "<versionId del borrador>"}
+POST /rest/workflows/{id}/activate      # body {"versionId": "<draft versionId>"}
 ```
 
-Sin este paso los cambios son invisibles y se pierde mucho tiempo depurando algo ya
-corregido.
+Without this step changes are invisible and a lot of time is lost debugging something
+already fixed.
 
-## Decisiones de diseño
+## Design decisions
 
-| Decisión | Motivo |
+| Decision | Reason |
 |---|---|
-| Fast ACK antes de procesar | Los emisores reintentan si tardas. ACK primero, trabajo después. |
-| Upsert por email | El mismo lead puede llegar por dos canales; el CRM no debe duplicar. |
-| Human-in-the-loop solo en HOT | Automatizar el juicio comercial en leads calientes es donde se pierde dinero. |
-| Error Workflow global con persistencia | Un log en memoria desaparece al reiniciar el contenedor. |
-| Salida LLM forzada a JSON estructurado | Sin formato estricto, el parseo depende de que el modelo se porte bien. |
-| Mapeo explícito de columnas | El auto-mapeo fallaba en silencio al renombrar un campo. |
-| PostgreSQL en vez de SQLite | Concurrencia real y durabilidad ante reinicios. |
+| Fast ACK before processing | Senders retry if you are slow. ACK first, work after. |
+| Upsert by email | The same lead can arrive through two channels; the CRM must not duplicate. |
+| Human-in-the-loop only for HOT | Automating commercial judgment on hot leads is where money is lost. |
+| Global Error Workflow with persistence | An in-memory log disappears when the container restarts. |
+| LLM output forced to structured JSON | Without a strict format, parsing depends on the model behaving. |
+| Explicit column mapping | Auto-mapping failed silently when a field was renamed. |
+| PostgreSQL instead of SQLite | Real concurrency and durability across restarts. |
 
-## Documentos relacionados
+## Related documents
 
-- [Patrón reutilizable: Webhook → IA → CRM → Notificación](./patterns/webhook-ai-crm-notify.md)
-- [Registro de decisiones de arquitectura (ADRs)](./adr/README.md)
-- [Plataforma SaaS completa](./platform.md)
-- [SECURITY.md](../SECURITY.md) — qué no se publica en este repo
+- [Reusable pattern: Webhook → AI → CRM → Notification](./patterns/webhook-ai-crm-notify.md)
+- [Architecture Decision Records (ADRs)](./adr/README.md)
+- [Full SaaS platform](./platform.md)
+- [SECURITY.md](../SECURITY.md) — what is not published in this repo

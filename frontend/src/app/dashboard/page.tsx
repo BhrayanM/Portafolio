@@ -16,10 +16,10 @@ const DEMO_STATS: LeadStats = {
 };
 
 const DEMO_METRICS = [
-  { label: 'Leads Capturados', value: '1,247', icon: Users, trend: '+12%', trendUp: true, color: 'bg-blue-50 text-blue-600' },
-  { label: 'Calificados por IA', value: '892', icon: Sparkles, trend: '+8%', trendUp: true, color: 'bg-purple-50 text-purple-600' },
-  { label: 'Automatizaciones', value: '3', icon: PlayCircle, trend: 'Activas', trendUp: null, color: 'bg-green-50 text-green-600' },
-  { label: 'Tasa de Conversión', value: '34%', icon: TrendingUp, trend: '+5%', trendUp: true, color: 'bg-indigo-50 text-indigo-600' },
+  { label: 'Leads Captured', value: '1,247', icon: Users, trend: '+12%', trendUp: true, color: 'bg-blue-50 text-blue-600' },
+  { label: 'AI-Qualified', value: '892', icon: Sparkles, trend: '+8%', trendUp: true, color: 'bg-purple-50 text-purple-600' },
+  { label: 'Automations', value: '3', icon: PlayCircle, trend: 'Active', trendUp: null, color: 'bg-green-50 text-green-600' },
+  { label: 'Conversion Rate', value: '34%', icon: TrendingUp, trend: '+5%', trendUp: true, color: 'bg-indigo-50 text-indigo-600' },
 ];
 
 export default function DashboardPage() {
@@ -48,7 +48,7 @@ export default function DashboardPage() {
       .catch((e) => {
         if (!cancelled) {
           clearTimeout(timer);
-          setError(e instanceof Error ? e.message : 'Error al cargar estadísticas');
+          setError(e instanceof Error ? e.message : 'Error loading statistics');
           setUseDemo(true);
           setLoading(false);
         }
@@ -63,13 +63,13 @@ export default function DashboardPage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Dashboard</h1>
-        <p className="text-sm text-slate-500 mt-1">Resumen de actividad de leads</p>
+        <p className="text-sm text-slate-500 mt-1">Lead activity overview</p>
       </div>
 
       {error && useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando datos de demostración.</span>
+          <span>Could not connect to the server. Showing demo data.</span>
         </div>
       )}
 
@@ -106,7 +106,7 @@ export default function DashboardPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Distribución de Leads</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Lead Distribution</h2>
               {displayStats ? (
                 <div className="space-y-4">
                   {[
@@ -129,33 +129,33 @@ export default function DashboardPage() {
                   ))}
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-8 text-sm">No hay datos disponibles.</p>
+                <p className="text-slate-500 text-center py-8 text-sm">No data available.</p>
               )}
             </div>
 
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Resumen Rápido</h2>
+              <h2 className="text-lg font-semibold text-slate-900 mb-4">Quick Summary</h2>
               {displayStats ? (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-slate-50 rounded-lg p-4">
-                    <p className="text-sm text-slate-500">Leads Totales</p>
+                    <p className="text-sm text-slate-500">Total Leads</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{displayStats.total.toLocaleString()}</p>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-4">
-                    <p className="text-sm text-slate-500">Nuevos Hoy</p>
+                    <p className="text-sm text-slate-500">New Today</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{displayStats.today}</p>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-4">
-                    <p className="text-sm text-slate-500">Score Promedio</p>
+                    <p className="text-sm text-slate-500">Average Score</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{displayStats.avg_score}</p>
                   </div>
                   <div className="bg-slate-50 rounded-lg p-4">
-                    <p className="text-sm text-slate-500">Nuevos (7d)</p>
+                    <p className="text-sm text-slate-500">New (7d)</p>
                     <p className="text-2xl font-bold text-slate-900 mt-1">{displayStats.new}</p>
                   </div>
                 </div>
               ) : (
-                <p className="text-slate-500 text-center py-8 text-sm">No hay datos disponibles.</p>
+                <p className="text-slate-500 text-center py-8 text-sm">No data available.</p>
               )}
             </div>
           </div>

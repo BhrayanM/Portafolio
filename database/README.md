@@ -1,23 +1,23 @@
 # Database
 
-Esquema PostgreSQL de la plataforma multi-tenant: migraciones versionadas y seeds.
+PostgreSQL schema of the multi-tenant platform: versioned migrations and seeds.
 
-## Migraciones
+## Migrations
 
-- **001–009** — esquema: tenants, usuarios, leads, scores, error log, settings, workflow
-  runs, audit log y lead log.
-- **010–016** — endurecimiento: Row-Level Security, roles de base de datos, grants,
-  índices, validación y `FORCE RLS`.
+- **001–009** — schema: tenants, users, leads, scores, error log, settings, workflow
+  runs, audit log and lead log.
+- **010–016** — hardening: Row-Level Security, database roles, grants, indexes,
+  validation and `FORCE RLS`.
 
-Todas las migraciones son **idempotentes** y se aplican con `ON_ERROR_STOP=1` (ver
+All migrations are **idempotent** and applied with `ON_ERROR_STOP=1` (see
 [docs/development-setup.md](../docs/development-setup.md)).
 
 ## Seeds
 
-- `001_admin_tenant.sql` — tenant administrador.
-- `002_admin_user.sql` — usuario administrador de prueba (solo entorno local/demo).
+- `001_admin_tenant.sql` — administrator tenant.
+- `002_admin_user.sql` — test administrator user (local/demo environment only).
 
-## Documentación relacionada
+## Related documentation
 
-- [Aislamiento multi-tenant y RLS](../docs/engineering-practices.md#arquitectura-multi-tenant)
-- [Guía de entorno de desarrollo](../docs/development-setup.md)
+- [Multi-tenant isolation and RLS](../docs/engineering-practices.md#multi-tenant-architecture)
+- [Development environment guide](../docs/development-setup.md)

@@ -7,7 +7,7 @@ let _stripe = null;
 function getStripe() {
   if (!_stripe) {
     if (!process.env.STRIPE_SECRET_KEY) {
-      throw new Error('STRIPE_SECRET_KEY no configurada');
+      throw new Error('STRIPE_SECRET_KEY not configured');
     }
     _stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
   }
@@ -23,10 +23,10 @@ const PLANS = {
 class BillingService {
   async createCheckoutSession(tenantId, planSlug, successUrl, cancelUrl) {
     const plan = PLANS[planSlug];
-    if (!plan) throw new NotFoundError('Plan no encontrado');
+    if (!plan) throw new NotFoundError('Plan not found');
 
     const tenant = await pool.query('SELECT id, name, stripe_customer_id FROM tenants WHERE id = $1', [tenantId]);
-    if (tenant.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
+    if (tenant.rows.length === 0) throw new NotFoundError('Tenant not found');
 
     let customerId = tenant.rows[0].stripe_customer_id;
 
@@ -112,7 +112,7 @@ class BillingService {
       'SELECT plan, status, stripe_subscription_id FROM tenants WHERE id = $1',
       [tenantId]
     );
-    if (result.rows.length === 0) throw new NotFoundError('Tenant no encontrado');
+    if (result.rows.length === 0) throw new NotFoundError('Tenant not found');
     return result.rows[0];
   }
 
@@ -137,7 +137,7 @@ class BillingService {
   constructEvent(payload, signature) {
     const secret = config.stripe.webhookSecret;
     if (!secret) {
-      throw new AppError('Webhook de Stripe no configurado', 503, 'STRIPE_WEBHOOK_NOT_CONFIGURED');
+      throw new AppError('Stripe webhook not configured', 503, 'STRIPE_WEBHOOK_NOT_CONFIGURED');
     }
     return getStripe().webhooks.constructEvent(payload, signature, secret);
   }

@@ -13,15 +13,15 @@ export default function SettingsPage() {
   useEffect(() => {
     settingsApi.apiKeys()
       .then(setApiKeys)
-      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar API keys'))
+      .catch(e => setError(e instanceof Error ? e.message : 'Error loading API keys'))
       .finally(() => setLoadingKeys(false));
   }, []);
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Configuración</h1>
-        <p className="text-sm text-slate-500 mt-1">Administra tu cuenta y claves de API</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Settings</h1>
+        <p className="text-sm text-slate-500 mt-1">Manage your account and API keys</p>
       </div>
 
       {error && (
@@ -38,16 +38,16 @@ export default function SettingsPage() {
               <User className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Perfil</h2>
-              <p className="text-sm text-slate-500">Información de tu cuenta</p>
+              <h2 className="text-lg font-semibold text-slate-900">Profile</h2>
+              <p className="text-sm text-slate-500">Account information</p>
             </div>
           </div>
           <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-600 space-y-2">
-            <p><span className="font-medium text-slate-900">Email:</span> visible en el header</p>
-            <p><span className="font-medium text-slate-900">Rol:</span> asignado por el administrador del tenant</p>
+            <p><span className="font-medium text-slate-900">Email:</span> shown in the header</p>
+            <p><span className="font-medium text-slate-900">Rol:</span> assigned by the tenant administrator</p>
           </div>
           <p className="text-xs text-slate-400 mt-3">
-            La edición de nombre y preferencias estará disponible próximamente.
+            Name and preference editing will be available soon.
           </p>
         </div>
 
@@ -58,7 +58,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <h2 className="text-lg font-semibold text-slate-900">API Keys</h2>
-              <p className="text-sm text-slate-500">Claves para integraciones externas</p>
+              <p className="text-sm text-slate-500">Keys for external integrations</p>
             </div>
           </div>
 
@@ -71,8 +71,8 @@ export default function SettingsPage() {
           ) : apiKeys.length === 0 ? (
             <div className="bg-slate-50 rounded-lg p-8 text-center">
               <Key className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-500 font-medium">No tienes API keys</p>
-              <p className="text-xs text-slate-400 mt-1">Próximamente podrás crearlas desde esta sección.</p>
+              <p className="text-sm text-slate-500 font-medium">You have no API keys</p>
+              <p className="text-xs text-slate-400 mt-1">You will be able to create them from this section soon.</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -85,7 +85,7 @@ export default function SettingsPage() {
                     </p>
                   </div>
                   <span className="text-xs text-slate-400">
-                    {key.last_used_at ? `Último uso: ${new Date(key.last_used_at).toLocaleDateString()}` : 'Sin uso'}
+                    {key.last_used_at ? `Last used: ${new Date(key.last_used_at).toLocaleDateString()}` : 'Never used'}
                   </span>
                 </div>
               ))}

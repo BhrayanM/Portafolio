@@ -10,20 +10,20 @@ const plans = [
     id: 'starter',
     name: 'Starter',
     price: 29,
-    features: ['Hasta 500 leads/mes', '1 usuario', 'Integración HubSpot', 'Soporte email'],
+    features: ['Up to 500 leads/month', '1 user', 'HubSpot integration', 'Email support'],
   },
   {
     id: 'growth',
     name: 'Growth',
     price: 79,
-    features: ['Hasta 2000 leads/mes', '5 usuarios', 'API completa', 'Slack + HubSpot', 'Soporte prioritario'],
+    features: ['Up to 2,000 leads/month', '5 users', 'Full API access', 'Slack + HubSpot', 'Priority support'],
     popular: true,
   },
   {
     id: 'enterprise',
     name: 'Enterprise',
     price: 199,
-    features: ['Leads ilimitados', 'Usuarios ilimitados', 'API + Webhooks', 'Todas las integraciones', 'Soporte 24/7', 'SLA garantizado'],
+    features: ['Unlimited leads', 'Unlimited users', 'API + Webhooks', 'All integrations', '24/7 support', 'Guaranteed SLA'],
   },
 ];
 
@@ -34,10 +34,10 @@ const DEMO_SUBSCRIPTION: Subscription = {
 };
 
 const statusLabels: Record<string, string> = {
-  active: 'Activa',
-  past_due: 'Vencida',
-  canceled: 'Cancelada',
-  incomplete: 'Incompleta',
+  active: 'Active',
+  past_due: 'Past due',
+  canceled: 'Canceled',
+  incomplete: 'Incomplete',
 };
 
 const statusColors: Record<string, string> = {
@@ -74,7 +74,7 @@ export default function BillingPage() {
       .catch((e) => {
         if (!cancelled) {
           clearTimeout(timer);
-          setError(e instanceof Error ? e.message : 'Error al cargar suscripción');
+          setError(e instanceof Error ? e.message : 'Error loading subscription');
           setUseDemo(true);
           setLoading(false);
         }
@@ -98,14 +98,14 @@ export default function BillingPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Facturación</h1>
-        <p className="text-sm text-slate-500 mt-1">Gestiona tu suscripción y planes disponibles</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Billing</h1>
+        <p className="text-sm text-slate-500 mt-1">Manage your subscription and available plans</p>
       </div>
 
       {error && useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando datos de demostración.</span>
+          <span>Could not connect to the server. Showing demo data.</span>
         </div>
       )}
 
@@ -116,8 +116,8 @@ export default function BillingPage() {
               <CreditCard className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-slate-900">Suscripción Actual</h2>
-              <p className="text-sm text-slate-500">Detalles de tu plan activo</p>
+              <h2 className="text-lg font-semibold text-slate-900">Current Subscription</h2>
+              <p className="text-sm text-slate-500">Details of your active plan</p>
             </div>
           </div>
           <div className="flex items-center gap-3 mb-2">
@@ -128,7 +128,7 @@ export default function BillingPage() {
           </div>
           {displaySubscription.current_period_end && (
             <p className="text-sm text-slate-500">
-              Próximo corte: {new Date(displaySubscription.current_period_end).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' })}
+              Renews on: {new Date(displaySubscription.current_period_end).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
             </p>
           )}
         </div>
@@ -152,13 +152,13 @@ export default function BillingPage() {
               >
                 {plan.popular && (
                   <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-xs font-medium px-3 py-1 rounded-full">
-                    Más popular
+                    Most popular
                   </span>
                 )}
                 <h3 className="text-lg font-bold text-slate-900">{plan.name}</h3>
                 <p className="mt-2 mb-6">
                   <span className="text-3xl font-bold text-slate-900">${plan.price}</span>
-                  <span className="text-slate-500 text-sm">/mes</span>
+                  <span className="text-slate-500 text-sm">/mo</span>
                 </p>
                 <ul className="space-y-2 flex-1">
                   {plan.features.map((f) => (
@@ -180,12 +180,12 @@ export default function BillingPage() {
                   {isLoading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Redirigiendo...
+                      Redirecting...
                     </>
                   ) : isCurrent ? (
-                    'Plan actual'
+                    'Current plan'
                   ) : (
-                    'Seleccionar'
+                    'Select'
                   )}
                 </button>
               </div>
@@ -195,7 +195,7 @@ export default function BillingPage() {
       )}
 
       <p className="text-xs text-slate-400 text-center mt-4">
-        Los pagos se procesan de forma segura a través de Stripe.
+        Payments are processed securely through Stripe.
       </p>
     </div>
   );

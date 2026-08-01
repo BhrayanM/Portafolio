@@ -1,69 +1,70 @@
-# Contacto
+# Contact
 
 **Bhrayan Márquez** — AI Automation Engineer
-Automatizo procesos de negocio: captación y calificación de leads, CRM, WhatsApp y
-agentes de IA conectados entre sí.
+I automate business processes: lead capture and qualification, CRM, WhatsApp and
+AI agents connected to each other.
 
 ---
 
-## Vía principal
+## Primary channel
 
 📧 **[bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)**
 
-Respondo en un plazo de **24–48 h hábiles**.
+I reply within **24–48 business hours**.
 
 ---
 
-## Para qué escribirme
+## What to write about
 
-| Motivo | Qué incluir en el mensaje |
+| Reason | What to include in your message |
 |---|---|
-| **Implementar un sistema como estos** | Canal de entrada (formulario, WhatsApp, voz, evento), CRM que usas, volumen mensual aproximado |
-| **Consultoría / auditoría de automatizaciones** | Qué tienes hoy montado y qué se te está rompiendo |
-| **Oportunidad laboral** | Rol, modalidad (remoto / híbrido), stack del equipo |
-| **Licenciamiento comercial de este contenido** | Uso previsto y alcance |
+| **Build a system like these** | Entry channel (form, WhatsApp, voice, event), the CRM you use, approximate monthly volume |
+| **Consulting / automation audit** | What you have in place today and what is breaking |
+| **Job opportunity** | Role, modality (remote / hybrid), team stack |
+| **Commercial licensing of this content** | Intended use and scope |
 
-Para acelerar la conversación, un mensaje útil se ve así:
+A useful message looks like this:
 
-> *"Recibimos ~400 consultas/mes por WhatsApp y formulario web. Usamos HubSpot.
-> Queremos calificar automáticamente y que un humano apruebe solo los leads calientes.
-> ¿Es viable y en qué plazo?"*
-
----
-
-## Idiomas de trabajo
-
-🇪🇸 **Español** — nativo  ·  🇺🇸 **Inglés** — profesional
-
-Los sistemas que construyo son bilingües por diseño, no por traducción posterior.
+> *"We receive ~400 inquiries/month via WhatsApp and our web form. We use HubSpot.
+> We want to qualify leads automatically and have a human approve only the hot ones.
+> Is that viable, and in what timeframe?"*
 
 ---
 
-## Cómo trabajo
+## Working languages
 
-1. **Llamada de descubrimiento** — entender el proceso real, no el que está en el manual.
-2. **Documento de arquitectura** — qué se automatiza, qué queda con criterio humano, dónde vive el dato.
-3. **Construcción por fases** — primero el camino feliz en producción, luego el endurecimiento.
-4. **Entrega con documentación** — diagrama, ADRs de las decisiones y procedimiento de rollback.
-5. **Operación y ajuste** — el sistema se mide y se corrige con datos reales, no con supuestos.
+🇺🇸 **English** — professional · 🇪🇸 **Spanish** — native
+
+The systems I build are bilingual by design, not by post-translation.
 
 ---
 
-## Lo que no hago por este canal
+## How I work
 
-- No envío workflows de n8n exportados, prompts de producción ni parámetros internos.
-  Esos artefactos son el método comercial y no se comparten como muestra. Lo que sí puedo
-  hacer es una **demo en vivo** o una **sesión técnica** explicando el diseño.
-- No comparto datos de clientes anteriores ni capturas con información de sus sistemas.
-
----
-
-## Nota sobre privacidad
-
-Este repositorio es público y deliberadamente **no contiene** teléfono, dirección, correo
-personal, documentos personales ni rutas locales. Todo contacto pasa por el correo
-profesional de arriba.
+1. **Discovery call** — understand the real process, not the one in the manual.
+2. **Architecture document** — what gets automated, what stays with human judgment,
+   where each piece of data lives.
+3. **Phased build** — the happy path in production first, hardening second.
+4. **Delivery with documentation** — diagram, ADRs of the decisions and rollback procedure.
+5. **Operation and tuning** — the system is measured and corrected with real data, not assumptions.
 
 ---
 
-<sub>© 2026 Bhrayan Márquez · Todos los derechos reservados · [Volver al inicio](./README.md)</sub>
+## What I do not do through this channel
+
+- I do not send exported n8n workflows, production prompts or internal parameters.
+  Those artifacts are the commercial method and are not shared as samples. What I can do
+  is a **live demo** or a **technical session** explaining the design.
+- I do not share previous client data or screenshots containing information from their systems.
+
+---
+
+## Privacy note
+
+This repository is public and deliberately does **not** contain a phone number, address,
+personal email, personal documents or local paths. All contact goes through the
+professional email above.
+
+---
+
+<sub>© 2026 Bhrayan Márquez · All rights reserved · [Back to home](./README.md)</sub>

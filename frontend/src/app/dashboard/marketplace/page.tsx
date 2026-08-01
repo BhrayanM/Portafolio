@@ -18,9 +18,9 @@ interface InstalledItem {
 }
 
 const DEMO_CATALOG: Automation[] = [
-  { id: 'lead-qualification', name: 'AI Lead Qualification', description: 'Clasifica leads automáticamente con IA y los sincroniza con HubSpot.', price: 'included' },
-  { id: 'whatsapp-agent', name: 'WhatsApp Sales Assistant', description: 'Agente conversacional que califica leads y agenda reuniones por WhatsApp.', price: 'pro' },
-  { id: 'voice-receptionist', name: 'Voice Receptionist', description: 'Recepcionista virtual bilingüe que toma mensajes y califica llamadas.', price: 'pro' },
+  { id: 'lead-qualification', name: 'AI Lead Qualification', description: 'Automatically classifies leads with AI and syncs them to HubSpot.', price: 'included' },
+  { id: 'whatsapp-agent', name: 'WhatsApp Sales Assistant', description: 'Conversational agent that qualifies leads and books meetings over WhatsApp.', price: 'pro' },
+  { id: 'voice-receptionist', name: 'Voice Receptionist', description: 'Bilingual virtual receptionist that takes messages and qualifies calls.', price: 'pro' },
 ];
 
 const iconMap: Record<string, React.ElementType> = {
@@ -61,7 +61,7 @@ export default function MarketplacePage() {
       .catch((e) => {
         if (!cancelled) {
           clearTimeout(timer);
-          setError(e instanceof Error ? e.message : 'Error al cargar marketplace');
+          setError(e instanceof Error ? e.message : 'Error loading marketplace');
           setUseDemo(true);
           setLoading(false);
         }
@@ -96,13 +96,13 @@ export default function MarketplacePage() {
     <div>
       <div className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight text-slate-900">Marketplace</h1>
-        <p className="text-sm text-slate-500 mt-1">Automatizaciones disponibles para tu cuenta</p>
+        <p className="text-sm text-slate-500 mt-1">Automations available for your account</p>
       </div>
 
       {error && useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando automatizaciones de demostración.</span>
+          <span>Could not connect to the server. Showing demo automations.</span>
         </div>
       )}
 
@@ -115,8 +115,8 @@ export default function MarketplacePage() {
       ) : displayCatalog.length === 0 ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center max-w-lg mx-auto">
           <Sparkles className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">No hay automatizaciones disponibles</p>
-          <p className="text-slate-400 text-sm mt-1">Próximamente encontrarás aquí workflows listos para instalar.</p>
+          <p className="text-slate-500 font-medium">No automations available</p>
+          <p className="text-slate-400 text-sm mt-1">Ready-to-install workflows will appear here soon.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl">
@@ -150,14 +150,14 @@ export default function MarketplacePage() {
                     {isPro ? (
                       <>Pro <Star className="w-3 h-3" /></>
                     ) : (
-                      'Incluido'
+                      'Included'
                     )}
                   </span>
 
                   {installed_ ? (
                     <span className="flex items-center gap-1.5 text-sm text-green-600 font-medium">
                       <CheckCircle2 className="w-4 h-4" />
-                      Instalado
+                      Installed
                     </span>
                   ) : (
                     <button
@@ -168,10 +168,10 @@ export default function MarketplacePage() {
                       {installingThis ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          Instalando...
+                          Installing...
                         </>
                       ) : (
-                        'Instalar'
+                        'Install'
                       )}
                     </button>
                   )}

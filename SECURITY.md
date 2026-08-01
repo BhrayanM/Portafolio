@@ -1,82 +1,81 @@
-# Política de seguridad y alcance de publicación
+# Security policy and publication scope
 
-Este repositorio es un **portafolio técnico público**. No aloja software ejecutable, no
-expone servicios y no contiene datos de clientes.
+This repository is a **public technical portfolio**. It does not host runnable software,
+does not expose services and does not contain client data.
 
 ---
 
-## 1. Qué NO se publica aquí (nunca)
+## 1. What is NEVER published here
 
-Esta lista es una regla de construcción del repositorio, no una aspiración:
+This list is a construction rule of the repository, not an aspiration:
 
-| Categoría | Estado |
+| Category | Status |
 |---|---|
-| Workflows n8n exportados (`.json`) | ❌ Nunca — bloqueado en `.gitignore` |
-| Grafo real: nodos, conexiones, Code nodes | ❌ Nunca |
-| Prompts de producción (texto literal) | ❌ Nunca — solo descripción de alto nivel |
-| Umbrales de puntuación y pesos del modelo de scoring | ❌ Nunca |
-| Ventanas de deduplicación y parámetros temporales | ❌ Nunca |
-| Reglas concretas de saneamiento / anti-inyección | ❌ Nunca — solo el principio de diseño |
-| Credenciales, tokens, API keys, credential IDs | ❌ Nunca |
-| URLs de webhook (producción o test) | ❌ Nunca |
-| Spreadsheet IDs, channel IDs, instance IDs | ❌ Nunca |
-| Cadenas de conexión de PostgreSQL, hosts, puertos | ❌ Nunca |
-| Datos personales o de clientes (PII), transcripciones, grabaciones | ❌ Nunca |
-| Correo personal, teléfono, dirección, rutas locales de usuario | ❌ Nunca |
+| Exported n8n workflows (`.json`) | ❌ Never — blocked in `.gitignore` |
+| Real graph: nodes, connections, Code nodes | ❌ Never |
+| Production prompts (literal text) | ❌ Never — high-level description only |
+| Scoring thresholds and model weights | ❌ Never |
+| Deduplication windows and temporal parameters | ❌ Never |
+| Concrete sanitization / anti-injection rules | ❌ Never — design principle only |
+| Credentials, tokens, API keys, credential IDs | ❌ Never |
+| Webhook URLs (production or test) | ❌ Never |
+| Spreadsheet IDs, channel IDs, instance IDs | ❌ Never |
+| PostgreSQL connection strings, hosts, ports | ❌ Never |
+| Personal or client data (PII), transcripts, recordings | ❌ Never |
+| Personal email, phone, address, local user paths | ❌ Never |
 
-**Motivo:** parte de esa información es un riesgo de seguridad y otra parte es el método
-comercial del autor. Ambas quedan fuera por decisión, no por descuido.
-
----
-
-## 2. Qué SÍ se publica
-
-- Arquitectura y flujo conceptual de cada sistema.
-- Decisiones de ingeniería con su justificación y su alternativa descartada.
-- Diagramas Mermaid e infografías conceptuales.
-- Resultados y comportamientos operativos observables.
-- Fragmentos de código **ilustrativos y genéricos**: muestran una idea de diseño y
-  **no son funcionales de extremo a extremo**. No contienen lógica de negocio ni prompts.
+**Reason:** part of this information is a security risk and another part is the author's
+commercial method. Both stay out by decision, not by oversight.
 
 ---
 
-## 3. Controles aplicados
+## 2. What IS published
 
-1. **`.gitignore` endurecido** — bloquea por patrón `.env*`, `credentials*`, `*.json` de
-   workflow y credenciales, dumps, backups, `*.sqlite`, exports de ejecuciones, CSV/XLSX,
-   `/uploads`, claves, certificados y documentos personales (`*.pdf`, `*curriculum*`).
-2. **Carpeta de cuarentena** — `_PRIVADO_NO_SUBIR/` está ignorada y existe para que los
-   archivos personales que aparezcan en el directorio de trabajo no puedan versionarse.
-3. **Revisión de imágenes** — cada imagen se revisa visualmente (¿revela credenciales,
-   prompts, IDs o datos?) y se escanea en busca de metadatos EXIF, GPS o rutas locales
-   antes de incluirse. Las imágenes publicadas están libres de metadatos.
-4. **Sin ejemplos con valores reales** — los placeholders son evidentes
-   (`<TU_API_KEY>`, `example.com`) y nunca se derivan de un valor real ofuscado.
+- Architecture and conceptual flow of each system.
+- Engineering decisions with their rationale and rejected alternative.
+- Mermaid diagrams and conceptual infographics.
+- Observable operational behavior and results.
+- **Illustrative, generic** code fragments: they show a design idea and are **not
+  end-to-end functional**. They contain no business logic or prompts.
 
 ---
 
-## 4. Si encuentras algo que no debería estar aquí
+## 3. Controls in place
 
-Si detectas en este repositorio un secreto, un identificador real, un dato personal o
-cualquier información que no debería ser pública:
-
-📧 **bhrayan.automation@gmail.com** — asunto: `SECURITY — portafolio público`
-
-Por favor **no abras un issue público** con el hallazgo. Se atiende en un plazo de 48 h y
-se responde confirmando la remediación (rotación de la credencial y purga del historial de
-Git si aplica).
-
----
-
-## 5. Sobre los sistemas descritos
-
-Los sistemas documentados operan en infraestructura privada, autoalojada, con credenciales
-gestionadas por variables de entorno y almacén de credenciales de la plataforma de
-orquestación. Ninguna credencial vive en un archivo versionado.
-
-Este repositorio **no** es un vector de acceso a esos sistemas: no publica endpoints,
-hosts, identificadores ni el modo de autenticarse contra ellos.
+1. **Hardened `.gitignore`** — blocks by pattern `.env*`, `credentials*`, workflow
+   `*.json` and credentials, dumps, backups, `*.sqlite`, execution exports, CSV/XLSX,
+   `/uploads`, keys, certificates and personal documents (`*.pdf`, `*curriculum*`).
+2. **Quarantine folder** — `_PRIVADO_NO_SUBIR/` is ignored and exists so that personal
+   files that appear in the working directory cannot be versioned.
+3. **Image review** — every image is reviewed visually (does it reveal credentials,
+   prompts, IDs or data?) and scanned for EXIF metadata, GPS or local paths before
+   inclusion. Published images are free of metadata.
+4. **No examples with real values** — placeholders are obvious
+   (`<YOUR_API_KEY>`, `example.com`) and never derived from an obfuscated real value.
 
 ---
 
-<sub>© 2026 Bhrayan Márquez · Todos los derechos reservados · [Volver al inicio](./README.md)</sub>
+## 4. If you find something that should not be here
+
+If you detect in this repository a secret, a real identifier, personal data or any
+information that should not be public:
+
+📧 **bhrayan.automation@gmail.com** — subject: `SECURITY — public portfolio`
+
+Please **do not open a public issue** with the finding. It is handled within 48 h and a
+reply confirms the remediation (credential rotation and Git history purge if applicable).
+
+---
+
+## 5. About the systems described
+
+The documented systems run on private, self-hosted infrastructure, with credentials
+managed through environment variables and the orchestration platform's credential store.
+No credential lives in a versioned file.
+
+This repository is **not** an access vector to those systems: it publishes no endpoints,
+hosts, identifiers or the way to authenticate against them.
+
+---
+
+<sub>© 2026 Bhrayan Márquez · All rights reserved · [Back to home](./README.md)</sub>

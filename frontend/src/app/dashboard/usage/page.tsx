@@ -37,7 +37,7 @@ export default function UsagePage() {
       .catch((e) => {
         if (!cancelled) {
           clearTimeout(timer);
-          setError(e instanceof Error ? e.message : 'Error al cargar el consumo del tenant');
+          setError(e instanceof Error ? e.message : 'Error loading tenant usage');
           setUseDemo(true);
           setLoading(false);
         }
@@ -51,23 +51,23 @@ export default function UsagePage() {
   const metrics = displayUsage
     ? [
         { label: 'Total Leads', value: displayUsage.total_leads, icon: Database, color: 'bg-indigo-50 text-indigo-600' },
-        { label: 'Ejecuciones', value: displayUsage.total_runs, icon: Activity, color: 'bg-green-50 text-green-600' },
-        { label: 'Usuarios', value: displayUsage.total_users, icon: Users, color: 'bg-purple-50 text-purple-600' },
-        { label: 'Promedio/Lead', value: displayUsage.total_runs > 0 ? (displayUsage.total_runs / Math.max(displayUsage.total_leads, 1)).toFixed(1) : '0', icon: Gauge, color: 'bg-amber-50 text-amber-600' },
+        { label: 'Runs', value: displayUsage.total_runs, icon: Activity, color: 'bg-green-50 text-green-600' },
+        { label: 'Users', value: displayUsage.total_users, icon: Users, color: 'bg-purple-50 text-purple-600' },
+        { label: 'Avg/Lead', value: displayUsage.total_runs > 0 ? (displayUsage.total_runs / Math.max(displayUsage.total_leads, 1)).toFixed(1) : '0', icon: Gauge, color: 'bg-amber-50 text-amber-600' },
       ]
     : [];
 
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Consumo</h1>
-        <p className="text-sm text-slate-500 mt-1">Estadísticas de uso del tenant</p>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Usage</h1>
+        <p className="text-sm text-slate-500 mt-1">Tenant usage statistics</p>
       </div>
 
       {error && useDemo && (
         <div className="bg-amber-50 border border-amber-200 text-amber-700 px-4 py-3 rounded-lg mb-6 text-sm flex items-center gap-2">
           <div className="w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
-          <span>No se pudo conectar con el servidor. Mostrando datos de demostración.</span>
+          <span>Could not connect to the server. Showing demo data.</span>
         </div>
       )}
 
@@ -79,8 +79,8 @@ export default function UsagePage() {
       ) : !displayUsage ? (
         <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-12 text-center max-w-lg mx-auto">
           <Database className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <p className="text-slate-500 font-medium">No hay datos de consumo disponibles</p>
-          <p className="text-slate-400 text-sm mt-1">Las estadísticas aparecerán cuando el sistema comience a procesar leads.</p>
+          <p className="text-slate-500 font-medium">No usage data available</p>
+          <p className="text-slate-400 text-sm mt-1">Statistics will appear once the system starts processing leads.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 max-w-4xl">

@@ -9,12 +9,12 @@ const links = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/dashboard/leads', label: 'Leads', icon: Users },
   { href: '/dashboard/analytics', label: 'Analytics', icon: BarChart3 },
-  { href: '/dashboard/activity', label: 'Actividad', icon: Activity },
-  { href: '/dashboard/billing', label: 'Facturación', icon: CreditCard },
-  { href: '/dashboard/integrations', label: 'Integraciones', icon: Puzzle },
+  { href: '/dashboard/activity', label: 'Activity', icon: Activity },
+  { href: '/dashboard/billing', label: 'Billing', icon: CreditCard },
+  { href: '/dashboard/integrations', label: 'Integrations', icon: Puzzle },
   { href: '/dashboard/marketplace', label: 'Marketplace', icon: Store },
-  { href: '/dashboard/usage', label: 'Uso de API', icon: Terminal },
-  { href: '/dashboard/settings', label: 'Configuración', icon: Settings },
+  { href: '/dashboard/usage', label: 'API Usage', icon: Terminal },
+  { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ];
 
 export default function Sidebar({ open, onClose }: { open: boolean; onClose: () => void }) {
@@ -37,7 +37,7 @@ export default function Sidebar({ open, onClose }: { open: boolean; onClose: () 
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
           </div>
-          <span className="text-xl font-bold text-slate-900">Portafolio</span>
+          <span className="text-xl font-bold text-slate-900">AI Automation</span>
         </div>
         <nav className="space-y-1">
           {links.map((link) => {

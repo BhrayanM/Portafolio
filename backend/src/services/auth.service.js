@@ -14,13 +14,13 @@ class AuthService {
     );
 
     if (result.rows.length === 0) {
-      throw new UnauthorizedError('Credenciales inválidas');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     const user = result.rows[0];
     const valid = await bcrypt.compare(password, user.password_hash);
     if (!valid) {
-      throw new UnauthorizedError('Credenciales inválidas');
+      throw new UnauthorizedError('Invalid credentials');
     }
 
     await pool.query(

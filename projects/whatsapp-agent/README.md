@@ -2,72 +2,71 @@
 
 # WhatsApp Conversational Agent
 
-**Agente conversacional con memoria, herramientas acotadas y escalado a humano.**
+**Conversational agent with memory and tools, with human escalation built in.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?style=flat-square&logo=n8n&logoColor=white)](#)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?style=flat-square&logo=whatsapp&logoColor=white)](#)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat-square&logo=docker&logoColor=white)](#)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp_Business_API-25D366?style=flat-square&logo=whatsapp&logoColor=white)](#)
-[![Twilio](https://img.shields.io/badge/Twilio-F22F46?style=flat-square&logo=twilio&logoColor=white)](#)
-[![LLM](https://img.shields.io/badge/LLM_+_Memory_+_Tools-412991?style=flat-square&logo=openai&logoColor=white)](#)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white)](#)
+[![CRM](https://img.shields.io/badge/CRM-FF7A59?style=flat-square&logo=hubspot&logoColor=white)](#)
 
-[![Estado](https://img.shields.io/badge/estado-en_producción-2ea44f?style=flat-square)](#)
-[![Fast ACK](https://img.shields.io/badge/fast--ACK-sí-0aa?style=flat-square)](#)
-[![Dedup](https://img.shields.io/badge/dedup-por_message_ID-blueviolet?style=flat-square)](#)
-[![Handoff](https://img.shields.io/badge/human_handoff-sí-orange?style=flat-square)](#)
+[![State](https://img.shields.io/badge/state-verified-2ea44f?style=flat-square)](#)
+[![Human in the loop](https://img.shields.io/badge/human--in--the--loop-yes-blueviolet?style=flat-square)](#)
+[![Error handling](https://img.shields.io/badge/error_handling-persistent-critical?style=flat-square)](#)
 
 </div>
 
-![Arquitectura del WhatsApp Conversational Agent](../../assets/diagrams/whatsapp-agent-architecture.png)
+![WhatsApp Conversational Agent architecture](../../assets/diagrams/whatsapp-agent-architecture.png)
 
 ---
 
-## El problema
+## The problem
 
-El cliente escribe por WhatsApp a las 21:40 de un viernes. Espera respuesta.
+The customer writes on WhatsApp at 9:40 PM on a Friday. They expect an answer.
 
-Sin automatización, ese mensaje se contesta el lunes — y para el lunes ya compró en otro
-sitio. Con una automatización mal hecha, pasa algo peor: recibe **la misma respuesta tres
-veces** porque el proveedor de mensajería reintentó el webhook mientras el flujo todavía
-estaba pensando.
-
----
-
-## La solución en una frase
-
-Webhook entrante con **confirmación inmediata**, **deduplicación por identificador de
-mensaje** y un **agente IA con memoria conversacional** que dispone de un conjunto acotado
-de herramientas — incluida la de **rendirse y llamar a un humano**.
+Without automation, that message is answered on Monday — and by Monday they already
+bought somewhere else. With a badly built automation, something worse happens: they get
+**the same answer three times** because the messaging provider retried the webhook while
+the flow was still thinking.
 
 ---
 
-## Arquitectura conceptual
+## The solution in one sentence
+
+An inbound webhook with **immediate acknowledgment**, **deduplication by message
+identifier** and an **AI agent with conversational memory** that has a scoped toolset —
+including the tool to **give up and call a human**.
+
+---
+
+## Conceptual architecture
 
 ```mermaid
 flowchart TD
-    A["📱 WhatsApp<br/>mensaje entrante"] --> B["🔌 Webhook"]
-    B --> C["⚡ Respond 200<br/><i>ACK inmediato</i>"]
-    C --> D["🔍 Dedup por message ID<br/>+ parseo del payload"]
-    D --> E{"¿Ya procesado?"}
-    E -- Sí --> E1["Descartar<br/>silenciosamente"]
+    A["📱 WhatsApp<br/>incoming message"] --> B["🔌 Webhook"]
+    B --> C["⚡ Respond 200<br/><i>immediate ACK</i>"]
+    C --> D["🔍 Dedup by message ID<br/>+ payload parsing"]
+    D --> E{"Already<br/>processed?"}
+    E -- Yes --> E1["Discard<br/>silently"]
     E -- No --> F["🧠 AI Agent"]
 
-    F --- G[("💬 Memoria<br/>conversacional")]
-    F --- H["🤖 Modelo<br/>de chat"]
+    F --- G[("💬 Conversational<br/>memory")]
+    F --- H["🤖 Chat<br/>model"]
 
-    F --> I{"Selección<br/>de herramienta"}
-    I -- "qualify_lead" --> J["Califica intención<br/>y presupuesto"]
-    I -- "lookup_contact" --> K["Consulta CRM<br/>por identificador"]
+    F --> I{"Tool<br/>selection"}
+    I -- "qualify_lead" --> J["Qualifies intent<br/>and budget"]
+    I -- "lookup_contact" --> K["CRM lookup<br/>by identifier"]
     I -- "escalate_human" --> L["🙋 Human handoff"]
-    I -- "ninguna" --> M["Responde con<br/>contexto de memoria"]
+    I -- "none" --> M["Replies with<br/>memory context"]
 
-    J --> N["✍️ Redacta<br/>respuesta"]
+    J --> N["✍️ Drafts<br/>response"]
     K --> N
     M --> N
-    N --> O["📤 Envía respuesta<br/>por WhatsApp"]
+    N --> O["📤 Sends reply<br/>via WhatsApp"]
 
-    L --> P["🔔 Notifica al equipo<br/>+ pausa la automatización<br/>en ese hilo"]
+    L --> P["🔔 Notifies the team<br/>+ pauses automation<br/>on that thread"]
 
-    Q["🚨 Error Workflow global"] -.captura fallos.-> R[("Tabla de errores<br/>en PostgreSQL")]
+    Q["🚨 Global Error Workflow"] -.captures failures.-> R[("Error table<br/>in PostgreSQL")]
 
     style C fill:#2ea44f,color:#fff
     style F fill:#412991,color:#fff
@@ -79,160 +78,159 @@ flowchart TD
 ```
 
 <details>
-<summary><b>Ver el flujo desde la perspectiva del grafo de orquestación</b></summary>
+<summary><b>View the flow from the orchestration graph perspective</b></summary>
 
 <br>
 
-![Flujo del agente WhatsApp](../../assets/diagrams/whatsapp-agent-flow.png)
+![WhatsApp agent flow](../../assets/diagrams/whatsapp-agent-flow.png)
 
-*Vista conceptual: el agente recibe modelo, memoria y herramientas como dependencias
-declaradas, no como pasos secuenciales. El agente decide **si** usa una herramienta.*
+*Conceptual view: the agent receives model, memory and tools as declared dependencies,
+not as sequential steps. The agent decides **whether** to use a tool.*
 
 </details>
 
 ---
 
-## Las tres decisiones que sostienen todo
+## The three decisions that hold everything together
 
-### 1. Fast-ACK: responder antes de pensar
+### 1. Fast-ACK: respond before thinking
 
-Los proveedores de mensajería tienen un presupuesto de tiempo para el webhook. Si lo
-excedes, **reintentan**. Y si tu flujo tarda porque está llamando a un LLM, vas a exceder
-ese presupuesto casi siempre.
+Messaging providers have a time budget for the webhook. If you exceed it, they
+**retry**. And if your flow is slow because it is calling an LLM, you will exceed that
+budget almost always.
 
 ```mermaid
 sequenceDiagram
-    participant P as Proveedor de mensajería
+    participant P as Messaging provider
     participant W as Webhook
-    participant A as Agente IA
+    participant A as AI agent
 
     rect rgb(60, 20, 20)
-    Note over P,A: ❌ Sin fast-ACK
-    P->>W: mensaje
-    W->>A: procesar (lento)
-    P->>W: reintento (timeout)
-    W->>A: procesar de nuevo
-    A-->>P: respuesta
-    A-->>P: respuesta duplicada 😖
+    Note over P,A: ❌ Without fast-ACK
+    P->>W: message
+    W->>A: process (slow)
+    P->>W: retry (timeout)
+    W->>A: process again
+    A-->>P: reply
+    A-->>P: duplicate reply 😖
     end
 
     rect rgb(20, 50, 25)
-    Note over P,A: ✅ Con fast-ACK + dedup
-    P->>W: mensaje
-    W-->>P: 200 OK (inmediato)
-    W->>A: procesar en segundo plano
-    P->>W: reintento
+    Note over P,A: ✅ With fast-ACK + dedup
+    P->>W: message
+    W-->>P: 200 OK (immediate)
+    W->>A: process in background
+    P->>W: retry
     W-->>P: 200 OK
-    W->>A: dedup → descartado ✔
-    A-->>P: una sola respuesta
+    W->>A: dedup → discarded ✔
+    A-->>P: exactly one reply
     end
 ```
 
-**Resultado:** el usuario recibe exactamente una respuesta por mensaje, sin importar cuántas
-veces el proveedor reintente.
+**Result:** the user receives exactly one reply per message, no matter how many times
+the provider retries.
 
-### 2. Deduplicación por identificador de mensaje
+### 2. Deduplication by message identifier
 
-El ACK rápido evita los timeouts, pero no es suficiente: un reintento que llega **antes**
-del ACK ya está en vuelo. La deduplicación por **message ID** es la red de seguridad real.
+Fast ACK prevents timeouts, but it is not enough: a retry that arrives **before** the
+ACK is already in flight. Deduplication by **message ID** is the real safety net.
 
-**Por qué message ID y no el contenido:** dos mensajes con el mismo texto pueden ser
-legítimos ("hola" dos veces). El identificador del proveedor es único por evento real.
+**Why message ID and not content:** two messages with the same text can be legitimate
+("hello" twice). The provider identifier is unique per real event.
 
-> La estrategia de almacenamiento y la ventana de retención del registro de dedup no se
-> publican.
+> The storage strategy and retention window of the dedup registry are not published.
 
-### 3. Memoria + herramientas acotadas
+### 3. Memory + scoped tools
 
-El agente tiene **memoria conversacional** (recuerda el hilo, no arranca de cero en cada
-mensaje) y un **conjunto cerrado y pequeño** de herramientas.
+The agent has **conversational memory** (it remembers the thread, it does not start
+from zero on every message) and a **small, closed set** of tools.
 
-| Herramienta | Qué hace | Por qué existe |
+| Tool | What it does | Why it exists |
 |---|---|---|
-| `qualify_lead` | Evalúa intención y capacidad de compra | Alimenta la priorización comercial sin preguntar de forma robótica |
-| `lookup_contact` | Busca el contacto en el CRM | La conversación arranca sabiendo quién es, no preguntando lo que ya sabemos |
-| `escalate_human` | Entrega la conversación a una persona | La IA debe saber cuándo **no** es la indicada |
+| `qualify_lead` | Evaluates intent and buying ability | Feeds sales prioritization without asking in a robotic way |
+| `lookup_contact` | Looks up the contact in the CRM | The conversation starts knowing who the person is, instead of asking what we already know |
+| `escalate_human` | Hands the conversation to a person | The AI must know when it is **not** the right one |
 
-**Decisión clave:** el agente llama herramientas **solo cuando hacen falta**. Un agente que
-consulta el CRM en cada mensaje es lento y caro. El coste real de un agente conversacional
-no está en el modelo: está en las llamadas que hace sin necesitarlas.
-
----
-
-## Human handoff: la herramienta más importante
-
-Cuando el agente escala, pasan **tres** cosas — y las tres son necesarias:
-
-1. Se notifica al equipo con el contexto de la conversación.
-2. Se **pausa la automatización en ese hilo**.
-3. Se marca el estado para que quede registro de que hubo intervención.
-
-**El punto 2 es el que casi siempre se olvida.** Sin él, la persona y el bot responden a la
-vez al mismo cliente. Eso destruye la confianza más rápido que no haber automatizado nada.
-
-Casos que disparan escalado: petición explícita de hablar con una persona, frustración
-detectada, tema fuera del alcance definido, o cualquier situación donde la respuesta
-incorrecta tenga coste real.
+**Key decision:** the agent calls tools **only when needed**. An agent that queries the
+CRM on every message is slow and expensive. The real cost of a conversational agent is
+not the model: it is the calls it makes without needing them.
 
 ---
 
-## Variante para comercio electrónico
+## Human handoff: the most important tool
 
-El mismo esqueleto, con herramientas de tienda y detección de idioma EN/ES:
+When the agent escalates, **three** things happen — and all three are necessary:
 
-![Variante e-commerce del agente](../../assets/diagrams/whatsapp-agent-commerce.webp)
+1. The team is notified with the conversation context.
+2. The **automation is paused on that thread**.
+3. The state is marked so there is a record of the intervention.
 
-Se añaden consulta de estado de pedido y base de conocimiento de preguntas frecuentes. El
-patrón de fiabilidad — ACK, dedup, memoria, handoff — no cambia. **Eso es lo que hace que
-el patrón valga: cambian las herramientas, no los cimientos.**
+**Point 2 is the one almost always forgotten.** Without it, the person and the bot
+reply at the same time to the same customer. That destroys trust faster than not
+automating anything.
+
+Escalation triggers: explicit request to talk to a person, detected frustration,
+out-of-scope topics, or any situation where a wrong answer has real cost.
 
 ---
 
-## Decisiones de ingeniería
+## E-commerce variant
 
-| Decisión | Alternativa descartada | Razón |
+The same skeleton, with store tools and EN/ES language detection:
+
+![E-commerce agent variant](../../assets/diagrams/whatsapp-agent-commerce.webp)
+
+Order status lookup and a FAQ knowledge base are added. The reliability pattern —
+ACK, dedup, memory, handoff — does not change. **That is what makes the pattern worth
+it: the tools change, the foundations do not.**
+
+---
+
+## Engineering decisions
+
+| Decision | Rejected alternative | Reason |
 |---|---|---|
-| Fast-ACK antes de procesar | Procesar y luego responder | Evita reintentos del proveedor por timeout, que es la causa raíz de las respuestas duplicadas |
-| Dedup por message ID | Dedup por contenido o por remitente | El contenido se repite de forma legítima; el ID identifica el evento |
-| Conjunto cerrado de herramientas | Agente con acceso amplio | Superficie de acción acotada = comportamiento predecible y auditable |
-| Memoria conversacional persistente | Contexto en cada petición | Coherencia entre mensajes sin arrastrar todo el historial en cada llamada |
-| Handoff que **pausa** el bot | Handoff solo notificando | Sin pausa, persona y bot responden a la vez al mismo cliente |
-| Estado fuera del contenedor | Estado en memoria del proceso | Un reinicio no puede borrar el hilo ni el registro de dedup |
-| Error Workflow con persistencia | Logs del contenedor | Los logs se pierden al recrear; una tabla se consulta y se agrega |
+| Fast-ACK before processing | Process and then respond | Prevents provider retries on timeout, the root cause of duplicate replies |
+| Dedup by message ID | Dedup by content or sender | Content repeats legitimately; the ID identifies the event |
+| Closed toolset | Agent with broad access | Bounded action surface = predictable, auditable behavior |
+| Persistent conversational memory | Context on every request | Coherence between messages without dragging the full history on every call |
+| Handoff that **pauses** the bot | Handoff by notification only | Without the pause, person and bot reply at the same time |
+| State outside the container | In-process memory state | A restart cannot erase the thread or the dedup registry |
+| Error workflow with persistence | Container logs | Logs are lost on recreate; a table can be queried and aggregated |
 
-📄 Contexto adicional en el [registro de ADRs](../../docs/adr/README.md).
+📄 Additional context in the [ADR registry](../../docs/adr/README.md).
 
 ---
 
-## Comportamiento operativo
+## Operational behavior
 
-| Propiedad | Comportamiento |
+| Property | Behavior |
 |---|---|
-| **Exactamente una respuesta** | Por mensaje real, sin importar los reintentos del proveedor |
-| **Continuidad conversacional** | El agente no vuelve a preguntar lo que ya sabe |
-| **Disponibilidad** | 24/7; el escalado a humano respeta el horario del equipo |
-| **Coste controlado** | Herramientas invocadas bajo demanda, no por defecto |
-| **Resiliencia a reinicios** | Hilos y dedup sobreviven al reinicio del contenedor |
-| **Trazabilidad** | Cada conversación deja registro de herramientas usadas y de si hubo escalado |
+| **Exactly one reply** | Per real message, regardless of provider retries |
+| **Conversational continuity** | The agent does not re-ask what it already knows |
+| **Availability** | 24/7; human escalation respects the team's schedule |
+| **Controlled cost** | Tools invoked on demand, not by default |
+| **Restart resilience** | Threads and dedup survive container restarts |
+| **Traceability** | Every conversation leaves a record of tools used and whether escalation happened |
 
 ---
 
-## Fragmento ilustrativo
+## Illustrative fragment
 
-> ⚠️ **Genérico y no funcional de extremo a extremo.** Muestra la *forma* del guardián de
-> deduplicación. No contiene la ventana temporal real, el backend de almacenamiento, el
-> formato del payload del proveedor ni el prompt del agente.
+> ⚠️ **Generic and not end-to-end functional.** It shows the *shape* of the
+> deduplication guard. It contains no real time window, no storage backend, no provider
+> payload format and no agent prompt.
 
 ```js
-// ILUSTRATIVO — guardián de deduplicación en la entrada.
-// Principio: el trabajo caro (LLM, CRM) solo ocurre tras pasar este punto.
+// ILLUSTRATIVE — deduplication guard at the entry.
+// Principle: expensive work (LLM, CRM) only happens after passing this point.
 
 async function shouldProcess(messageId, store) {
   if (!messageId) {
     return { process: false, reason: 'missing_message_id' };
   }
 
-  // Reserva atómica: si otra ejecución ya lo tomó, ésta se retira.
+  // Atomic reservation: if another execution already took it, this one backs off.
   const reserved = await store.reserveOnce(messageId);
   if (!reserved) {
     return { process: false, reason: 'duplicate_delivery' };
@@ -241,31 +239,31 @@ async function shouldProcess(messageId, store) {
   return { process: true };
 }
 
-// Orden de operaciones que importa:
-//   1) responder 200 al proveedor
-//   2) deduplicar
-//   3) recién entonces invocar al agente
+// Order of operations that matters:
+//   1) reply 200 to the provider
+//   2) deduplicate
+//   3) only then invoke the agent
 ```
 
 ---
 
-## Qué NO encontrarás en este repositorio
+## What you will NOT find in this repository
 
-- El workflow n8n exportado ni el grafo real de nodos y conexiones.
-- El prompt del agente ni las descripciones literales de las herramientas.
-- La ventana de deduplicación ni el backend donde se almacena.
-- Los criterios exactos que disparan el escalado a humano.
-- Credenciales, tokens, instance IDs, números de teléfono, URLs de webhook.
+- The exported n8n workflow or the real node/connection graph.
+- The agent prompt or the literal tool descriptions.
+- The deduplication window or the backend where it is stored.
+- The exact criteria that trigger human escalation.
+- Credentials, tokens, instance IDs, phone numbers, webhook URLs.
 
-Ver [SECURITY.md](../../SECURITY.md).
+See [SECURITY.md](../../SECURITY.md).
 
 ---
 
 <div align="center">
 
-**¿Tu WhatsApp de negocio necesita responder a las 21:40 de un viernes?**
+**Does your business WhatsApp need to answer at 9:40 PM on a Friday?**
 [bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)
 
-[⬅️ Volver al portafolio](../../README.md) · [Patrón reutilizable](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
+[⬅️ Back to the portfolio](../../README.md) · [Reusable pattern](../../docs/patterns/webhook-ai-crm-notify.md) · [ADRs](../../docs/adr/README.md)
 
 </div>

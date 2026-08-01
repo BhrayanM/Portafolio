@@ -4,13 +4,13 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Portafolio SaaS API',
+      title: 'AI Automation Platform API',
       version: '1.0.0',
-      description: 'API REST del sistema Portafolio — gestion de leads, autenticacion y facturacion',
+      description: 'REST API of the Portafolio platform — lead management, authentication and billing',
     },
     servers: [
-      { url: 'https://api.example.com', description: 'Produccion local' },
-      { url: 'http://localhost:3000', description: 'Desarrollo' },
+      { url: 'https://api.example.com', description: 'Production (local)' },
+      { url: 'http://localhost:3000', description: 'Development' },
     ],
     components: {
       securitySchemes: {
@@ -43,13 +43,13 @@ const options = {
             ai_category: {
               type: 'string',
               enum: ['HOT', 'WARM', 'COLD'],
-              description: 'Clasificacion del lead. Enum cerrado, canonico en mayusculas.',
+              description: 'Lead classification. Closed enum, canonical uppercase.',
             },
             ai_business_category: {
               type: 'string',
               maxLength: 100,
-              description: 'Sector de negocio. Texto libre emitido por el LLM, no es un enum cerrado.',
-              example: 'Software y Tecnologia',
+              description: 'Business sector. Free text emitted by the LLM, not a closed enum.',
+              example: 'Software and Technology',
             },
             status: { type: 'string' },
             created_at: { type: 'string', format: 'date-time' },
@@ -86,50 +86,50 @@ const options = {
         get: {
           tags: ['System'],
           summary: 'Health check',
-          responses: { 200: { description: 'API operativa' } },
+          responses: { 200: { description: 'API operational' } },
         },
       },
       '/api/auth/login': {
         post: {
           tags: ['Auth'],
-          summary: 'Iniciar sesion',
+          summary: 'Sign in',
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string' }, password: { type: 'string' } } } } },
           },
-          responses: { 200: { description: 'Login exitoso, cookie seteada' }, 401: { description: 'Credenciales invalidas' } },
+          responses: { 200: { description: 'Login successful, session cookie set' }, 401: { description: 'Invalid credentials' } },
         },
       },
       '/api/auth/register': {
         post: {
           tags: ['Auth'],
-          summary: 'Registrar usuario',
+          summary: 'Register user',
           requestBody: {
             required: true,
             content: { 'application/json': { schema: { type: 'object', properties: { email: { type: 'string' }, password: { type: 'string' }, name: { type: 'string' } } } } },
           },
-          responses: { 201: { description: 'Usuario creado' } },
+          responses: { 201: { description: 'User created' } },
         },
       },
       '/api/auth/logout': {
         post: {
           tags: ['Auth'],
-          summary: 'Cerrar sesion',
-          responses: { 200: { description: 'Cookie eliminada' } },
+          summary: 'Sign out',
+          responses: { 200: { description: 'Session cookie cleared' } },
         },
       },
       '/api/auth/me': {
         get: {
           tags: ['Auth'],
-          summary: 'Usuario actual',
+          summary: 'Current user',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
-          responses: { 200: { description: 'Datos del usuario autenticado' }, 401: { description: 'No autenticado' } },
+          responses: { 200: { description: 'Authenticated user data' }, 401: { description: 'Not authenticated' } },
         },
       },
       '/api/leads': {
         get: {
           tags: ['Leads'],
-          summary: 'Listar leads',
+          summary: 'List leads',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           parameters: [
             { in: 'query', name: 'status', schema: { type: 'string' } },
@@ -138,22 +138,22 @@ const options = {
             { in: 'query', name: 'limit', schema: { type: 'integer' } },
             { in: 'query', name: 'offset', schema: { type: 'integer' } },
           ],
-          responses: { 200: { description: 'Lista de leads', content: { 'application/json': { schema: { type: 'array', items: { '$ref': '#/components/schemas/Lead' } } } } } },
+          responses: { 200: { description: 'List of leads', content: { 'application/json': { schema: { type: 'array', items: { '$ref': '#/components/schemas/Lead' } } } } } },
         },
         post: {
           tags: ['Leads'],
-          summary: 'Crear lead',
+          summary: 'Create lead',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           requestBody: { required: true, content: { 'application/json': { schema: { '$ref': '#/components/schemas/CreateLeadInput' } } } },
-          responses: { 201: { description: 'Lead creado' }, 400: { description: 'Validacion fallida' } },
+          responses: { 201: { description: 'Lead created' }, 400: { description: 'Validation failed' } },
         },
       },
       '/api/leads/stats': {
         get: {
           tags: ['Leads'],
-          summary: 'Estadisticas de leads',
+          summary: 'Lead statistics',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
-          responses: { 200: { description: 'Estadisticas', content: { 'application/json': { schema: { '$ref': '#/components/schemas/LeadStats' } } } } },
+          responses: { 200: { description: 'Statistics', content: { 'application/json': { schema: { '$ref': '#/components/schemas/LeadStats' } } } } },
         },
       },
       // Documenta el endpoint del dashboard de actividad. Sirve la
@@ -162,16 +162,16 @@ const options = {
       '/api/leads/activity': {
         get: {
           tags: ['Leads'],
-          summary: 'Actividad reciente procesada por el workflow',
-          description: 'Entradas de `lead_log`, mas recientes primero. Aisladas por tenant via RLS.',
+          summary: 'Recent activity processed by the workflow',
+          description: '`lead_log` entries, most recent first. Isolated per tenant via RLS.',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           parameters: [
             { in: 'query', name: 'limit', schema: { type: 'integer', minimum: 1, maximum: 200, default: 50 } },
             { in: 'query', name: 'offset', schema: { type: 'integer', minimum: 0, default: 0 } },
           ],
           responses: {
-            200: { description: 'Listado de actividad' },
-            400: { description: 'Parametros de paginacion invalidos' },
+            200: { description: 'Activity listing' },
+            400: { description: 'Invalid pagination parameters' },
           },
         },
       },
@@ -179,11 +179,11 @@ const options = {
       '/api/tenants/usage': {
         get: {
           tags: ['Tenants'],
-          summary: 'Consumo de recursos del tenant',
+          summary: 'Tenant resource usage',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           responses: {
             200: {
-              description: 'Totales del tenant',
+              description: 'Tenant totals',
               content: {
                 'application/json': {
                   schema: {
@@ -203,34 +203,34 @@ const options = {
       '/api/leads/{id}': {
         get: {
           tags: ['Leads'],
-          summary: 'Obtener lead por ID',
+          summary: 'Get lead by ID',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           parameters: [{ in: 'path', name: 'id', required: true, schema: { type: 'integer' } }],
-          responses: { 200: { description: 'Lead encontrado' }, 404: { description: 'No encontrado' } },
+          responses: { 200: { description: 'Lead found' }, 404: { description: 'Not found' } },
         },
       },
       '/api/billing/plans': {
         get: {
           tags: ['Billing'],
-          summary: 'Listar planes disponibles',
-          responses: { 200: { description: 'Planes' } },
+          summary: 'List available plans',
+          responses: { 200: { description: 'Plans' } },
         },
       },
       '/api/billing/subscription': {
         get: {
           tags: ['Billing'],
-          summary: 'Suscripcion actual',
+          summary: 'Current subscription',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
-          responses: { 200: { description: 'Datos de suscripcion' } },
+          responses: { 200: { description: 'Subscription data' } },
         },
       },
       '/api/billing/checkout': {
         post: {
           tags: ['Billing'],
-          summary: 'Crear sesion de checkout',
+          summary: 'Create checkout session',
           security: [{ cookieAuth: [] }, { bearerAuth: [] }],
           requestBody: { required: true, content: { 'application/json': { schema: { type: 'object', properties: { plan: { type: 'string' } } } } } },
-          responses: { 200: { description: 'URL de checkout' } },
+          responses: { 200: { description: 'Checkout URL' } },
         },
       },
     },

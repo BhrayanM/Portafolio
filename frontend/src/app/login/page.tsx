@@ -26,12 +26,12 @@ export default function LoginPage() {
       await authApi.login(email, password);
       router.push('/dashboard');
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      const message = err instanceof Error ? err.message : 'Error signing in';
       if (message === 'Failed to fetch') {
         const apiHealth = process.env.NEXT_PUBLIC_API_URL
           ? `${process.env.NEXT_PUBLIC_API_URL.replace(/\/api$/,'')}/health`
           : 'http://localhost:3001/health';
-        setError(`No se pudo conectar con el servidor. Acepta el certificado SSL visitando ${apiHealth} en tu navegador.`);
+        setError(`Could not connect to the server. Accept the SSL certificate by visiting ${apiHealth} in your browser.`);
       } else {
         setError(message);
       }
@@ -59,8 +59,8 @@ export default function LoginPage() {
             </svg>
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-center mb-1 text-gray-900">Portafolio SaaS</h1>
-        <p className="text-gray-500 text-center mb-8">Panel de automatización con IA</p>
+        <h1 className="text-2xl font-bold text-center mb-1 text-gray-900">AI Automation Platform</h1>
+        <p className="text-gray-500 text-center mb-8">AI automation dashboard</p>
 
         {error && (
           <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm leading-relaxed">
@@ -76,12 +76,12 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-xl focus:ring-2 focus:ring-brand-500 focus:border-transparent outline-none text-gray-900 bg-white"
-              placeholder="tu@email.com"
+              placeholder="you@email.com"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
             <input
               type="password"
               value={password}
@@ -102,10 +102,10 @@ export default function LoginPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-                Iniciando sesión...
+                Signing in...
               </>
             ) : (
-              'Iniciar sesión'
+              'Sign in'
             )}
           </button>
         </form>

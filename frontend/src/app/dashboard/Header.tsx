@@ -21,7 +21,7 @@ export default function Header({ user, onMenuToggle }: { user: User | null; onMe
       <button
         onClick={onMenuToggle}
         className="lg:hidden p-2 text-slate-500 hover:text-slate-700 rounded-lg hover:bg-slate-100"
-        aria-label="Abrir menú"
+        aria-label="Open menu"
       >
         <Menu className="w-5 h-5" />
       </button>
@@ -32,7 +32,7 @@ export default function Header({ user, onMenuToggle }: { user: User | null; onMe
           onClick={handleLogout}
           className="text-sm text-slate-500 hover:text-red-600 transition-colors font-medium"
         >
-          Cerrar sesión
+          Sign out
         </button>
       </div>
     </header>

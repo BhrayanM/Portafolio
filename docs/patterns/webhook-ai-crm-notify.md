@@ -1,44 +1,44 @@
-# Patrón: Webhook → IA → CRM → Notificación
+# Pattern: Webhook → AI → CRM → Notification
 
-**El esqueleto reutilizable detrás de los cuatro sistemas de este portafolio.**
+**The reusable skeleton behind the four systems in this portfolio.**
 
-Cuando llega un cliente nuevo con un caso distinto, no se empieza de cero. Cambian el canal
-y las herramientas; **los cimientos de fiabilidad ya están probados**.
+When a new client arrives with a different use case, we do not start from zero. The
+channels and tools change; **the reliability foundations are already proven**.
 
 ---
 
-## Las cinco capas
+## The five layers
 
 ```mermaid
 flowchart TB
-    subgraph L1 ["1 · BORDE"]
-        A["Canal de entrada<br/><i>form · WhatsApp · voz · evento</i>"] --> B["Autenticación<br/>+ límite de tasa"]
-        B --> C["ACK inmediato<br/><i>si el canal reintenta</i>"]
+    subgraph L1 ["1 · EDGE"]
+        A["Entry channel<br/><i>form · WhatsApp · voice · event</i>"] --> B["Authentication<br/>+ rate limit"]
+        B --> C["Immediate ACK<br/><i>if the channel retries</i>"]
     end
 
-    subgraph L2 ["2 · HIGIENE"]
-        D["Saneamiento<br/>+ normalización"] --> E["Deduplicación por<br/>identidad de negocio"]
-        E --> F["Validación de contrato<br/><i>fallar ruidosamente</i>"]
+    subgraph L2 ["2 · HYGIENE"]
+        D["Sanitization<br/>+ normalization"] --> E["Deduplication by<br/>business identity"]
+        E --> F["Contract validation<br/><i>fail loudly</i>"]
     end
 
-    subgraph L3 ["3 · DECISIÓN"]
-        G["Capa IA<br/><i>salida estructurada</i>"] --> H["Router determinista<br/><i>en código, no en el modelo</i>"]
-        H --> I{"¿Necesita<br/>criterio humano?"}
-        I -- Sí --> J["Human-in-the-loop<br/><i>espera persistente</i>"]
+    subgraph L3 ["3 · DECISION"]
+        G["AI layer<br/><i>structured output</i>"] --> H["Deterministic router<br/><i>in code, not in the model</i>"]
+        H --> I{"Needs human<br/>judgment?"}
+        I -- Yes --> J["Human-in-the-loop<br/><i>persistent wait</i>"]
     end
 
-    subgraph L4 ["4 · PERSISTENCIA"]
-        K["Escritura idempotente<br/>en el sistema de registro"] --> L["Upsert en CRM"]
-        L --> M["Capa operativa<br/><i>si el negocio la necesita</i>"]
+    subgraph L4 ["4 · PERSISTENCE"]
+        K["Idempotent write<br/>to the system of record"] --> L["CRM upsert"]
+        L --> M["Operational layer<br/><i>if the business needs it</i>"]
     end
 
-    subgraph L5 ["5 · SALIDA"]
-        N["Notificación<br/>al equipo"] --> O["Seguimiento<br/>programado"]
+    subgraph L5 ["5 · OUTPUT"]
+        N["Team notification"] --> O["Scheduled follow-up"]
     end
 
     L1 --> L2 --> L3 --> L4 --> L5
 
-    P["Error Workflow global"] -.captura fallos de<br/>cualquier capa.-> Q[("Tabla de errores<br/>persistente")]
+    P["Global Error Workflow"] -.captures failures<br/>from any layer.-> Q[("Persistent<br/>error table")]
 
     style L3 fill:#2a1f4d,color:#fff
     style L4 fill:#1a2f52,color:#fff
@@ -48,175 +48,174 @@ flowchart TB
 
 ---
 
-## Capa 1 — Borde
+## Layer 1 — Edge
 
-**Responsabilidad:** que nada entre sin autenticar y que el canal no reintente.
+**Responsibility:** nothing enters unauthenticated, and the channel does not retry.
 
-| Regla | Por qué |
+| Rule | Why |
 |---|---|
-| Todo webhook lleva autenticación | Un endpoint público sin clave es una factura de LLM abierta a cualquiera |
-| ACK antes de procesar en canales que reintentan | Los reintentos por timeout son la causa raíz de las respuestas duplicadas |
-| El rechazo también se registra | Un pico de peticiones inválidas es información, no ruido |
+| Every webhook carries authentication | A public endpoint without a key is an open LLM bill for anyone |
+| ACK before processing on channels that retry | Timeout retries are the root cause of duplicate responses |
+| Rejections are also logged | A spike of invalid requests is information, not noise |
 
-**Aplicado en:** Lead Qualification (API key) · WhatsApp Agent (fast-ACK) · Voice
-Receptionist (webhook de voz) · Appointment (evento validado).
+**Applied in:** Lead Qualification (API key) · WhatsApp Agent (fast-ACK) · Voice
+Receptionist (voice webhook) · Appointment (validated event).
 
 ---
 
-## Capa 2 — Higiene de entrada
+## Layer 2 — Input hygiene
 
-**Responsabilidad:** que lo que entra sea seguro, único y con la forma esperada.
+**Responsibility:** what enters is safe, unique and in the expected shape.
 
-### Saneamiento antes del modelo
+### Sanitization before the model
 
-El texto lo escribe un desconocido y termina en un LLM. Se normaliza y se acota **antes**
-de tocar el modelo, para que el contenido se trate como *dato a evaluar*, no como
-*instrucción a obedecer*.
+The text is written by a stranger and ends up in an LLM. It is normalized and scoped
+**before** touching the model, so the content is treated as *data to evaluate*, not
+*instructions to obey*.
 
-> Principio de diseño. Las reglas concretas no se publican.
+> Design principle. The concrete rules are not published.
 
-### Deduplicación por identidad de negocio
+### Deduplication by business identity
 
-La clave es la que identifica **la cosa real**, no la ejecución:
+The key identifies **the real thing**, not the execution:
 
-| Sistema | Identidad de dedup |
+| System | Dedup identity |
 |---|---|
-| Lead Qualification | Email del lead |
-| WhatsApp Agent | Message ID del proveedor |
-| Appointment Automation | Clave de idempotencia del evento |
+| Lead Qualification | Lead email |
+| WhatsApp Agent | Provider message ID |
+| Appointment Automation | Event idempotency key |
 
-**Antipatrón:** deduplicar por ID de ejecución. Cambia en cada reintento, así que no
-deduplica nada.
+**Antipattern:** deduplicating by execution ID. It changes on every retry, so it
+deduplicates nothing.
 
-### Validación de contrato
+### Contract validation
 
-Si el payload no cumple, va al camino de error. **Nunca** se escribe a medias: un registro
-parcial parece correcto y no lo es.
+If the payload does not comply, it goes to the error path. **Never** a partial write: a
+partial record looks correct and is not.
 
 ---
 
-## Capa 3 — Decisión
+## Layer 3 — Decision
 
-**Responsabilidad:** que la IA aporte criterio sin quedarse con el control.
+**Responsibility:** the AI brings judgment without keeping control.
 
-### La IA propone, el código dispone
+### The AI proposes, code disposes
 
 ```mermaid
 flowchart LR
-    A["Entrada saneada"] --> B["🧠 Modelo<br/><i>devuelve campos tipados</i>"]
-    B --> C{"¿Cumple<br/>el esquema?"}
-    C -- No --> D["Camino de error<br/><i>fallo ruidoso</i>"]
-    C -- Sí --> E["⚙️ Router determinista<br/><i>lógica de negocio en código</i>"]
-    E --> F["Destino"]
+    A["Sanitized input"] --> B["🧠 Model<br/><i>returns typed fields</i>"]
+    B --> C{"Meets<br/>schema?"}
+    C -- No --> D["Error path<br/><i>loud failure</i>"]
+    C -- Yes --> E["⚙️ Deterministic router<br/><i>business logic in code</i>"]
+    E --> F["Destination"]
 
     style B fill:#412991,color:#fff
     style E fill:#1a6b2a,color:#fff
     style D fill:#8b1a1a,color:#fff
 ```
 
-**Por qué el router va en código y no en el modelo:**
+**Why the router lives in code and not in the model:**
 
-1. **Auditable** — se puede leer, versionar y probar.
-2. **Reproducible** — la misma entrada da el mismo destino, siempre.
-3. **Barato** — no cuesta una llamada adicional al modelo.
-4. **Rápido** — decisivo cuando hay un presupuesto de latencia (voz).
+1. **Auditable** — can be read, versioned and tested.
+2. **Reproducible** — the same input always gives the same destination.
+3. **Cheap** — no extra model call.
+4. **Fast** — decisive when there is a latency budget (voice).
 
-### Human-in-the-loop donde el error es caro
+### Human-in-the-loop where errors are expensive
 
-No se aprueba todo: la fatiga de aprobación hace que la gente apruebe en automático y el
-gate deja de proteger. Se aprueba **solo lo que tiene coste real si sale mal**.
+Not everything is approved: approval fatigue makes people approve on autopilot and the
+gate stops protecting. Only **what has real cost if it goes wrong** is approved.
 
-La espera es **persistente**: si el contenedor se reinicia mientras alguien decide, la
-aprobación pendiente sigue viva.
+The wait is **persistent**: if the container restarts while someone decides, the pending
+approval stays alive.
 
 ---
 
-## Capa 4 — Persistencia
+## Layer 4 — Persistence
 
-**Responsabilidad:** que el dato sobreviva y que nunca se duplique.
+**Responsibility:** the data survives and is never duplicated.
 
-| Rol | Herramienta | Por qué |
+| Role | Tool | Why |
 |---|---|---|
-| Sistema de registro | PostgreSQL | Concurrencia real, durabilidad, historia consultable |
-| Sistema de negocio | CRM con upsert | Estado actual del contacto, sin duplicados |
-| Capa operativa | Hoja de cálculo | El equipo trabaja donde ya sabe trabajar |
+| System of record | PostgreSQL | Real concurrency, durability, queryable history |
+| Business system | CRM with upsert | Current contact state, no duplicates |
+| Operational layer | Spreadsheet | The team works where it already knows how to work |
 
-**Regla de oro: toda escritura es idempotente.** Ejecutar el mismo evento N veces deja el
-sistema igual que ejecutarlo una vez. Sin esto, cada reintento —y va a haber reintentos—
-ensucia el CRM.
+**Golden rule: every write is idempotent.** Running the same event N times leaves the
+system identical to running it once. Without this, every retry —and there will be
+retries— dirties the CRM.
 
 ---
 
-## Capa 5 — Salida
+## Layer 5 — Output
 
-**Responsabilidad:** que la gente correcta se entere, y que lo pendiente no se olvide.
+**Responsibility:** the right people find out, and pending items are not forgotten.
 
-| Regla | Por qué |
+| Rule | Why |
 |---|---|
-| Notificar **después** de persistir | No avisar de algo que luego falló al escribirse |
-| El seguimiento marca estado | Sin la marca, el cron reenvía el mismo mensaje en cada pasada |
-| La notificación lleva contexto accionable | Un aviso sin contexto obliga a abrir otras tres pestañas |
+| Notify **after** persisting | Do not announce something that then failed to be written |
+| Follow-up marks state | Without the mark, the cron re-sends the same message every pass |
+| Notification carries actionable context | An alert without context forces opening three more tabs |
 
 ---
 
-## Transversal — Error Workflow global
+## Cross-cutting — Global Error Workflow
 
 ```mermaid
 flowchart LR
-    A["Fallo en<br/>cualquier capa"] --> B["Error Workflow<br/>global"]
-    B --> C[("Tabla de errores<br/>en PostgreSQL")]
-    B --> D["Alerta al equipo<br/><i>si es crítico</i>"]
-    C --> E["Consulta y agregación<br/><i>¿puntual o sistemático?</i>"]
+    A["Failure in<br/>any layer"] --> B["Global Error<br/>Workflow"]
+    B --> C[("Error table<br/>in PostgreSQL")]
+    B --> D["Team alert<br/><i>if critical</i>"]
+    C --> E["Query and aggregation<br/><i>one-off or systematic?</i>"]
 
     style B fill:#8b1a1a,color:#fff
     style C fill:#8b1a1a,color:#fff
 ```
 
-**Persistente, no un log.** Los logs de un contenedor se pierden al recrearlo. Una tabla
-sobrevive, se consulta, se agrupa por tipo de fallo y responde la única pregunta que
-importa en operación: *¿esto pasó una vez o pasa todos los días?*
+**Persistent, not a log.** Container logs disappear when recreated. A table survives,
+can be queried, grouped by failure type and answers the only question that matters in
+operations: *did this happen once or every day?*
 
 ---
 
-## Fragmento ilustrativo del patrón
+## Illustrative fragment of the pattern
 
-> ⚠️ **Genérico y no funcional de extremo a extremo.** Muestra el *orden de las capas*. No
-> contiene prompts, umbrales, esquemas de negocio, ventanas de dedup ni reglas de
-> saneamiento.
+> ⚠️ **Generic and not end-to-end functional.** It shows the *layer order*. It contains
+> no prompts, thresholds, business schemas, dedup windows or sanitization rules.
 
 ```js
-// ILUSTRATIVO — la secuencia de capas, sin la lógica de negocio.
+// ILLUSTRATIVE — the layer sequence, without the business logic.
 
 async function pipeline(request, deps) {
-  // ── 1 · BORDE ────────────────────────────────────────────────
+  // ── 1 · EDGE ────────────────────────────────────────────────
   if (!deps.auth.isValid(request)) {
     await deps.store.recordRejection('unauthorized');
     return { status: 401 };
   }
-  deps.channel.ackImmediately();          // solo en canales que reintentan
+  deps.channel.ackImmediately();          // only on channels that retry
 
-  // ── 2 · HIGIENE ──────────────────────────────────────────────
-  const clean = deps.sanitizer.normalize(request.body);   // reglas no publicadas
+  // ── 2 · HYGIENE ──────────────────────────────────────────────
+  const clean = deps.sanitizer.normalize(request.body);   // rules not published
   const claimed = await deps.store.claimOnce(deps.identityOf(clean));
   if (!claimed) return { status: 200, note: 'duplicate' };
   if (!deps.contract.isValid(clean)) return deps.errorPath(clean, 'schema');
 
-  // ── 3 · DECISIÓN ─────────────────────────────────────────────
-  const decision = await deps.ai.evaluate(clean);          // prompt no publicado
+  // ── 3 · DECISION ─────────────────────────────────────────────
+  const decision = await deps.ai.evaluate(clean);          // prompt not published
   if (!deps.contract.isValidDecision(decision)) {
     return deps.errorPath(clean, 'ai_schema');
   }
-  const destination = deps.router.resolve(decision);       // determinista, en código
+  const destination = deps.router.resolve(decision);       // deterministic, in code
   if (destination.needsHumanApproval) {
-    const approved = await deps.humanGate.await(clean, decision); // espera persistente
+    const approved = await deps.humanGate.await(clean, decision); // persistent wait
     if (!approved) return { status: 200, note: 'rejected_by_human' };
   }
 
-  // ── 4 · PERSISTENCIA ─────────────────────────────────────────
+  // ── 4 · PERSISTENCE ──────────────────────────────────────────
   await deps.db.upsertRecord(clean, decision);
   await deps.crm.upsertContact(clean);
 
-  // ── 5 · SALIDA ───────────────────────────────────────────────
+  // ── 5 · OUTPUT ───────────────────────────────────────────────
   await deps.notifier.send(deps.summaryOf(clean, decision));
   if (destination.schedulesFollowup) await deps.queue.enqueue(clean);
 
@@ -226,49 +225,48 @@ async function pipeline(request, deps) {
 
 ---
 
-## Cómo se instancia el patrón
+## How the pattern is instantiated
 
-| Capa | Lead Qualification | WhatsApp Agent | Appointment | Voice Receptionist |
+| Layer | Lead Qualification | WhatsApp Agent | Appointment | Voice Receptionist |
 |---|---|---|---|---|
-| **Canal** | Formulario web | WhatsApp | Evento de calendario | Llamada de voz |
-| **Borde** | API key | Fast-ACK | Validación de evento | Webhook de voz |
-| **Dedup** | Email | Message ID | Clave de idempotencia | Sesión de llamada |
-| **Decisión IA** | Score + categoría | Agente con memoria y tools | Resultado tipado | Intención + reglas |
-| **Gate humano** | Leads Hot | Herramienta de escalado | — | Escalado tras N fallos |
-| **Persistencia** | PostgreSQL + Sheets | Memoria + registro | PostgreSQL | Registro de interacción |
-| **CRM** | Upsert HubSpot | Consulta CRM | Upsert por contacto | — |
-| **Salida** | Slack + cron | Respuesta WhatsApp | Notificación al equipo | Voz + confirmación escrita |
+| **Channel** | Web form | WhatsApp | Calendar event | Phone call |
+| **Edge** | API key | Fast-ACK | Event validation | Voice webhook |
+| **Dedup** | Email | Message ID | Idempotency key | Call session |
+| **AI decision** | Score + category | Agent with memory and tools | Typed outcome | Intent + rules |
+| **Human gate** | Hot leads | Escalation tool | — | Escalation after N failures |
+| **Persistence** | PostgreSQL + Sheets | Memory + record | PostgreSQL | Interaction record |
+| **CRM** | HubSpot upsert | CRM lookup | Upsert by contact | — |
+| **Output** | Slack + cron | WhatsApp reply | Team notification | Voice + written confirmation |
 
-**Lectura:** cambia cada celda, no cambia la estructura. Ese es el activo real — el tiempo
-de puesta en marcha de un caso nuevo baja porque los problemas difíciles ya están resueltos
-una vez.
+**Reading:** change each cell, not the structure. That is the real asset — the time to
+start a new use case drops because the hard problems are already solved once.
 
 ---
 
-## Antipatrones que este patrón evita
+## Antipatterns this pattern avoids
 
-| Antipatrón | Qué provoca |
+| Antipattern | What it causes |
 |---|---|
-| Webhook público sin autenticar | Coste de LLM abierto a cualquiera |
-| Procesar antes de responder | Reintentos por timeout → respuestas duplicadas |
-| Dedup por ID de ejecución | No deduplica nada: cambia en cada reintento |
-| Que el modelo decida el destino | Comportamiento no reproducible ni auditable |
-| Parsear texto libre del modelo | Fallos silenciosos que contaminan el CRM |
-| Aprobar humanamente todo | Fatiga de aprobación: se aprueba sin leer |
-| SQLite bajo escrituras concurrentes | Bloqueos y pérdida de datos al reiniciar |
-| Escribir sin upsert | Contactos duplicados → el equipo deja de confiar en el CRM |
-| Notificar antes de persistir | Avisos de cosas que nunca se escribieron |
-| Errores solo en logs del contenedor | Se pierden al recrear; nunca se sabe si el fallo es sistemático |
-| Handoff que no pausa el bot | Persona y bot responden a la vez al mismo cliente |
-| Cron sin marca de estado | El mismo contacto recibe el mismo mensaje en cada pasada |
+| Unauthenticated public webhook | Open LLM bill for anyone |
+| Process before responding | Timeout retries → duplicate responses |
+| Dedup by execution ID | Deduplicates nothing: changes on every retry |
+| Model decides the destination | Non-reproducible, non-auditable behavior |
+| Parsing free model text | Silent failures that corrupt the CRM |
+| Human approval of everything | Approval fatigue: approving without reading |
+| SQLite under concurrent writes | Locks and data loss on restart |
+| Writing without upsert | Duplicate contacts → the team stops trusting the CRM |
+| Notifying before persisting | Announcements of things never written |
+| Errors only in container logs | Lost on recreate; never known if systematic |
+| Handoff that does not pause the bot | Person and bot reply at the same time |
+| Cron without state mark | The same contact gets the same message every pass |
 
 ---
 
 <div align="center">
 
-[⬅️ Volver al portafolio](../../README.md) · [ADRs](../adr/README.md) · [SECURITY](../../SECURITY.md)
+[⬅️ Back to the portfolio](../../README.md) · [ADRs](../adr/README.md) · [SECURITY](../../SECURITY.md)
 
-**¿Quieres este patrón aplicado a tu proceso?**
+**Do you want this pattern applied to your process?**
 [bhrayan.automation@gmail.com](mailto:bhrayan.automation@gmail.com)
 
 </div>

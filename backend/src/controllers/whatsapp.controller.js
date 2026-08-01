@@ -6,7 +6,7 @@ const handleIncoming = async (req, res) => {
   try {
     const message = whatsappService.parseIncoming(req.body);
     if (!message) {
-      return res.status(400).json({ error: 'Mensaje no válido' });
+      return res.status(400).json({ error: 'Invalid message' });
     }
 
     // No se loguea el texto del mensaje (contenido del usuario) ni el
@@ -38,7 +38,7 @@ const verifyWebhook = (req, res) => {
     return res.status(200).send(result.toString());
   }
 
-  res.status(403).send('Verificación fallida');
+  res.status(403).send('Verification failed');
 };
 
 const sendMessage = async (req, res, next) => {
