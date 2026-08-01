@@ -5,12 +5,15 @@
 **I automate business processes: lead capture and qualification, CRM, WhatsApp and AI agents connected to each other.**
 
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?logo=n8n&logoColor=white)](#stack)
-[![AI](https://img.shields.io/badge/AI-412991?logo=openai&logoColor=white)](#stack)
-[![REST API](https://img.shields.io/badge/REST_API-000000?logo=express&logoColor=white)](#stack)
-[![CRM](https://img.shields.io/badge/CRM-FF7A59?logo=hubspot&logoColor=white)](#stack)
+[![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white)](#stack)
+[![Anthropic](https://img.shields.io/badge/Anthropic-D97757?logo=anthropic&logoColor=white)](#stack)
+[![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?logo=hubspot&logoColor=white)](#stack)
+[![Slack](https://img.shields.io/badge/Slack-4A154B?logo=slack&logoColor=white)](#stack)
+[![Twilio](https://img.shields.io/badge/Twilio-F22F46?logo=twilio&logoColor=white)](#stack)
 [![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?logo=whatsapp&logoColor=white)](#stack)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](#stack)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#stack)
+[![REST API](https://img.shields.io/badge/REST_API-000000?logo=express&logoColor=white)](#stack)
 
 [![CI](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml/badge.svg)](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-113_passing-2ea44f)](#evidence)
