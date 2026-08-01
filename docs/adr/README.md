@@ -51,6 +51,7 @@ las 23:00 con un cliente esperando.
 | [010](#adr-010) | Estado fuera del contenedor y resiliencia a reinicios | ✅ Aceptada | Infraestructura |
 | [011](#adr-011) | Toda escritura externa es idempotente (upsert) | ✅ Aceptada | Todos |
 | [012](#adr-012) | El handoff a humano pausa la automatización del hilo | ✅ Aceptada | WhatsApp, Voz |
+| [013](#adr-013) | Mitigación de CSRF: SameSite + validación de Origin | ✅ Aceptada | Backend |
 
 ---
 
@@ -312,6 +313,43 @@ la confianza más rápido que no haber automatizado nada.
 devolverlo a la automatización.
 
 **Rollback.** No recomendado.
+
+---
+
+<a id="adr-013"></a>
+## ADR-013 · Mitigación de CSRF para sesiones por cookie (SameSite + validación de Origin)
+
+**Contexto.** La API autentica por cookie HttpOnly (`access_token`) para navegadores y
+por `Authorization: Bearer` para clientes no-navegador. CSRF es un ataque exclusivo de
+navegador: un sitio malicioso dispara peticiones mutantes con las cookies de la víctima.
+
+**Decisión.** Defensa por capas sin cambiar el contrato de la API:
+
+1. **SameSite=Lax** en la cookie de sesión: el navegador no envía la cookie en POST
+   cross-site. Cubre el caso normal.
+2. **Validación de Origin** en `middleware/csrf.js`: toda petición mutante
+   (POST/PUT/PATCH/DELETE) con cookie de sesión debe traer un Origin same-origin o
+   listado en `CORS_ORIGINS`. Si el Origin no está autorizado, la petición se rechaza
+   con 403. Sin Origin no puede tratarse de un navegador (los navegadores siempre lo
+   envían en peticiones mutantes) y la petición pasa.
+3. Los clientes Bearer no envían cookie: no se ven afectados.
+
+**Alternativas descartadas.**
+- **`csurf` / tokens CSRF de doble envío:** la librería clásica está sin mantenimiento y
+  con CVEs conocidos; los tokens de doble envío añaden estado y complejidad al cliente.
+- **Confiar solo en SameSite:** no cubre los despliegues con `SameSite=None`
+  (frontend y API en subdominios distintos, como documenta `.env.example`).
+
+**Razón.** La validación de Origin no añade estado, no exige cambios en el frontend y
+bloquea el único vector real (navegador con cookie de sesión). El webhook de Stripe queda
+fuera por diseño: se autentica por firma HMAC y no usa cookies.
+
+**Consecuencias.** Las peticiones mutantes desde el navegador deben ser same-origin o
+estar en la allowlist CORS — requisito que el frontend ya cumple (`credentials: 'include'`
+hacia origenes CORS). Clientes que usen cookie fuera de navegador deben enviar Origin.
+
+**Rollback.** Documentado y de bajo riesgo: retirar el middleware deja la protección en
+manos de SameSite únicamente.
 
 ---
 

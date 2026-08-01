@@ -5,6 +5,10 @@ on:
     branches: ['**']
   pull_request:
 
+# Principio de menor privilegio: este workflow solo lee el repositorio.
+permissions:
+  contents: read
+
 # Cancela ejecuciones antiguas de la misma rama: solo interesa el ultimo commit.
 concurrency:
   group: ci-${{ github.ref }}

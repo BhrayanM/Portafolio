@@ -18,6 +18,7 @@ const { authenticate } = require('./middleware/auth');
 const { errorHandler } = require('./middleware/errorHandler');
 const { securityMiddleware } = require('./middleware/security');
 const { globalLimiter } = require('./middleware/rateLimit');
+const { csrfProtection } = require('./middleware/csrf');
 const { requestId } = require('./middleware/requestId');
 const { getMetrics } = require('./controllers/metrics.controller');
 const { NotFoundError } = require('./utils/errors');
@@ -48,6 +49,11 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), asyn
 
 app.use(express.json({ limit: '1mb' }));
 app.use(cookieParser());
+
+// CSRF: peticiones mutantes con cookie de sesión requieren Origin autorizado
+// (same-origin o CORS_ORIGINS). El webhook de Stripe queda fuera por diseño:
+// se verifica por firma y no usa cookies. Ver middleware/csrf.js.
+app.use(csrfProtection);
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteTitle: 'Portafolio API Docs' }));
 
