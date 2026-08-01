@@ -1,0 +1,9 @@
+{
+  "email": "contact@example.com",
+  "name": "Jane Smith",
+  "company": "Acme Corp",
+  "phone": "+1-555-0123",
+  "source": "website",
+  "interest": "enterprise-plan",
+  "message": "Interested in learning more about your automation solutions"
+}

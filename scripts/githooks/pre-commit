@@ -1,0 +1,104 @@
+#!/bin/sh
+# Barrera contra publicacion accidental de secretos y material interno.
+# Repo publico: ver SECURITY.md seccion 1 (lista de "nunca se publica").
+#
+# Bloquea, sobre los archivos EN STAGE:
+#   1. Archivos .env (salvo .env.example)
+#   2. Exports de workflows n8n (n8n/workflows/*.json y similares)
+#   3. Tokens: sk-, xoxb-, xoxp-, pat-, ghp-, AKIA...
+#   4. Credential IDs de n8n (bloque "credentials" de un export)
+#   5. URLs de webhook con host no-local
+#   6. Cadenas de conexion PostgreSQL con credenciales
+#
+# Saltar deliberadamente (usar con criterio):  git commit --no-verify
+
+RED=$(printf '\033[31m'); YEL=$(printf '\033[33m'); RST=$(printf '\033[0m')
+fail=0
+
+note() { printf "%s  [BLOQUEADO]%s %s\n" "$RED" "$RST" "$1"; fail=1; }
+
+# Solo archivos añadidos/copiados/modificados/renombrados en stage
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+[ -z "$staged" ] && exit 0
+
+# ── 1. Archivos de entorno ────────────────────────────────────────────
+for f in $staged; do
+  case "$f" in
+    *.env.example|*.env.template|*.env.sample) ;;
+    .env|*/.env|*.env|.env.*|*/.env.*)
+      note "archivo de entorno en stage: $f" ;;
+  esac
+done
+
+# ── 2. Exports de workflows n8n ───────────────────────────────────────
+for f in $staged; do
+  case "$f" in
+    n8n/workflows/*.json|*/n8n/workflows/*.json|workflows/*.json)
+      note "export de workflow n8n: $f  (SECURITY.md: nunca se publica)" ;;
+  esac
+done
+
+# Un .json cualquiera con forma de workflow n8n exportado
+# Se excluye la carpeta projects/examples/ que contiene ejemplos sanitizados e intencionales.
+for f in $staged; do
+  case "$f" in
+    projects/examples/*.json) ;;
+    *.json)
+      [ -f "$f" ] || continue
+      if grep -qE '"type"[[:space:]]*:[[:space:]]*"n8n-nodes-' "$f" 2>/dev/null; then
+        note "$f parece un workflow n8n exportado (contiene nodos n8n-nodes-*)"
+      fi ;;
+  esac
+done
+
+# ── 3-6. Escaneo de contenido ─────────────────────────────────────────
+# Se escanea el contenido en stage, no el del disco.
+# Valores de ejemplo evidentes: no son secretos, no deben bloquear el commit.
+PLACEHOLDER='tu_|your|YOUR|xxx|XXX|placeholder|PLACEHOLDER|example|EXAMPLE|ejemplo|changeme|CHANGEME|\$\{|\$[A-Z_]{3,}|user:pass|usuario:clave|<[a-z-]+>|\.\.\.|REPLACE|TODO'
+
+scan() { # <regex> <descripcion>
+  for f in $staged; do
+    [ -f "$f" ] || continue
+    # saltar binarios; descartar coincidencias que son claramente placeholders
+    if git show ":$f" 2>/dev/null | head -c 1048576 \
+         | grep -oIE "$1" 2>/dev/null \
+         | grep -qvE "$PLACEHOLDER"; then
+      note "$2 en $f"
+    fi
+  done
+}
+
+scan 'sk-[A-Za-z0-9_-]{16,}'                    'API key estilo OpenAI (sk-...)'
+scan 'xox[baprs]-[A-Za-z0-9-]{10,}'             'token de Slack (xox...)'
+scan 'pat-[a-z0-9]{2,}-[A-Za-z0-9-]{10,}'       'HubSpot private app token (pat-...)'
+scan 'ghp_[A-Za-z0-9]{20,}'                     'GitHub personal access token'
+scan 'AKIA[0-9A-Z]{16}'                         'AWS access key id'
+scan '-----BEGIN [A-Z ]*PRIVATE KEY-----'       'clave privada'
+
+# Credential IDs de n8n: bloque "credentials" de un export
+scan '"credentials"[[:space:]]*:[[:space:]]*\{'  'bloque de credenciales n8n (credential IDs)'
+scan '"(httpHeaderAuth|slackApi|hubspotApi|postgres)"[[:space:]]*:[[:space:]]*\{[[:space:]]*"id"' \
+     'credential ID de n8n'
+
+# URLs de webhook con host no-local (localhost/127.0.0.1 permitidos: son de desarrollo)
+for f in $staged; do
+  [ -f "$f" ] || continue
+  if git show ":$f" 2>/dev/null | head -c 1048576 \
+       | grep -oIE 'https?://[A-Za-z0-9.-]+(:[0-9]+)?/webhook(-test)?/' 2>/dev/null \
+       | grep -qvE '://(localhost|127\.0\.0\.1)'; then
+    note "URL de webhook con host no-local en $f"
+  fi
+done
+
+# Cadenas de conexion PostgreSQL con credenciales embebidas
+scan 'postgres(ql)?://[^:/@[:space:]]+:[^@[:space:]]+@' \
+     'cadena de conexion PostgreSQL con credenciales'
+
+if [ "$fail" -ne 0 ]; then
+  printf "\n%sCommit abortado por .git/hooks/pre-commit%s\n" "$RED" "$RST"
+  printf "%sQuita el archivo del stage o redacta el secreto.%s\n" "$YEL" "$RST"
+  printf "%sSi es un falso positivo: git commit --no-verify%s\n\n" "$YEL" "$RST"
+  exit 1
+fi
+
+exit 0

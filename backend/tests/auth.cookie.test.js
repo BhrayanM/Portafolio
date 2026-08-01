@@ -8,20 +8,26 @@
 const request = require('supertest');
 const bcrypt = require('bcrypt');
 
-const PASSWORD = '<ADMIN_SEED_PASSWORD>';
+const PASSWORD = 'fixture-password-no-real';
 let PASSWORD_HASH;
 
 const USER = {
   id: '11111111-1111-1111-1111-111111111111',
   tenant_id: '22222222-2222-2222-2222-222222222222',
-  email: 'admin@portafolio.ai',
+  email: 'admin@example.com',
   name: 'Admin',
   role: 'admin',
 };
 
 // Doble del pool de `pg`. El factory no captura nada del exterior: jest.mock se iza
 // por encima de las declaraciones del archivo. La implementacion se define en beforeAll.
-jest.mock('../src/db', () => ({ pool: { query: jest.fn() } }));
+jest.mock('../src/db', () => ({
+  pool: { query: jest.fn() },
+  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
+  runWithTenant: (tenantId, fn) => fn(),
+  getCurrentTenantId: () => null,
+}));
 
 const { pool } = require('../src/db');
 const app = require('../src/app');
@@ -100,7 +106,7 @@ describe('POST /api/auth/login', () => {
   it('rechaza un email inexistente', async () => {
     const res = await request(app)
       .post('/api/auth/login')
-      .send({ email: 'nadie@portafolio.ai', password: PASSWORD });
+      .send({ email: 'nadie@example.com', password: PASSWORD });
 
     expect(res.status).toBe(401);
   });

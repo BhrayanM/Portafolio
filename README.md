@@ -206,41 +206,100 @@ IDs de hojas/canales/instancias, cadenas de conexión ni datos de clientes.
 
 ---
 
-## 🚀 FASE 0 — Infraestructura Base (Docker + n8n + PostgreSQL)
+## La plataforma — AI Lead Automation Platform
+
+Además de la documentación de arriba, este repositorio **contiene el código** de una plataforma
+SaaS multi-tenant de captación y calificación de leads. Todo lo que sigue está verificado
+ejecutándolo, no solo escrito.
+
+### Arquitectura
+
+```
+Formulario · WhatsApp · Voz · API
+        │
+   NGINX  — TLS 1.2/1.3 · HSTS · rate limit 10 r/s · cabeceras de seguridad
+        ├──────────────► Next.js 14  (dashboard, 12 rutas)
+        └──────────────► Express      (API REST, 9 grupos de recursos)
+                              │
+                              ├── n8n  — workflows de automatización
+                              │        └── LLM → HubSpot → Slack
+                              └── PostgreSQL 15
+                                     multi-tenant · RLS con FORCE · 16 migraciones
+```
+
+| Capa | Tecnología | Estado |
+|---|---|---|
+| **Frontend** | Next.js 14 (App Router), TypeScript estricto, Tailwind | 12 rutas, build en verde |
+| **Backend** | Node.js 20, Express 4, API REST | 9 grupos de rutas, OpenAPI en `/api-docs` |
+| **Base de datos** | PostgreSQL 15, multi-tenant | 16 migraciones + 2 seeds, **RLS activo con FORCE** |
+| **Automatización** | n8n 2.31.6 autoalojado | 3 workflows de ejemplo, importados y ejecutados |
+| **IA** | Orquestación de LLM vía HTTP | scoring con salida estructurada y router determinista |
+| **CRM** | HubSpot | upsert idempotente |
+| **Notificaciones** | Slack | webhook entrante |
+| **Pagos** | Stripe | checkout + webhook con verificación de firma |
+| **Infraestructura** | Docker Compose, NGINX | imágenes pineadas a patch exacto |
+| **Testing** | Jest + Supertest | **98 tests**, CI con lint + typecheck + build + barrido de secretos |
+
+### Seguridad
+
+- **Sesión en cookie HttpOnly + Secure + SameSite** — el JWT no es accesible desde JavaScript.
+- **Aislamiento multi-tenant impuesto por el motor.** `FORCE ROW LEVEL SECURITY` en las seis
+  tablas multi-tenant y conexión con un rol sin privilegios de propietario. Sin contexto de
+  tenant, una consulta devuelve cero filas; un `INSERT` con `tenant_id` ajeno se rechaza.
+- **Arranque en fallo rápido** — en producción el proceso aborta si falta `JWT_SECRET`,
+  `CORS_ORIGINS`, `POSTGRES_PASSWORD` o `STRIPE_WEBHOOK_SECRET`. No hay secretos por defecto.
+- **Validación de entrada con Joi** en todas las rutas que escriben.
+- Rate limit por IP, CORS con lista blanca, Helmet, y auditoría por triggers en base de datos.
 
 ### Requisitos
 
-- Docker & Docker Compose (v2+)
-- Git
+- Docker & Docker Compose v2+ · Node.js 20 LTS (para desarrollo local) · Git
 
-### Inicio rápido
+### Inicio rápido — solo la infraestructura de automatización
 
 ```bash
-# 1. Clonar
-git clone https://github.com/BhrayanM/Portafolio.git
-cd Portafolio
+git clone <este-repositorio> && cd Portafolio
+cp .env.example .env      # editar; nunca se commitea
 
-# 2. Configurar entorno
-cp .env.example .env
-# Editar .env con tus valores reales (nunca se commitea)
-
-# 3. Levantar servicios
-docker compose up -d
-
-# 4. Acceder
-# n8n:     http://localhost:5678
-# Postgres: localhost:5432
-
-# 5. Ver logs
-docker compose logs -f
+docker compose up -d      # n8n + PostgreSQL
+# n8n → http://localhost:5678
 ```
 
-### Servicios
+| Servicio | Puerto | Imagen | Persistencia |
+|---|---|---|---|
+| n8n | 5678 | `n8nio/n8n:2.31.6` | volumen `n8n_data` |
+| PostgreSQL | 5432 | `postgres:15.18-alpine` | volumen `postgres_data` |
 
-| Servicio   | Puerto | Imagen                | Persistencia     |
-|-----------|--------|-----------------------|------------------|
-| n8n       | 5678   | n8nio/n8n:latest      | n8n_data volume  |
-| PostgreSQL| 5432   | postgres:15-alpine    | postgres_data vol|
+### Inicio rápido — la plataforma completa
+
+```bash
+# 1. Esquema y datos iniciales
+for f in database/migrations/*.sql database/seeds/*.sql; do
+  docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+    -v ON_ERROR_STOP=1 -f - < "$f" || { echo "fallo en $f"; break; }
+done
+
+# 2. Rol de aplicación — sin esto RLS no aísla nada (ver database/migrations/016)
+docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+  -c "ALTER ROLE app LOGIN PASSWORD '<generada>';"
+# y en .env:  DB_USER=app  ·  DB_PASSWORD=<la misma>
+
+# 3. Backend y dashboard
+cd backend  && npm ci && npm run dev     # API   → http://localhost:3000
+cd frontend && npm ci && npm run dev     # Panel → http://localhost:3001
+```
+
+> El `cat migrations/*.sql | psql` de toda la vida **no** sirve aquí: sin `ON_ERROR_STOP=1` un
+> fallo no detiene el flujo y el operador ve un código de salida 0. El bucle de arriba comprueba
+> cada fichero.
+
+### Verificación
+
+```bash
+cd backend  && npm run lint && npm test        # 98 tests
+cd frontend && npx tsc --noEmit && npm run build
+docker compose -f docker-compose.prod.yml build
+```
 
 ### Respaldo
 
@@ -248,8 +307,21 @@ docker compose logs -f
 ./scripts/backup.sh
 ```
 
-### Roadmap completo
+---
 
-Ver [`docs/IMPLEMENTATION_PLAN.md`](./docs/IMPLEMENTATION_PLAN.md) para el plan maestro de 14 fases.
+## Roadmap
+
+Declarado aquí, y **no** presentado como implementado en ninguna otra parte del repositorio:
+
+| Elemento | Estado real |
+|---|---|
+| Redis (caché / rate-limit distribuido) | `cache.service.js` existe; sin consumidor ni servicio en compose |
+| RabbitMQ (procesamiento asíncrono) | configuración declarada; sin servicio ni productor |
+| Google Sheets · Shopify | integraciones del sistema de producción; sin código en este repositorio |
+| API keys con hash en reposo | hoy se almacenan en claro en `tenants.api_keys` |
+| Firma HMAC en los webhooks de WhatsApp y Twilio | pendiente; hoy solo el handshake de verificación |
+| Observabilidad (Prometheus · Grafana · Loki) | configuración en `monitoring/`; targets sin revalidar |
+| Tests de frontend | ninguno |
+| Tabla de control de migraciones | las migraciones son idempotentes, pero nada registra cuáles se aplicaron |
 
 </div>

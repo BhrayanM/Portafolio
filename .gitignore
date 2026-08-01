@@ -12,6 +12,39 @@ personal/
 # ── Config pública del IDE (NUNCA se sube) ──────────────────
 opencode.json
 
+# ── Contexto de agente IA y bitácora interna (repo público) ──
+# F21.2: CLAUDE.md, AGENTS.md y HANDOFF.md llevaban IDs reales de
+# credenciales n8n, el portal de HubSpot y rutas de workspace privado.
+# SECURITY.md los prohíbe. Se conservan en local, fuera de git.
+CLAUDE.md
+AGENTS.md
+MEMORY.md
+PROGRESO.md
+PROJECT_STATUS.md
+DECISIONS.md
+CHANGELOG_AI.md
+
+# ── Documentación interna de proceso (no es material de portfolio) ──
+# Auditorías, planes de remediación, reportes de fase y bitácoras.
+# `docs/fase-*/` incluye prompts de producción: SECURITY.md regla 5.
+docs/AUDITORIA_*.md
+docs/CIERRE_FASE.md
+docs/FASE19_*.md
+docs/FASE20_*.md
+docs/FASE21_*.md
+docs/HANDOFF.md
+docs/IMPLEMENTATION_PLAN.md
+docs/LECCIONES_APRENDIDAS.md
+docs/LOG_AUTONOMO.md
+docs/PLAN_REMEDIACION.md
+docs/PRODUCCION_CHECKLIST.md
+docs/RELEASE_CHECKLIST.md
+docs/REMEDIACION_COMPLETA.md
+docs/REPORTE_FASE_*.md
+docs/SPRINT*.md
+docs/VALIDACION_RUNTIME.md
+docs/fase-*/
+
 # ── Secretos y credenciales ──────────────────────────────────
 .env
 .env.*
@@ -43,9 +76,12 @@ id_ed25519*
 .pgpass
 .aws/
 .ssh/
-*apikey*
-*api_key*
-*secret*
+# Patrones específicos para secretos reales (no código)
+*apikey*.secret
+*api_key*.key
+*secret*.key
+*secret*.pem
+*secret*.env
 !SECURITY.md
 
 # ── Exportaciones de n8n (NUNCA se publican) ─────────────────
@@ -62,10 +98,16 @@ executions/
 *.credentials.json
 credentials*.json
 flows/
-workflows/
 # Los exports de workflows n8n NO se versionan aqui: este repo es publico y
 # SECURITY.md los prohibe (grafo real, Code nodes, prompts, credential IDs).
 # Se respaldan fuera del repo. Reforzado por .git/hooks/pre-commit.
+#
+# F22 R-06: esta regla era `workflows/`, SIN anclar. Un patron sin `/` inicial
+# casa con cualquier directorio de ese nombre a cualquier profundidad, asi que
+# tambien se tragaba `.github/workflows/` y **ci.yml nunca estuvo en git**: el CI
+# no es que no se hubiera ejecutado por falta de push, es que no existia en
+# GitHub. Anclado al directorio de n8n, que es lo que se queria proteger.
+/n8n/workflows/
 
 # ── Bases de datos, dumps, backups ───────────────────────────
 *.sqlite

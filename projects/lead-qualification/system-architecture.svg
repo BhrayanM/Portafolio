@@ -1,0 +1,142 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 720" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="720" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" fill="#e2e8f0" font-size="18" font-weight="700">AI Lead Engine — System Architecture</text>
+  <line x1="200" y1="50" x2="700" y2="50" stroke="#334155" stroke-width="1"/>
+
+  <!-- Layer 1: Omnichannel Inbound -->
+  <rect x="300" y="70" width="300" height="56" rx="8" fill="url(#blue)" filter="url(#shadow)"/>
+  <text x="450" y="94" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Omnichannel Inbound</text>
+  <text x="450" y="112" text-anchor="middle" fill="#bfdbfe" font-size="10">Web Forms · WhatsApp · Voice · Email · API</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="126" x2="450" y2="150" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,148 450,156 455,148" fill="#475569"/>
+
+  <!-- Layer 2: Secure Intake -->
+  <rect x="250" y="158" width="400" height="56" rx="8" fill="url(#red)" filter="url(#shadow)"/>
+  <text x="450" y="182" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Secure Intake Layer</text>
+  <text x="450" y="200" text-anchor="middle" fill="#fecaca" font-size="10">Authentication · Rate Limiting · Payload Validation · Deduplication</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="214" x2="450" y2="238" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,236 450,244 455,236" fill="#475569"/>
+
+  <!-- Layer 3: AI Brain -->
+  <rect x="250" y="246" width="400" height="56" rx="8" fill="url(#purple)" filter="url(#shadow)"/>
+  <text x="450" y="270" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">AI Brain — Decision Engine</text>
+  <text x="450" y="288" text-anchor="middle" fill="#ddd6fe" font-size="10">LLM Scoring · Structured Output · Category Classification</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="302" x2="450" y2="326" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,324 450,332 455,324" fill="#475569"/>
+
+  <!-- Layer 4: Supervisor Agent Orchestrator -->
+  <rect x="200" y="334" width="500" height="56" rx="8" fill="url(#orange)" filter="url(#shadow)"/>
+  <text x="450" y="358" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Supervisor Agent Orchestrator</text>
+  <text x="450" y="376" text-anchor="middle" fill="#fed7aa" font-size="10">Human-in-the-Loop Gate · Route by Category · Deterministic Router</text>
+
+  <!-- Branches from Orchestrator -->
+  <line x1="450" y1="390" x2="450" y2="400" stroke="#475569" stroke-width="2"/>
+  <line x1="130" y1="400" x2="770" y2="400" stroke="#475569" stroke-width="2"/>
+  <line x1="130" y1="400" x2="130" y2="418" stroke="#475569" stroke-width="2"/>
+  <line x1="320" y1="400" x2="320" y2="418" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="400" x2="450" y2="418" stroke="#475569" stroke-width="2"/>
+  <line x1="580" y1="400" x2="580" y2="418" stroke="#475569" stroke-width="2"/>
+  <line x1="770" y1="400" x2="770" y2="418" stroke="#475569" stroke-width="2"/>
+  <polygon points="125,416 130,424 135,416" fill="#475569"/>
+  <polygon points="315,416 320,424 325,416" fill="#475569"/>
+  <polygon points="445,416 450,424 455,416" fill="#475569"/>
+  <polygon points="575,416 580,424 585,416" fill="#475569"/>
+  <polygon points="765,416 770,424 775,416" fill="#475569"/>
+
+  <!-- Layer 5: Integration Targets -->
+  <rect x="60" y="430" width="140" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="130" y="452" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">CRM Sync</text>
+  <text x="130" y="467" text-anchor="middle" fill="#64748b" font-size="9">HubSpot API</text>
+
+  <rect x="250" y="430" width="140" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="320" y="452" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">Calendar</text>
+  <text x="320" y="467" text-anchor="middle" fill="#64748b" font-size="9">Google Calendar API</text>
+
+  <rect x="380" y="430" width="140" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="450" y="452" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">Research</text>
+  <text x="450" y="467" text-anchor="middle" fill="#64748b" font-size="9">Enrichment API</text>
+
+  <rect x="520" y="430" width="140" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="590" y="452" text-anchor="middle" fill="#f472b6" font-size="11" font-weight="600">Support</text>
+  <text x="590" y="467" text-anchor="middle" fill="#64748b" font-size="9">Ticket System</text>
+
+  <rect x="700" y="430" width="140" height="48" rx="6" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="770" y="452" text-anchor="middle" fill="#a78bfa" font-size="11" font-weight="600">Notifications</text>
+  <text x="770" y="467" text-anchor="middle" fill="#64748b" font-size="9">Slack · Email · SMS</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="478" x2="450" y2="506" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,504 450,512 455,504" fill="#475569"/>
+
+  <!-- Layer 6: Automated Follow-up -->
+  <rect x="250" y="514" width="400" height="48" rx="8" fill="url(#green)" filter="url(#shadow)"/>
+  <text x="450" y="536" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Automated Follow-up Loop</text>
+  <text x="450" y="552" text-anchor="middle" fill="#a7f3d0" font-size="10">Scheduled Cron · Idempotent State Tracking · Engagement Scoring</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="562" x2="450" y2="588" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,586 450,594 455,586" fill="#475569"/>
+
+  <!-- Layer 7: Observability -->
+  <rect x="200" y="596" width="500" height="48" rx="8" fill="#1e293b" stroke="#475569" stroke-width="1.5"/>
+  <text x="450" y="618" text-anchor="middle" fill="#94a3b8" font-size="13" font-weight="600">Observability &amp; Reliability Layer</text>
+  <text x="450" y="634" text-anchor="middle" fill="#64748b" font-size="10">Error Workflow · Persistent Error Logs · Prometheus Metrics · Grafana Dashboards</text>
+
+  <!-- Left annotation -->
+  <rect x="30" y="120" width="100" height="560" rx="6" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="80" y="400" text-anchor="middle" fill="#475569" font-size="10" transform="rotate(-90, 80, 400)">Production-Grade Event-Driven Pipeline</text>
+
+  <!-- Right annotation -->
+  <rect x="770" y="120" width="100" height="560" rx="6" fill="none" stroke="#334155" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="820" y="400" text-anchor="middle" fill="#475569" font-size="10" transform="rotate(90, 820, 400)">Multi-Tenant · RLS · Containerized</text>
+
+  <!-- Legend -->
+  <rect x="30" y="668" width="12" height="12" rx="2" fill="url(#blue)"/>
+  <text x="48" y="678" fill="#94a3b8" font-size="9">Ingestion</text>
+  <rect x="130" y="668" width="12" height="12" rx="2" fill="url(#red)"/>
+  <text x="148" y="678" fill="#94a3b8" font-size="9">Security</text>
+  <rect x="230" y="668" width="12" height="12" rx="2" fill="url(#purple)"/>
+  <text x="248" y="678" fill="#94a3b8" font-size="9">AI</text>
+  <rect x="310" y="668" width="12" height="12" rx="2" fill="url(#orange)"/>
+  <text x="328" y="678" fill="#94a3b8" font-size="9">Orchestration</text>
+  <rect x="450" y="668" width="12" height="12" rx="2" fill="url(#green)"/>
+  <text x="468" y="678" fill="#94a3b8" font-size="9">Automation</text>
+</svg>

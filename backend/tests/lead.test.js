@@ -79,8 +79,8 @@ describe('sanitizeLead — límites y saneamiento', () => {
   });
 
   it('descarta caracteres no telefónicos', () => {
-    expect(sanitizeLead({ email: 'a@b.com', phone: '+34 (600) 111-222 ext' }).phone)
-      .toBe('+34 (600) 111-222 ');
+    expect(sanitizeLead({ email: 'a@b.com', phone: '+1 (555) 010-199 ext' }).phone)
+      .toBe('+1 (555) 010-199 ');
   });
 
   it('no deja pasar etiquetas ni texto de inyección sin acotar', () => {
@@ -228,10 +228,10 @@ describe('flujo completo sin servicios externos', () => {
   it('lead caliente: saneado → parseado → derivado a aprobación', () => {
     const sanitized = sanitizeLead({
       body: {
-        email: '  Laura@ACME.com ',
-        name: 'Laura Fernandez',
-        company: 'Acme Corp',
-        phone: '+34 600 111 222',
+        email: '  Jane.Smith@EXAMPLE.com ',
+        name: 'Jane Smith',
+        company: 'Demo Company',
+        phone: '+1 555 010 199',
         message: 'Necesito contratar, presupuesto aprobado.',
       },
     });
@@ -240,7 +240,7 @@ describe('flujo completo sin servicios externos', () => {
       sanitized
     );
 
-    expect(scored.email).toBe('laura@acme.com');
+    expect(scored.email).toBe('jane.smith@example.com');
     expect(isHot(scored)).toBe(true);
     expect(resolveStatus(scored)).toBe('hot');
     expect(scored.aiScore).toBe(92);

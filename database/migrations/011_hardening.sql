@@ -1,113 +1,158 @@
 -- ═════════════════════════════════════════════════════════════
---  BASE DE DATOS DURO — F19(c): Refuerzo en Capa de Datos
---  Puede ejecutarse después de la migración 010 (RLS activo) para fortalecer aún más
+--  F19(c) PARTE 1 — Auditoría e integridad en la capa de datos
+--  Requiere: 001–010 aplicadas (RLS activo).
+--  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 
--- 1. LOGGING DE AUDITORÍA — seguimiento inmutable de cambios críticos
--- Activa triggers en tablas importantes para registrar INSERT/UPDATE/DELETE seguros
--- Atención: usando DELETE EVENTO en vez de BEFORE para el borrado basado en triggers
+BEGIN;
 
--- Función: registrar auditoría genérica en audit_log
+-- ─────────────────────────────────────────────────────────────
+-- 1. AUDITORÍA — registro inmutable de cambios críticos
+-- ─────────────────────────────────────────────────────────────
+--
+-- F21.3 · tres defectos corregidos respecto de la versión original:
+--
+--   a) Los triggers eran BEFORE y la función terminaba en RETURN NULL.
+--      En PostgreSQL, un trigger BEFORE ... FOR EACH ROW que devuelve NULL
+--      CANCELA la operación. Tal como estaba, cualquier INSERT en leads,
+--      users, tenants o workflow_runs se habría descartado en silencio.
+--      Son AFTER: la auditoría registra hechos consumados y su valor de
+--      retorno se ignora.
+--
+--   b) La función leía NEW.tenant_id directamente. La tabla `tenants` no
+--      tiene esa columna (su clave es `id`), así que el trigger sobre
+--      tenants fallaba con «record "new" has no field "tenant_id"» y
+--      bloqueaba permanentemente el alta de tenants — con ello, el seed
+--      del tenant administrador y por tanto el login.
+--      Se resuelve con to_jsonb(rec)->>'tenant_id', que devuelve NULL si la
+--      columna no existe en lugar de abortar; para `tenants` el tenant
+--      auditado es su propio id.
+--
+--   c) No contemplaba DELETE: en un trigger de borrado NEW es NULL. Se
+--      selecciona el registro de referencia según TG_OP.
+
 CREATE OR REPLACE FUNCTION log_audit()
 RETURNS TRIGGER AS $$
 DECLARE
-  actor_id UUID;
+  rec          JSONB;
+  audit_tenant UUID;
+  audit_res_id TEXT;
 BEGIN
-  -- Intentionalmente NO usamos current_setting('app.tenant_id') aquí.
-  -- La auditoría debe pertenecer al tenant_original DEL REGISTRO, no al tenant_
-  -- que realiza la operación, previniendo el ghost-delete (asignando borrados a un
-  -- actor que no existe). Actor null garantizado a tracert en las consultas.
+  -- Registro de referencia: el nuevo salvo en DELETE, donde solo hay OLD.
+  IF TG_OP = 'DELETE' THEN
+    rec := to_jsonb(OLD);
+  ELSE
+    rec := to_jsonb(NEW);
+  END IF;
+
+  audit_res_id := rec->>'id';
+
+  -- Deliberadamente NO se usa current_setting('app.tenant_id'): la entrada
+  -- pertenece al tenant DEL REGISTRO, no al que ejecuta la operación. Así un
+  -- borrado no queda atribuido a un tenant que no es su dueño.
+  IF TG_TABLE_NAME = 'tenants' THEN
+    audit_tenant := audit_res_id::UUID;      -- el tenant es la propia fila
+  ELSE
+    audit_tenant := NULLIF(rec->>'tenant_id', '')::UUID;
+  END IF;
+
   INSERT INTO audit_log (
-    tenant_id,
-    user_id,
-    action,
-    resource,
-    resource_id,
-    details,
-    ip_address,
-    user_agent,
-    created_at
+    tenant_id, user_id, action, resource, resource_id,
+    details, ip_address, user_agent, created_at
   ) VALUES (
-    NEW.tenant_id,
+    audit_tenant,
     NULL,
     TG_OP,
     TG_TABLE_NAME,
-    COALESCE(NEW.id::text, OLD.id::text),
+    audit_res_id,
     CASE TG_OP
-      WHEN 'INSERT' THEN jsonb_build_object('data', NEW)
-      WHEN 'UPDATE' THEN jsonb_build_object('old', OLD, 'new', NEW)
-      WHEN 'DELETE' THEN jsonb_build_object('old', OLD)
+      WHEN 'INSERT' THEN jsonb_build_object('data', to_jsonb(NEW))
+      WHEN 'UPDATE' THEN jsonb_build_object('old', to_jsonb(OLD), 'new', to_jsonb(NEW))
+      WHEN 'DELETE' THEN jsonb_build_object('old', to_jsonb(OLD))
     END,
     NULL,
     NULL,
     CURRENT_TIMESTAMP
   );
-  RETURN NULL;
+
+  RETURN NULL;   -- irrelevante en AFTER; explícito para dejarlo claro
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Trigger: leads — registro de creación/modificación
-CREATE TRIGGER leads_audit BEFORE INSERT OR UPDATE ON leads
-FOR EACH ROW EXECUTE FUNCTION log_audit();
+-- Idempotencia: la migración debe poder reaplicarse sobre una base ya migrada.
+DROP TRIGGER IF EXISTS leads_audit         ON leads;
+DROP TRIGGER IF EXISTS users_audit         ON users;
+DROP TRIGGER IF EXISTS tenants_audit       ON tenants;
+DROP TRIGGER IF EXISTS workflow_runs_audit ON workflow_runs;
 
--- Trigger: users — registro solo para creación (edición de contraseñas/nombre de administrador)
-CREATE TRIGGER users_audit BEFORE INSERT ON users
-FOR EACH ROW EXECUTE FUNCTION log_audit();
+CREATE TRIGGER leads_audit         AFTER INSERT OR UPDATE ON leads
+  FOR EACH ROW EXECUTE FUNCTION log_audit();
 
--- Trigger: tenants — registro solo para creación (ingeniería inversa del tenant)
-CREATE TRIGGER tenants_audit BEFORE INSERT ON tenants
-FOR EACH ROW EXECUTE FUNCTION log_audit();
+CREATE TRIGGER users_audit         AFTER INSERT           ON users
+  FOR EACH ROW EXECUTE FUNCTION log_audit();
 
--- Trigger: workflow_runs — creación/finalización de ejecución de workflow críticos
-CREATE TRIGGER workflow_runs_audit BEFORE INSERT OR UPDATE ON workflow_runs
-FOR EACH ROW EXECUTE FUNCTION log_audit();
+CREATE TRIGGER tenants_audit       AFTER INSERT           ON tenants
+  FOR EACH ROW EXECUTE FUNCTION log_audit();
 
--- 2. INTEGRIDAD MULTI-TENANT — check constraints donde sea posible (ibuprofen)
--- No queremos etiquetas extra, solo integridad fácil de entender.
+CREATE TRIGGER workflow_runs_audit AFTER INSERT OR UPDATE ON workflow_runs
+  FOR EACH ROW EXECUTE FUNCTION log_audit();
 
-ALTER TABLE users
-  ADD CONSTRAINT users_tenant_must_exist
-    CHECK (tenant_id IN (SELECT id FROM tenants));
+-- ─────────────────────────────────────────────────────────────
+-- 2. INTEGRIDAD MULTI-TENANT
+-- ─────────────────────────────────────────────────────────────
+--
+-- F21.3 · la versión original declaraba siete constraints de la forma
+--
+--     CHECK (tenant_id IN (SELECT id FROM tenants))
+--
+-- que PostgreSQL rechaza («cannot use subquery in check constraint»), y con
+-- razón: un CHECK se evalúa solo sobre la fila que se escribe, así que no
+-- podría detectar el borrado posterior del tenant referenciado. Sería una
+-- garantía aparente.
+--
+-- La integridad que se buscaba YA está impuesta, y de forma más fuerte, por
+-- las claves foráneas declaradas en 001–009:
+--
+--   users.tenant_id           → tenants(id) ON DELETE CASCADE     (002)
+--   leads.tenant_id           → tenants(id) ON DELETE CASCADE     (003)
+--   scores.tenant_id          → tenants(id) ON DELETE CASCADE     (004)
+--   error_log.tenant_id       → tenants(id) ON DELETE SET NULL    (005)
+--   tenant_settings.tenant_id → tenants(id) ON DELETE CASCADE     (006)
+--   workflow_runs.tenant_id   → tenants(id) ON DELETE SET NULL    (007)
+--   audit_log.tenant_id       → tenants(id) ON DELETE SET NULL    (008)
+--
+-- Las FK cubren el caso que el CHECK no cubría y admiten NULL donde la
+-- columna es opcional, que es exactamente la semántica pretendida. No se
+-- añade nada: se documenta y se verifica en 015_db_validation.sql.
 
-ALTER TABLE leads
-  ADD CONSTRAINT leads_tenant_must_exist
-    CHECK (tenant_id IN (SELECT id FROM tenants));
+-- ─────────────────────────────────────────────────────────────
+-- 3. PROTECCIÓN DE DATOS EN LOGS
+-- ─────────────────────────────────────────────────────────────
+-- Un stack trace sin enmascarar puede arrastrar rutas, tokens en query
+-- strings o fragmentos de payload. El default cubre a quien inserta sin
+-- especificar la columna; el enmascarado del valor entrante es
+-- responsabilidad de backend/src/utils/redact.js.
 
-ALTER TABLE scores
-  ADD CONSTRAINT scores_tenant_must_exist
-    CHECK (tenant_id IN (SELECT id FROM tenants));
+ALTER TABLE error_log ALTER COLUMN stack_trace SET DEFAULT '[MASKED]';
 
-ALTER TABLE workflow_runs
-  ADD CONSTRAINT workflow_runs_tenant_must_exist
-    CHECK (tenant_id IS NULL OR tenant_id IN (SELECT id FROM tenants));
+-- ─────────────────────────────────────────────────────────────
+-- 4. NOTAS DE REPARACIÓN (F21.3)
+-- ─────────────────────────────────────────────────────────────
+--
+-- Retirado · ALTER TABLE error_log ADD CONSTRAINT uk_error_log_unique
+--            UNIQUE (workflow_id, message)
+--
+--   Un error que se repite es el caso normal, no una anomalía: el mismo
+--   workflow fallando dos veces por el mismo motivo es precisamente lo que
+--   hay que registrar. Con esa constraint el segundo INSERT viola la unicidad
+--   y el manejador de errores falla al registrar el error. Se retira porque
+--   rompe la función de la tabla; la deduplicación, si se quiere, va en la
+--   consulta (GROUP BY) o en una columna `occurrences`.
+--
+-- Movido · los cuatro CREATE INDEX de esta migración pasan a
+--          014_db_indexes.sql, que es donde se gestiona la estrategia de
+--          índices. Dos de ellos (idx_leads_tenant_status,
+--          idx_leads_tenant_category) colisionaban por nombre con los que
+--          crea esa migración.
 
-ALTER TABLE audit_log
-  ADD CONSTRAINT audit_log_tenant_must_exist
-    CHECK (tenant_id IS NULL OR tenant_id IN (SELECT id FROM tenants));
-
-ALTER TABLE error_log
-  ADD CONSTRAINT error_log_tenant_must_exist
-    CHECK (tenant_id IS NULL OR tenant_id IN (SELECT id FROM tenants));
-
-ALTER TABLE tenant_settings
-  ADD CONSTRAINT tenant_settings_tenant_must_exist
-    CHECK (tenant_id IN (SELECT id FROM tenants));
-
--- 3. DATOS ÚNICOS / LÍTICOS en tablas delta — por seviullidad, valores únicos
-
-ALTER TABLE error_log ADD CONSTRAINT uk_error_log_unique UNIQUE (workflow_id, message);
-
--- 4. ÍNDICES — compactar, basados en uso real (de acuerdo con las consultas en backend)
-
-CREATE INDEX idx_leads_tenant_status ON leads(tenant_id, status);
-CREATE INDEX idx_leads_tenant_category ON leads(tenant_id, ai_category);
-CREATE INDEX idx_scores_lead_tenant ON scores(lead_id, tenant_id);
-CREATE INDEX idx_workflow_runs_tenant_status ON workflow_runs(tenant_id, status);
-
--- 5. LOGGING — tiempo G-04: masking en error_log, mantener alto nivel de seguridad
-
-ALTER TABLE error_log
-  ALTER COLUMN stack_trace SET DEFAULT '[MASKED]';
-
--- 6. COMMIT IMPERATIVO — la transacción está dentro de la migración (se ejecuta completita)
--- No hay UNDO central, solo un rollback manual si algo falla.
+COMMIT;
