@@ -1,10 +1,10 @@
 /**
- * Protección CSRF: peticiones mutantes con cookie de sesión solo se aceptan
- * con Origin same-origin o en la allowlist CORS (config.corsOrigins).
+ * Protección CSRF por doble envío de token: toda petición mutante con cookie de
+ * sesión debe repetir en `x-csrf-token` el valor de la cookie `csrf-token`
+ * emitida por el servidor. Además se valida Origin (same-origin o CORS_ORIGINS).
  *
- * CSRF es un ataque de navegador: quien usa Bearer (clientes no-navegador) o no
- * manda cookie no se ve afectado. Las peticiones sin Origin no pueden venir de un
- * navegador (siempre lo envían en POST/PUT/PATCH/DELETE) y pasan.
+ * Las peticiones sin cookie de sesión (login, clientes Bearer, webhooks externos)
+ * y los métodos seguros no se validan, solo reciben la cookie si falta.
  */
 const request = require('supertest');
 const bcrypt = require('bcrypt');
@@ -31,8 +31,23 @@ const app = require('../src/app');
 const config = require('../src/config');
 
 const COOKIE = config.cookie.name;
-const authCookie = (res) =>
-  res.headers['set-cookie'].find((c) => c.startsWith(`${COOKIE}=`));
+const CSRF_COOKIE = 'csrf-token';
+const CSRF_HEADER = 'x-csrf-token';
+
+const cookiePair = (res, name) => {
+  const raw = res.headers['set-cookie'] || [];
+  const entry = raw.find((c) => c.startsWith(`${name}=`));
+  if (!entry) return null;
+  return `${name}=${decodeURIComponent(entry.split(';')[0].slice(name.length + 1))}`;
+};
+
+const cookieValue = (res, name) => {
+  const pair = cookiePair(res, name);
+  return pair ? pair.slice(name.length + 1) : null;
+};
+
+// Cabecera Cookie completa: sesión + token CSRF (lo que haría el navegador).
+const sessionCookies = (res) => `${cookiePair(res, COOKIE)}; ${cookiePair(res, CSRF_COOKIE)}`;
 
 beforeAll(async () => {
   PASSWORD_HASH = await bcrypt.hash(PASSWORD, 10);
@@ -55,53 +70,96 @@ async function login() {
   const res = await request(app)
     .post('/api/auth/login')
     .send({ email: USER.email, password: PASSWORD });
-  return authCookie(res);
+  return res;
 }
 
-describe('CSRF — validación de Origin en peticiones mutantes con cookie', () => {
-  it('rechaza 403 un POST con cookie y Origin no autorizado', async () => {
-    const cookie = await login();
+describe('emisión de la cookie csrf-token', () => {
+  it('el login emite la cookie csrf-token además de la de sesión', async () => {
+    const res = await login();
+    expect(res.status).toBe(200);
+    expect(cookiePair(res, CSRF_COOKIE)).toBeTruthy();
+  });
+
+  it('una petición segura sin cookie recibe la cookie csrf-token', async () => {
+    const res = await request(app).get('/api/auth/me');
+    expect(res.status).toBe(401);
+    expect(cookiePair(res, CSRF_COOKIE)).toBeTruthy();
+  });
+});
+
+describe('CSRF — doble envío en peticiones mutantes con sesión', () => {
+  it('rechaza 403 sin cabecera x-csrf-token', async () => {
+    const loginRes = await login();
     const res = await request(app)
       .post('/api/auth/logout')
-      .set('Cookie', cookie)
-      .set('Origin', 'https://sitio-malicioso.example.com');
+      .set('Cookie', sessionCookies(loginRes))
+      .set('Origin', config.corsOrigins[0]);
 
     expect(res.status).toBe(403);
   });
 
-  it('acepta un POST con cookie y Origin en la allowlist CORS', async () => {
-    const cookie = await login();
+  it('rechaza 403 con un token que no coincide con la cookie', async () => {
+    const loginRes = await login();
     const res = await request(app)
       .post('/api/auth/logout')
-      .set('Cookie', cookie)
+      .set('Cookie', sessionCookies(loginRes))
+      .set('x-csrf-token', 'token-inventado')
+      .set('Origin', config.corsOrigins[0]);
+
+    expect(res.status).toBe(403);
+  });
+
+  it('acepta con cookie de sesión, token válido y Origin en la allowlist CORS', async () => {
+    const loginRes = await login();
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', sessionCookies(loginRes))
+      .set('x-csrf-token', cookieValue(loginRes, CSRF_COOKIE))
       .set('Origin', config.corsOrigins[0]);
 
     expect(res.status).toBe(200);
   });
 
-  it('acepta un POST same-origin', async () => {
-    const cookie = await login();
+  it('acepta una petición same-origin con token válido', async () => {
+    const loginRes = await login();
     const res = await request(app)
       .post('/api/auth/logout')
       .set('Host', 'localhost:3000')
-      .set('Cookie', cookie)
+      .set('Cookie', sessionCookies(loginRes))
+      .set('x-csrf-token', cookieValue(loginRes, CSRF_COOKIE))
       .set('Origin', 'http://localhost:3000');
 
     expect(res.status).toBe(200);
   });
 
-  it('acepta un POST con cookie y sin Origin (cliente no-navegador)', async () => {
-    const cookie = await login();
-    const res = await request(app).post('/api/auth/logout').set('Cookie', cookie);
+  it('acepta un cliente no-navegador: cookie de sesión + token válido y sin Origin', async () => {
+    const loginRes = await login();
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', sessionCookies(loginRes))
+      .set('x-csrf-token', cookieValue(loginRes, CSRF_COOKIE));
 
     expect(res.status).toBe(200);
   });
 
+  it('rechaza 403 con token válido y Origin no autorizado', async () => {
+    const loginRes = await login();
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', sessionCookies(loginRes))
+      .set('x-csrf-token', cookieValue(loginRes, CSRF_COOKIE))
+      .set('Origin', 'https://sitio-malicioso.example.com');
+
+    expect(res.status).toBe(403);
+  });
+});
+
+describe('CSRF — fuera de alcance del middleware', () => {
   it('no filtra métodos seguros: GET con cookie y Origin no autorizado pasa', async () => {
-    const cookie = await login();
+    const loginRes = await login();
     const res = await request(app)
       .get('/api/auth/me')
-      .set('Cookie', cookie)
+      .set('Cookie', sessionCookies(loginRes))
       .set('Origin', 'https://sitio-malicioso.example.com');
 
     expect(res.status).toBe(200);

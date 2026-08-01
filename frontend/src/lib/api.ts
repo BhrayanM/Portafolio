@@ -4,6 +4,10 @@
    Session is carried via HttpOnly `access_token` cookie — no JWT in
    localStorage. The backend enforces CORS_ORIGINS; the client only
    needs `credentials: 'include'` on every fetch.
+
+   CSRF: the backend issues a JS-readable `csrf-token` cookie and requires
+   every state-changing request to echo it in the `x-csrf-token` header
+   (double-submit pattern). This wrapper adds it automatically.
    ════════════════════════════════════════════════════════════════
 */
 
@@ -12,6 +16,16 @@ import type { User, Lead, LeadStats, BillingPlan, Subscription, ApiKey, LeadLogE
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || '';
 
 const REQUEST_TIMEOUT_MS = Number(process.env.NEXT_PUBLIC_REQUEST_TIMEOUT_MS) || 10000;
+
+const CSRF_COOKIE = 'csrf-token';
+const CSRF_HEADER = 'x-csrf-token';
+const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+
+function getCsrfToken(): string {
+  if (typeof document === 'undefined') return '';
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${CSRF_COOKIE}=([^;]+)`));
+  return match ? decodeURIComponent(match[1]) : '';
+}
 
 export type ApiError = Error & { status?: number; context?: unknown };
 
@@ -35,6 +49,12 @@ export const apiFetch = async <T>(path: string, init: RequestInit = {}): Promise
   // estado "cargando" para siempre; el AbortController la corta.
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+  // CSRF (doble envío): toda petición mutante debe repetir el token de la cookie.
+  if (init.method && !SAFE_METHODS.has(init.method) && !headers.has(CSRF_HEADER)) {
+    const csrf = getCsrfToken();
+    if (csrf) headers.set(CSRF_HEADER, csrf);
+  }
 
   let res: Response;
   try {

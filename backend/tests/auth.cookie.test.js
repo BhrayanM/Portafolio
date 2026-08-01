@@ -42,6 +42,16 @@ const cookieHeader = (res) => {
 };
 const authCookie = (res) => cookieHeader(res).find((c) => c.startsWith(`${COOKIE}=`));
 
+// Doble envío CSRF: el logout es una petición mutante con cookie de sesión y
+// debe repetir en `x-csrf-token` el valor de la cookie `csrf-token` (ver csrf.test.js).
+const csrfToken = (res) => {
+  const raw = cookieHeader(res).find((c) => c.startsWith('csrf-token='));
+  return raw ? decodeURIComponent(raw.split(';')[0].slice('csrf-token='.length)) : '';
+};
+
+// Cabecera Cookie completa: sesión + token CSRF (lo que haría el navegador).
+const sessionCookies = (res) => `${authCookie(res)}; ${cookieHeader(res).find((c) => c.startsWith('csrf-token='))}`;
+
 beforeAll(async () => {
   PASSWORD_HASH = await bcrypt.hash(PASSWORD, 10);
 
@@ -123,7 +133,7 @@ describe('GET /api/auth/me', () => {
       .post('/api/auth/login')
       .send({ email: USER_EMAIL, password: PASSWORD });
 
-    const res = await request(app).get('/api/auth/me').set('Cookie', authCookie(login));
+    const res = await request(app).get('/api/auth/me').set('Cookie', sessionCookies(login));
 
     expect(res.status).toBe(200);
     expect(res.body.user.email).toBe(USER_EMAIL);
@@ -141,7 +151,10 @@ describe('POST /api/auth/logout', () => {
       .post('/api/auth/login')
       .send({ email: USER_EMAIL, password: PASSWORD });
 
-    const res = await request(app).post('/api/auth/logout').set('Cookie', authCookie(login));
+    const res = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', sessionCookies(login))
+      .set('x-csrf-token', csrfToken(login));
 
     expect(res.status).toBe(200);
     const cleared = authCookie(res);
@@ -155,7 +168,10 @@ describe('POST /api/auth/logout', () => {
       .post('/api/auth/login')
       .send({ email: USER_EMAIL, password: PASSWORD });
 
-    const out = await request(app).post('/api/auth/logout').set('Cookie', authCookie(login));
+    const out = await request(app)
+      .post('/api/auth/logout')
+      .set('Cookie', sessionCookies(login))
+      .set('x-csrf-token', csrfToken(login));
 
     // El navegador guardaria la cookie vaciada; reproducimos ese estado.
     const res = await request(app).get('/api/auth/me').set('Cookie', `${COOKIE}=`);

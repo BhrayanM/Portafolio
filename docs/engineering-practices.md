@@ -145,7 +145,7 @@ defecto, sin fallbacks silenciosos.
 | Capa | Controles |
 |---|---|
 | Red | Redes Docker privadas, TLS 1.2+ en el borde, HSTS, cabeceras de seguridad; puertos internos nunca expuestos |
-| Aplicación | Helmet (CSP, HSTS, X-Frame), CORS por entorno con lista blanca, rate limit por niveles (global, auth, API key), validación de Origin en peticiones mutantes con cookie (CSRF) |
+| Aplicación | Helmet (CSP, HSTS, X-Frame), CORS por entorno con lista blanca, rate limit por niveles (global, auth, API key), CSRF por doble envío de token + validación de Origin en peticiones mutantes con cookie |
 | Autenticación | bcrypt cost 12, JWT HS256 (24 h, sin refresh tokens), rotación de API keys |
 | Autorización | Roles (admin/manager/member), middleware por tenant, RLS como refuerzo final |
 | Datos | `.env` en `.gitignore`, patrones de secreto en `.gitignore` (`*.secret`, `*.key`, `*.pem`) |

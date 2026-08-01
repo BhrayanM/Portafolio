@@ -51,7 +51,7 @@ las 23:00 con un cliente esperando.
 | [010](#adr-010) | Estado fuera del contenedor y resiliencia a reinicios | ✅ Aceptada | Infraestructura |
 | [011](#adr-011) | Toda escritura externa es idempotente (upsert) | ✅ Aceptada | Todos |
 | [012](#adr-012) | El handoff a humano pausa la automatización del hilo | ✅ Aceptada | WhatsApp, Voz |
-| [013](#adr-013) | Mitigación de CSRF: SameSite + validación de Origin | ✅ Aceptada | Backend |
+| [013](#adr-013) | Mitigación de CSRF: doble envío de token + Origin + SameSite | ✅ Aceptada | Backend |
 
 ---
 
@@ -317,39 +317,44 @@ devolverlo a la automatización.
 ---
 
 <a id="adr-013"></a>
-## ADR-013 · Mitigación de CSRF para sesiones por cookie (SameSite + validación de Origin)
+## ADR-013 · Mitigación de CSRF para sesiones por cookie (doble envío + Origin + SameSite)
 
 **Contexto.** La API autentica por cookie HttpOnly (`access_token`) para navegadores y
 por `Authorization: Bearer` para clientes no-navegador. CSRF es un ataque exclusivo de
 navegador: un sitio malicioso dispara peticiones mutantes con las cookies de la víctima.
 
-**Decisión.** Defensa por capas sin cambiar el contrato de la API:
+**Decisión.** Defensa por capas sin cambiar el contrato de la API para clientes Bearer:
 
 1. **SameSite=Lax** en la cookie de sesión: el navegador no envía la cookie en POST
    cross-site. Cubre el caso normal.
-2. **Validación de Origin** en `middleware/csrf.js`: toda petición mutante
-   (POST/PUT/PATCH/DELETE) con cookie de sesión debe traer un Origin same-origin o
-   listado en `CORS_ORIGINS`. Si el Origin no está autorizado, la petición se rechaza
-   con 403. Sin Origin no puede tratarse de un navegador (los navegadores siempre lo
-   envían en peticiones mutantes) y la petición pasa.
-3. Los clientes Bearer no envían cookie: no se ven afectados.
+2. **Doble envío de token (OWASP)** en `middleware/csrf.js`: el servidor emite una
+   cookie `csrf-token` legible por JS; toda petición mutante (POST/PUT/PATCH/DELETE)
+   con cookie de sesión debe repetir el token en la cabecera `x-csrf-token`. Un sitio
+   externo no puede leer la cookie (Same Origin Policy) ni fijar la cabecera (CORS).
+3. **Validación de Origin**: la petición debe ser same-origin o venir de un origen de
+   `CORS_ORIGINS`.
+
+Las peticiones sin cookie de sesión —login, clientes Bearer, webhooks externos
+(WhatsApp, Twilio, Stripe)— no se validan: se autentican por otros medios.
 
 **Alternativas descartadas.**
-- **`csurf` / tokens CSRF de doble envío:** la librería clásica está sin mantenimiento y
-  con CVEs conocidos; los tokens de doble envío añaden estado y complejidad al cliente.
+- **`csurf`:** sin mantenimiento y con CVEs conocidos.
+- **`tiny-csrf`:** mantenida y compatible, pero diseñada para formularios servidor
+  (cookie HttpOnly firmada de 5 minutos, token de un solo uso por `req.csrfToken()`),
+  no para una SPA JSON con clientes server-to-server.
 - **Confiar solo en SameSite:** no cubre los despliegues con `SameSite=None`
   (frontend y API en subdominios distintos, como documenta `.env.example`).
 
-**Razón.** La validación de Origin no añade estado, no exige cambios en el frontend y
-bloquea el único vector real (navegador con cookie de sesión). El webhook de Stripe queda
-fuera por diseño: se autentica por firma HMAC y no usa cookies.
+**Razón.** El doble envío sin estado en servidor, combinado con SameSite y Origin,
+bloquea el vector real (navegador con cookie de sesión) sin requerir sesión de
+servidor ni cambiar el flujo Bearer.
 
-**Consecuencias.** Las peticiones mutantes desde el navegador deben ser same-origin o
-estar en la allowlist CORS — requisito que el frontend ya cumple (`credentials: 'include'`
-hacia origenes CORS). Clientes que usen cookie fuera de navegador deben enviar Origin.
+**Consecuencias.** El frontend repite la cookie en la cabecera en toda petición
+mutante (una línea en el cliente HTTP centralizado). Los clientes que usen cookie de
+sesión fuera de navegador deben repetir el token igual que un navegador.
 
-**Rollback.** Documentado y de bajo riesgo: retirar el middleware deja la protección en
-manos de SameSite únicamente.
+**Rollback.** Documentado y de bajo riesgo: retirar el middleware deja la protección
+en manos de SameSite únicamente.
 
 ---
 
