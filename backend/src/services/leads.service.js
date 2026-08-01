@@ -8,7 +8,11 @@ class LeadsService {
     let idx = 2;
 
     if (filters.status) { query += ` AND status = $${idx++}`; params.push(filters.status); }
-    if (filters.category) { query += ` AND ai_category = $${idx++}`; params.push(filters.category); }
+    if (filters.category) {
+      const normalized = filters.category.charAt(0).toUpperCase() + filters.category.slice(1).toLowerCase();
+      query += ` AND ai_category = $${idx++}`;
+      params.push(normalized);
+    }
     if (filters.search) { query += ` AND (email ILIKE $${idx} OR name ILIKE $${idx} OR company ILIKE $${idx})`; params.push(`%${filters.search}%`); idx++; }
 
     query += ' ORDER BY created_at DESC';

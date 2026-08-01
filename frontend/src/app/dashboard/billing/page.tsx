@@ -45,11 +45,12 @@ export default function BillingPage() {
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [loading, setLoading] = useState(true);
   const [checkoutLoading, setCheckoutLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     billingApi.subscription()
       .then(setSubscription)
-      .catch(() => {})
+      .catch(e => setError(e instanceof Error ? e.message : 'Error al cargar suscripción'))
       .finally(() => setLoading(false));
   }, []);
 
@@ -66,6 +67,13 @@ export default function BillingPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold mb-6">Facturación</h1>
+
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center justify-between">
+          <span className="text-sm">{error}</span>
+          <button onClick={() => setError(null)} className="text-red-500 hover:text-red-700 ml-4 text-lg leading-none">&times;</button>
+        </div>
+      )}
 
       {subscription && (
         <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8 max-w-2xl">

@@ -13,7 +13,8 @@ const pool = new Pool({
 });
 
 pool.on('error', (err) => {
-  console.error('PostgreSQL pool error:', err.message);
+  const { logger } = require('./utils/logger');
+  logger.error('PostgreSQL pool error', { error: err.message });
 });
 
 module.exports = { pool };

@@ -104,6 +104,26 @@ describe('GET /api/leads/stats', () => {
   });
 });
 
+describe('GET /api/leads (list)', () => {
+  it('filtra por category=HOT normalizando a Hot (C-02)', async () => {
+    await request(app)
+      .get('/api/leads?category=HOT')
+      .set('Authorization', authHeader);
+    const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
+    expect(call).toBeDefined();
+    expect(call[1]).toContain('Hot');
+  });
+
+  it('filtra por category=COLD normalizando a Cold (C-02)', async () => {
+    await request(app)
+      .get('/api/leads?category=COLD')
+      .set('Authorization', authHeader);
+    const call = pool.query.mock.calls.find(c => c[0] && c[0].includes('ai_category'));
+    expect(call).toBeDefined();
+    expect(call[1]).toContain('Cold');
+  });
+});
+
 describe('POST /api/leads', () => {
   it('responde 401 sin token', async () => {
     const res = await request(app)
@@ -144,6 +164,46 @@ describe('GET /api/billing/plans', () => {
     const res = await request(app).get('/api/billing/plans');
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
+  });
+
+  it('tiene los slugs correctos: starter, growth, enterprise', async () => {
+    const res = await request(app).get('/api/billing/plans');
+    const slugs = res.body.map(p => p.slug).sort();
+    expect(slugs).toEqual(['enterprise', 'growth', 'starter']);
+  });
+});
+
+describe('POST /api/billing/checkout', () => {
+  it('responde 401 sin token', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .send({ plan: 'starter' });
+    expect(res.status).toBe(401);
+  });
+
+  it('responde 400 con plan invalido', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ plan: 'invalid-plan' });
+    expect(res.status).toBe(400);
+  });
+
+  it('responde 400 con plan vacio', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({});
+    expect(res.status).toBe(400);
+  });
+
+  it('acepta plan growth (C-01: schema y service unificados)', async () => {
+    const res = await request(app)
+      .post('/api/billing/checkout')
+      .set('Authorization', authHeader)
+      .send({ plan: 'growth' });
+    expect(res.status).not.toBe(400);
+    expect(res.status).not.toBe(401);
   });
 });
 

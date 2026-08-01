@@ -1,5 +1,6 @@
 const { pool } = require('../db');
 const { NotFoundError } = require('../utils/errors');
+const { logger } = require('../utils/logger');
 
 let _stripe = null;
 function getStripe() {
@@ -14,7 +15,7 @@ function getStripe() {
 
 const PLANS = {
   starter: { priceId: 'price_starter_monthly', name: 'Starter', amount: 4900, currency: 'usd' },
-  pro: { priceId: 'price_pro_monthly', name: 'Pro', amount: 14900, currency: 'usd' },
+  growth: { priceId: 'price_growth_monthly', name: 'Growth', amount: 14900, currency: 'usd' },
   enterprise: { priceId: 'price_enterprise_monthly', name: 'Enterprise', amount: 49900, currency: 'usd' },
 };
 
@@ -61,7 +62,7 @@ class BillingService {
           [plan, session.subscription, tenantId]
         );
 
-        console.log(`Tenant ${tenantId} subscribed to ${plan}`);
+        logger.info('Tenant subscribed', { tenantId, plan });
         break;
       }
 
@@ -114,6 +115,10 @@ class BillingService {
       amount: plan.amount,
       currency: plan.currency,
     }));
+  }
+
+  constructEvent(payload, signature) {
+    return getStripe().webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET || '');
   }
 }
 

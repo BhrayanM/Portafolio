@@ -1,4 +1,5 @@
 const whatsappService = require('../services/whatsapp.service');
+const { logger } = require('../utils/logger');
 
 const handleIncoming = async (req, res) => {
   try {
@@ -7,15 +8,11 @@ const handleIncoming = async (req, res) => {
       return res.status(400).json({ error: 'Mensaje no válido' });
     }
 
-    // El mensaje entrante se procesa via n8n webhook (/webhook/whatsapp-agent)
-    // Este endpoint es el receptor desde WhatsApp Cloud API
-    // n8n escucha en POST /webhook/whatsapp-agent con Fast ACK
-
-    console.log(`[WhatsApp] Mensaje de ${message.from}: ${message.text}`);
+    logger.info('WhatsApp incoming message', { from: message.from, text: message.text });
 
     res.status(200).json({ received: true });
   } catch (error) {
-    console.error('[WhatsApp] Error:', error.message);
+    logger.error('WhatsApp error', { error: error.message });
     res.status(500).json({ error: error.message });
   }
 };

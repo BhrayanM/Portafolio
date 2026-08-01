@@ -15,11 +15,7 @@ const createCheckout = async (req, res, next) => {
 const handleWebhook = async (req, res, next) => {
   try {
     const sig = req.headers['stripe-signature'];
-    const event = require('stripe')(process.env.STRIPE_SECRET_KEY).webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    const event = billingService.constructEvent(req.body, sig);
     await billingService.handleWebhook(event);
     res.json({ received: true });
   } catch (error) {
