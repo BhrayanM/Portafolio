@@ -1,5 +1,6 @@
 const voiceService = require('../services/voice.service');
 const { logger } = require('../utils/logger');
+const { maskPhone } = require('../utils/redact');
 
 const handleIncoming = async (req, res) => {
   try {
@@ -8,7 +9,12 @@ const handleIncoming = async (req, res) => {
       return res.status(400).json({ error: 'Payload no válido' });
     }
 
-    logger.info('Voice incoming call', { from: call.from, status: call.callStatus });
+    // H-06 — El telefono es PII: se enmascara. `callSid` ya permite correlacionar.
+    logger.info('Voice incoming call', {
+      callSid: call.callSid,
+      from: maskPhone(call.from),
+      status: call.callStatus,
+    });
 
     res.set('Content-Type', 'text/xml');
     res.send(`<?xml version="1.0" encoding="UTF-8"?>
@@ -16,8 +22,9 @@ const handleIncoming = async (req, res) => {
   <Say voice="alice" language="es-MX">Bienvenido a Portafolio. Estamos procesando su llamada.</Say>
 </Response>`);
   } catch (error) {
+    // Mismo criterio que H-11: detalle al log, mensaje generico al cliente.
     logger.error('Voice error', { error: error.message });
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Error interno del servidor' } });
   }
 };
 

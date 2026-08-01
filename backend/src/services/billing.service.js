@@ -1,5 +1,6 @@
 const { pool } = require('../db');
-const { NotFoundError } = require('../utils/errors');
+const config = require('../config');
+const { NotFoundError, AppError, ValidationError } = require('../utils/errors');
 const { logger } = require('../utils/logger');
 
 let _stripe = null;
@@ -56,6 +57,13 @@ class BillingService {
         const session = event.data.object;
         const tenantId = session.metadata.tenant_id;
         const plan = session.metadata.plan;
+
+        // D-05(c) — Defensa en profundidad: `plan` y `tenant_id` vienen del metadata
+        // del evento. Aunque la firma ya se verifica, el UPDATE no debe poder escribir
+        // un plan arbitrario en la tabla; solo los slugs del catalogo.
+        if (!Object.prototype.hasOwnProperty.call(PLANS, plan)) {
+          throw new ValidationError(`Plan no reconocido en el webhook: ${plan}`);
+        }
 
         await pool.query(
           `UPDATE tenants SET plan = $1, status = 'active', stripe_subscription_id = $2, updated_at = CURRENT_TIMESTAMP WHERE id = $3`,
@@ -117,8 +125,21 @@ class BillingService {
     }));
   }
 
+  /**
+   * H-01 — Verificacion de firma del webhook.
+   *
+   * Antes se pasaba `process.env.STRIPE_WEBHOOK_SECRET || ''`. Con la clave vacia
+   * la verificacion no falla en cerrado: **cualquiera puede calcular el mismo
+   * HMAC-SHA256 con clave vacia** y forjar una firma valida. De ahi el bypass de
+   * facturacion. Ahora, sin secret, se rechaza en vez de verificar contra ''.
+   * En produccion el arranque ya falla antes si la variable falta (ver config).
+   */
   constructEvent(payload, signature) {
-    return getStripe().webhooks.constructEvent(payload, signature, process.env.STRIPE_WEBHOOK_SECRET || '');
+    const secret = config.stripe.webhookSecret;
+    if (!secret) {
+      throw new AppError('Webhook de Stripe no configurado', 503, 'STRIPE_WEBHOOK_NOT_CONFIGURED');
+    }
+    return getStripe().webhooks.constructEvent(payload, signature, secret);
   }
 }
 

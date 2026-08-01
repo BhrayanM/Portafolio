@@ -55,13 +55,15 @@ docker exec "${DB_CONTAINER}" pg_dump -U "${DB_USER}" "${DB_NAME}" \
 
 # Comprimir
 gzip "${BACKUP_DIR}/db_${TIMESTAMP}.sql"
-info "DB backup: ${BACKUP_DIR}/db_${TIMESTAMP}.sql.gz"
+chmod 600 "${BACKUP_DIR}/db_${TIMESTAMP}.sql.gz"
+info "DB backup: ${BACKUP_DIR}/db_${TIMESTAMP}.sql.gz (permisos 600)"
 
 # ── 2. Backup de n8n (solo workflows exportados) ────────────
 if [ -d "./n8n/workflows" ]; then
   tar czf "${BACKUP_DIR}/n8n_workflows_${TIMESTAMP}.tar.gz" \
     -C ./n8n/workflows .
-  info "n8n workflows: ${BACKUP_DIR}/n8n_workflows_${TIMESTAMP}.tar.gz"
+  chmod 600 "${BACKUP_DIR}/n8n_workflows_${TIMESTAMP}.tar.gz"
+  info "n8n workflows: ${BACKUP_DIR}/n8n_workflows_${TIMESTAMP}.tar.gz (permisos 600)"
 fi
 
 # ── 3. Backup de .env (opt-in: contiene secretos en claro) ──

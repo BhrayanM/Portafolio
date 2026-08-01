@@ -1,57 +1,77 @@
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.53.0
     restart: always
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.1.0
     restart: always
     depends_on:
       - prometheus
       - loki
     environment:
       GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
-      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?error}
       GF_INSTALL_PLUGINS: grafana-piechart-panel
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana-dashboards:/etc/grafana/provisioning/dashboards:ro
       - ./monitoring/grafana-datasources:/etc/grafana/provisioning/datasources:ro
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:3.0.0
     restart: always
     volumes:
       - ./monitoring/loki.yml:/etc/loki/loki.yml:ro
       - loki_data:/loki
     ports:
-      - "3100:3100"
+      - "127.0.0.1:3100:3100"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
   uptime-kuma:
-    image: louislam/uptime-kuma:latest
+    image: louislam/uptime-kuma:1.23.13
     restart: always
     volumes:
       - uptime_kuma_data:/app/data
     ports:
-      - "3002:3001"
+      - "127.0.0.1:3002:3001"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 
   node-exporter:
-    image: prom/node-exporter:latest
+    image: prom/node-exporter:v1.8.1
     restart: always
     volumes:
       - /proc:/host/proc:ro
@@ -61,6 +81,11 @@ services:
       - '--path.procfs=/host/proc'
       - '--path.sysfs=/host/sys'
       - '--path.rootfs=/rootfs'
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
     networks:
       - portafolio-net
 

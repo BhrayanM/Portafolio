@@ -6,8 +6,18 @@ const securityMiddleware = (app) => {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
+        // scriptSrc NO se toca a proposito (D-03): endurecerlo romperia Swagger UI
+        // y el frontend. Lo de abajo es aditivo y no afecta a la carga de scripts.
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],
+        // frame-ancestors es la version moderna de X-Frame-Options (anti clickjacking).
+        frameAncestors: ["'none'"],
+        // Sin plugins embebidos (Flash/Java): superficie muerta pero explotable.
+        objectSrc: ["'none'"],
+        // Impide que un HTML inyectado reescriba las URLs relativas con <base>.
+        baseUri: ["'self'"],
+        // Evita que un formulario inyectado postee credenciales a un dominio externo.
+        formAction: ["'self'"],
       },
     },
     hsts: { maxAge: 31536000, includeSubDomains: true, preload: true },
