@@ -44,17 +44,10 @@ implementation details. See [SECURITY.md](../SECURITY.md).
 
 ## Images pending manual rework
 
-The following PNG diagrams contain Spanish labels baked into the image. They are
-functional but not yet aligned with the English documentation; they need a manual
-replacement pass with an image editor:
-
-| File | Needed change |
-|---|---|
-| `diagrams/lead-qualification-architecture.png` | Translate embedded labels to English |
-| `diagrams/whatsapp-agent-architecture.png` | Translate embedded labels to English |
-| `diagrams/whatsapp-agent-flow.png` | Translate embedded labels to English |
-| `diagrams/whatsapp-agent-commerce.webp` | Translate embedded labels to English |
-| `diagrams/voice-receptionist-architecture.png` | Translate embedded labels to English |
+None. All diagrams were verified in English via OCR scan (January 2026 audit) and any
+outlier was regenerated from its editable SVG source (`voice-receptionist-architecture.png`
+was replaced by a render of `projects/voice-receptionist/voice-agent-bilingual-architecture.svg`,
+which is already in English).
 
 All SVG diagrams and Mermaid diagrams in the repository are already in English.
 
