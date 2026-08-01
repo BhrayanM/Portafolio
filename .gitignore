@@ -63,6 +63,9 @@ executions/
 credentials*.json
 flows/
 workflows/
+# Los exports de workflows n8n NO se versionan aqui: este repo es publico y
+# SECURITY.md los prohibe (grafo real, Code nodes, prompts, credential IDs).
+# Se respaldan fuera del repo. Reforzado por .git/hooks/pre-commit.
 
 # ── Bases de datos, dumps, backups ───────────────────────────
 *.sqlite
@@ -71,6 +74,8 @@ workflows/
 *.db3
 *.mdb
 *.sql
+!database/migrations/*.sql
+!database/seeds/*.sql
 *.dump
 *.bak
 *.bacpac

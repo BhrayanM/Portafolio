@@ -10,10 +10,24 @@ set -euo pipefail
 # ── Configuración ────────────────────────────────────────────
 BACKUP_DIR="${BACKUP_DIR:-./backups}"
 TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
-DB_CONTAINER="portafolio-postgres-1"
 DB_USER="${POSTGRES_USER:-n8n}"
 DB_NAME="${POSTGRES_DB:-n8n}"
 RETENTION_DAYS="${RETENTION_DAYS:-30}"
+# Respaldar .env es opt-in: se copia en claro y es un riesgo si el destino no esta cifrado.
+BACKUP_ENV="${BACKUP_ENV:-0}"
+
+# Contenedor de PostgreSQL: se puede fijar con DB_CONTAINER; si no, se autodetecta.
+# El nombre depende del directorio del proyecto (docker compose lo prefija), por lo que
+# fijarlo a mano se rompe al renombrar la carpeta.
+if [ -z "${DB_CONTAINER:-}" ]; then
+  DB_CONTAINER=$(docker ps --filter "name=postgres" --filter "status=running" \
+                   --format '{{.Names}}' | grep -E 'portafolio' | head -1 || true)
+fi
+if [ -z "${DB_CONTAINER:-}" ]; then
+  echo "[ERROR] No se encontro un contenedor de PostgreSQL en ejecucion." >&2
+  echo "        Fijalo a mano:  DB_CONTAINER=<nombre> ./scripts/backup.sh" >&2
+  exit 1
+fi
 
 # ── Colores ──────────────────────────────────────────────────
 RED='\033[0;31m'
@@ -29,6 +43,7 @@ error() { echo -e "${RED}[ERROR]${NC} $1"; }
 mkdir -p "${BACKUP_DIR}"
 
 # ── 1. Backup de PostgreSQL ─────────────────────────────────
+info "Contenedor: ${DB_CONTAINER} · base: ${DB_NAME}"
 info "Backup de base de datos..."
 docker exec "${DB_CONTAINER}" pg_dump -U "${DB_USER}" "${DB_NAME}" \
   --clean \
@@ -49,10 +64,16 @@ if [ -d "./n8n/workflows" ]; then
   info "n8n workflows: ${BACKUP_DIR}/n8n_workflows_${TIMESTAMP}.tar.gz"
 fi
 
-# ── 3. Backup de .env (cifrado simbólico - b64 ofuscado) ────
-if [ -f ".env" ]; then
-  warn "Respaldando .env — asegúrate de que este backup esté cifrado"
+# ── 3. Backup de .env (opt-in: contiene secretos en claro) ──
+# Antes se copiaba siempre. El comentario decia "cifrado simbolico" pero era un `cp` plano:
+# dejaba las API keys legibles en ./backups. Ahora hay que pedirlo explicitamente.
+if [ "${BACKUP_ENV}" = "1" ] && [ -f ".env" ]; then
+  warn ".env contiene secretos EN CLARO. Cifra este backup antes de moverlo fuera del host."
   cp .env "${BACKUP_DIR}/env_${TIMESTAMP}.backup"
+  chmod 600 "${BACKUP_DIR}/env_${TIMESTAMP}.backup"
+  info "env backup: ${BACKUP_DIR}/env_${TIMESTAMP}.backup (permisos 600)"
+elif [ -f ".env" ]; then
+  info "Omitido .env (usa BACKUP_ENV=1 para incluirlo)."
 fi
 
 # ── 4. Limpieza de backups antiguos ──────────────────────────

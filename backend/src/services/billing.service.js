@@ -1,6 +1,16 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const { pool } = require('../db');
 const { NotFoundError } = require('../utils/errors');
+
+let _stripe = null;
+function getStripe() {
+  if (!_stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY no configurada');
+    }
+    _stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+  }
+  return _stripe;
+}
 
 const PLANS = {
   starter: { priceId: 'price_starter_monthly', name: 'Starter', amount: 4900, currency: 'usd' },
@@ -19,7 +29,7 @@ class BillingService {
     let customerId = tenant.rows[0].stripe_customer_id;
 
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         metadata: { tenant_id: tenantId },
         name: tenant.rows[0].name,
       });
@@ -27,7 +37,7 @@ class BillingService {
       await pool.query('UPDATE tenants SET stripe_customer_id = $1 WHERE id = $2', [customerId, tenantId]);
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const session = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       line_items: [{ price: plan.priceId, quantity: 1 }],

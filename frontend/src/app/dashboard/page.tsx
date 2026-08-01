@@ -1,21 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+import { apiFetch } from '@/lib/api';
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    fetch(`${API}/leads/stats`, {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((r) => r.json())
+    apiFetch('/leads/stats')
       .then(setStats)
       .catch(console.error)
       .finally(() => setLoading(false));

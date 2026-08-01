@@ -2,15 +2,16 @@ const jwt = require('jsonwebtoken');
 const config = require('../config');
 const { UnauthorizedError, ForbiddenError } = require('../utils/errors');
 const { pool } = require('../db');
+const { extractToken } = require('../utils/authCookie');
 
 const authenticate = async (req, res, next) => {
   try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    // Cookie HttpOnly primero; Bearer como respaldo para clientes no-navegador.
+    const token = extractToken(req);
+    if (!token) {
       throw new UnauthorizedError('Token requerido');
     }
 
-    const token = authHeader.split(' ')[1];
     const decoded = jwt.verify(token, config.jwt.secret);
 
     const result = await pool.query(

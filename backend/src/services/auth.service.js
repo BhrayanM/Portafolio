@@ -2,7 +2,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { pool } = require('../db');
 const config = require('../config');
-const { UnauthorizedError, ValidationError } = require('../utils/errors');
+const { UnauthorizedError } = require('../utils/errors');
 
 class AuthService {
   async login(email, password) {

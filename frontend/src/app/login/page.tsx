@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { apiFetch } from '@/lib/api';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -16,19 +17,11 @@ export default function LoginPage() {
     setError('');
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      // El backend responde con Set-Cookie (HttpOnly). No hay token que guardar aquí.
+      await apiFetch('/auth/login', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
-      if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error?.message || 'Error al iniciar sesión');
-      }
-
-      const data = await res.json();
-      localStorage.setItem('token', data.token);
       router.push('/dashboard');
     } catch (err: any) {
       setError(err.message);
