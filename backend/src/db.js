@@ -5,7 +5,7 @@ const config = require('./config');
 /**
  * Acceso a PostgreSQL con contexto de tenant.
  *
- * F21.5 — Por que esto no es un `new Pool()` a secas.
+ * Por que esto no es un `new Pool()` a secas.
  *
  * La migracion 016 activa FORCE ROW LEVEL SECURITY: a partir de ahi las politicas
  * de aislamiento por tenant se aplican a **todos** los roles, incluido el

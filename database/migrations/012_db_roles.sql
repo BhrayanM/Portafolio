@@ -1,7 +1,6 @@
 -- ═════════════════════════════════════════════════════════════
---  F19(c) PARTE 2 — Roles de base de datos con privilegio mínimo
+--  PARTE 2 — Roles de base de datos con privilegio mínimo
 --  Requiere: 001–011 aplicadas.
---  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 
 BEGIN;
@@ -15,7 +14,7 @@ BEGIN;
 --   app_admin  operaciones por lotes y verificación. Mismo alcance de datos,
 --          separado para poder auditar y revocar de forma independiente.
 --
--- F21.3 · dos cambios respecto de la versión original:
+-- Dos cambios respecto de la versión original:
 --
 --   a) Los roles se creaban con LOGIN y una contraseña literal escrita en el
 --      fichero ('changeme_service_credentials_change_in_prod'). Este es un
@@ -89,7 +88,7 @@ REVOKE ALL ON SCHEMA public FROM PUBLIC;
 GRANT  USAGE ON SCHEMA public TO app, app_admin;
 
 -- ─────────────────────────────────────────────────────────────
--- 4. NOTAS DE REPARACIÓN (F21.3)
+-- 4. NOTAS DE REPARACIÓN
 -- ─────────────────────────────────────────────────────────────
 --
 -- Retirado · GRANT USAGE ON SCHEMA pg_catalog, pg_temp TO PUBLIC

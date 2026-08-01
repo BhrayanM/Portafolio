@@ -50,6 +50,38 @@ class LeadsService {
     return result.rows[0];
   }
 
+  /**
+   * Actividad reciente: el rastro que deja el workflow de n8n.
+   *
+   * `frontend/src/lib/api.ts` ya llamaba a `/leads/activity` y el backend no
+   * montaba la ruta: la pantalla `/dashboard/activity` respondia 404 y mostraba su
+   * banner de error. Se implementa contra `lead_log`, que es donde el nodo
+   * "Log to PostgreSQL" del workflow escribe cada lead procesado.
+   *
+   * `leads` (alta por API) y `lead_log` (procesado por n8n) son tablas distintas a
+   * proposito: la primera es el recurso del CRM, la segunda es la traza de
+   * ejecucion con el veredicto del modelo. La pantalla de actividad quiere la
+   * segunda.
+   *
+   * Se devuelven exactamente los campos del tipo `LeadLogEntry` del frontend, ni
+   * uno mas: `message` puede traer texto libre del formulario y no pinta en un
+   * listado de actividad.
+   */
+  async getActivity(tenantId, filters = {}) {
+    const limit = Math.min(Math.max(parseInt(filters.limit, 10) || 50, 1), 200);
+    const offset = Math.max(parseInt(filters.offset, 10) || 0, 0);
+
+    const result = await pool.query(
+      `SELECT id, email, name, source, status, ai_score, created_at
+         FROM lead_log
+        WHERE tenant_id = $1
+        ORDER BY created_at DESC
+        LIMIT $2 OFFSET $3`,
+      [tenantId, limit, offset]
+    );
+    return result.rows;
+  }
+
   async create(tenantId, data) {
     const { email, name, company, phone, message, source, ai_business_category } = data;
     const result = await pool.query(

@@ -17,7 +17,7 @@
 
 </div>
 
-![Arquitectura del Lead Qualification Engine](../../assets/lead-qualification-architecture.png)
+![Arquitectura del Lead Qualification Engine](../../assets/diagrams/lead-qualification-architecture.png)
 
 ---
 

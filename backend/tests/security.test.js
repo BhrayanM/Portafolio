@@ -2,7 +2,7 @@ const request = require('supertest');
 
 jest.mock('../src/db', () => ({
   pool: { query: jest.fn() },
-  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `resolveTenant` abre el ambito de tenant con el que `src/db` fija
   // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
   runWithTenant: (tenantId, fn) => fn(),
   getCurrentTenantId: () => null,
@@ -32,9 +32,9 @@ beforeAll(() => {
   });
 });
 
-// F19(a) D-07 — El alta dejo de ser publica. Antes, quien conociese el UUID de un
+// El alta dejo de ser publica. Antes, quien conociese el UUID de un
 // tenant podia crearse una cuenta dentro con solo llamar a esta ruta.
-describe('POST /api/auth/register — cerrado a admin (D-07)', () => {
+describe('POST /api/auth/register — cerrado a admin', () => {
   it('responde 401 sin token', async () => {
     const res = await request(app)
       .post('/api/auth/register')
@@ -68,7 +68,7 @@ describe('POST /api/auth/register — cerrado a admin (D-07)', () => {
     expect(insert[1][0]).toBe(ADMIN.tenant_id);
   });
 
-  it('rechaza contrasenas de menos de 8 caracteres (D-06)', async () => {
+  it('rechaza contrasenas de menos de 8 caracteres', async () => {
     const res = await request(app)
       .post('/api/auth/register')
       .set('Authorization', `Bearer ${tokenFor(ADMIN)}`)
@@ -77,8 +77,8 @@ describe('POST /api/auth/register — cerrado a admin (D-07)', () => {
   });
 });
 
-// F19(a) H-08 — el tenant sale solo de la identidad verificada.
-describe('resolveTenant — sin puerta trasera por cabecera (H-08)', () => {
+// El tenant sale solo de la identidad verificada.
+describe('resolveTenant — sin puerta trasera por cabecera', () => {
   it('no concede acceso con x-tenant-id y sin autenticacion', async () => {
     const res = await request(app)
       .get('/api/leads')
@@ -87,8 +87,8 @@ describe('resolveTenant — sin puerta trasera por cabecera (H-08)', () => {
   });
 });
 
-// F19(a) H-13 — algoritmo de firma fijado.
-describe('JWT — algoritmo fijado (H-13)', () => {
+// Algoritmo de firma fijado.
+describe('JWT — algoritmo fijado', () => {
   it('rechaza un token firmado con alg "none"', async () => {
     const unsigned = jwt.sign({ userId: ADMIN.id, tenantId: ADMIN.tenant_id, role: 'admin' }, null, {
       algorithm: 'none',

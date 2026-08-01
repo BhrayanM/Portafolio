@@ -1,7 +1,7 @@
 const config = require('../src/config');
 const { parseTrustProxy } = require('../src/config');
 
-// F18.5 — `trust proxy` decide si Express resuelve req.ip desde X-Forwarded-For.
+// `trust proxy` decide si Express resuelve req.ip desde X-Forwarded-For.
 // Es lo que hace que el rate limiter cuente por cliente y no por IP del proxy,
 // asi que el valor por defecto es una decision de seguridad, no un detalle.
 describe('config.trustProxy', () => {

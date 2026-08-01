@@ -1,7 +1,6 @@
 -- ═════════════════════════════════════════════════════════════
---  F19(c) H-04 — Verificación del endurecimiento aplicado
+--  Verificación del endurecimiento aplicado
 --  Requiere: 001–014 aplicadas.
---  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 --
 -- Comprueba que el endurecimiento de 010–014 está realmente presente. Aborta
@@ -9,7 +8,7 @@
 -- del despliegue y no en producción.
 --
 -- SOLO LECTURA. La versión original insertaba filas de prueba en lead_log y
--- error_log ('audit@example.com', 'Prueba de validación H-04') y las dejaba
+-- error_log ('audit@example.com', 'Prueba de validación') y las dejaba
 -- ahí: una migración que se ejecuta en producción contaminaba las tablas de
 -- datos. Las verificaciones de abajo interrogan el catálogo del sistema.
 --
@@ -40,11 +39,11 @@ BEGIN
     AND policyname LIKE 'tenant_isolation%';
 
   IF actual <> esperado THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: se esperaban % politicas RLS tenant_isolation, hay %',
+    RAISE EXCEPTION 'VALIDACION FALLIDO: se esperaban % politicas RLS tenant_isolation, hay %',
       esperado, actual;
   END IF;
 
-  RAISE NOTICE 'H-04 OK: % politicas RLS de aislamiento por tenant', actual;
+  RAISE NOTICE 'VALIDACION OK: % politicas RLS de aislamiento por tenant', actual;
 END $$;
 
 DO $$
@@ -61,10 +60,10 @@ BEGIN
   );
 
   IF sin_rls IS NOT NULL THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: RLS no habilitada en: %', sin_rls;
+    RAISE EXCEPTION 'VALIDACION FALLIDO: RLS no habilitada en: %', sin_rls;
   END IF;
 
-  RAISE NOTICE 'H-04 OK: RLS habilitada en las 6 tablas multi-tenant';
+  RAISE NOTICE 'VALIDACION OK: RLS habilitada en las 6 tablas multi-tenant';
 END $$;
 
 DO $$
@@ -89,10 +88,10 @@ BEGIN
   );
 
   IF faltan IS NOT NULL THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: falta la FK tenant_id -> tenants(id) en: %', faltan;
+    RAISE EXCEPTION 'VALIDACION FALLIDO: falta la FK tenant_id -> tenants(id) en: %', faltan;
   END IF;
 
-  RAISE NOTICE 'H-04 OK: 7 claves foraneas tenant_id -> tenants(id)';
+  RAISE NOTICE 'VALIDACION OK: 7 claves foraneas tenant_id -> tenants(id)';
 END $$;
 
 DO $$
@@ -113,10 +112,10 @@ BEGIN
   );
 
   IF faltan IS NOT NULL THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: triggers de auditoria ausentes o declarados BEFORE: %', faltan;
+    RAISE EXCEPTION 'VALIDACION FALLIDO: triggers de auditoria ausentes o declarados BEFORE: %', faltan;
   END IF;
 
-  RAISE NOTICE 'H-04 OK: 4 triggers de auditoria AFTER activos';
+  RAISE NOTICE 'VALIDACION OK: 4 triggers de auditoria AFTER activos';
 END $$;
 
 DO $$
@@ -130,11 +129,11 @@ BEGIN
     AND column_name  = 'stack_trace';
 
   IF mascara IS NULL OR mascara NOT LIKE '%MASKED%' THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: error_log.stack_trace sin default enmascarado (actual: %)',
+    RAISE EXCEPTION 'VALIDACION FALLIDO: error_log.stack_trace sin default enmascarado (actual: %)',
       COALESCE(mascara, 'NULL');
   END IF;
 
-  RAISE NOTICE 'H-04 OK: error_log.stack_trace enmascarado por defecto';
+  RAISE NOTICE 'VALIDACION OK: error_log.stack_trace enmascarado por defecto';
 END $$;
 
 DO $$
@@ -146,17 +145,17 @@ BEGIN
   WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = r);
 
   IF faltan IS NOT NULL THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: roles de servicio ausentes: %', faltan;
+    RAISE EXCEPTION 'VALIDACION FALLIDO: roles de servicio ausentes: %', faltan;
   END IF;
 
   IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname IN ('app','app_admin') AND rolbypassrls) THEN
-    RAISE EXCEPTION 'H-04 FALLIDO: un rol de servicio tiene BYPASSRLS y saltaria el aislamiento por tenant';
+    RAISE EXCEPTION 'VALIDACION FALLIDO: un rol de servicio tiene BYPASSRLS y saltaria el aislamiento por tenant';
   END IF;
 
-  RAISE NOTICE 'H-04 OK: roles app y app_admin presentes, sin BYPASSRLS';
+  RAISE NOTICE 'VALIDACION OK: roles app y app_admin presentes, sin BYPASSRLS';
 END $$;
 
 DO $$
 BEGIN
-  RAISE NOTICE 'H-04 COMPLETO: 6 verificaciones superadas';
+  RAISE NOTICE 'VALIDACION COMPLETO: 6 verificaciones superadas';
 END $$;

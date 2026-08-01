@@ -42,7 +42,7 @@ class AuthService {
 
   async register(data) {
     const { email, password, name, tenantId } = data;
-    // D-06: 12 rondas. No invalida los hashes existentes: bcrypt guarda el coste
+    // 12 rondas. No invalida los hashes existentes: bcrypt guarda el coste
     // dentro del propio hash, asi que los antiguos se siguen verificando bien.
     const hash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
@@ -56,7 +56,7 @@ class AuthService {
     return result.rows[0];
   }
 
-  // H-13: se fija el algoritmo. Sin `algorithms`, jsonwebtoken acepta el que venga
+  // Se fija el algoritmo. Sin `algorithms`, jsonwebtoken acepta el que venga
   // en la cabecera del token, que abre la puerta a ataques de confusion de algoritmo.
   verifyToken(token) {
     return jwt.verify(token, config.jwt.secret, { algorithms: config.jwt.algorithms });

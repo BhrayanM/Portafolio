@@ -23,7 +23,7 @@ const authLimiter = rateLimit({
   message: { error: { code: 'AUTH_RATE_LIMIT', message: 'Demasiados intentos de login. Intenta de nuevo en 15 minutos.' } },
 });
 
-// D-04 — El alta de usuarios es admin-only desde F19(a), pero se limita igual:
+// El alta de usuarios es admin-only, pero se limita igual:
 // una credencial de admin filtrada no debe poder crear cuentas en bucle.
 const registerLimiter = rateLimit({
   skip: skipInTests,
@@ -34,6 +34,6 @@ const registerLimiter = rateLimit({
   message: { error: { code: 'REGISTER_RATE_LIMIT', message: 'Demasiadas altas. Intenta de nuevo en 15 minutos.' } },
 });
 
-// `apiKeyLimiter` se retiro en F19(a) (D-04): estaba definido y no se aplicaba en
+// `apiKeyLimiter` se retiro: estaba definido y no se aplicaba en
 // ninguna ruta. Un limitador de adorno da una sensacion de proteccion que no existe.
 module.exports = { globalLimiter, authLimiter, registerLimiter };

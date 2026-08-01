@@ -9,7 +9,7 @@ const handleIncoming = async (req, res) => {
       return res.status(400).json({ error: 'Mensaje no válido' });
     }
 
-    // H-06 — No se loguea el texto del mensaje (contenido del usuario) ni el
+    // No se loguea el texto del mensaje (contenido del usuario) ni el
     // telefono completo. Se deja solo lo necesario para operar: id, tipo y
     // telefono enmascarado, que basta para correlacionar sin guardar PII.
     logger.info('WhatsApp incoming message', {
@@ -21,7 +21,7 @@ const handleIncoming = async (req, res) => {
 
     res.status(200).json({ received: true });
   } catch (error) {
-    // Mismo criterio que H-11: el detalle va al log, al cliente solo un mensaje
+    // Mismo criterio: el detalle va al log, al cliente solo un mensaje
     // generico. `error.message` puede arrastrar internos de la API de Meta.
     logger.error('WhatsApp error', { error: error.message });
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Error interno del servidor' } });

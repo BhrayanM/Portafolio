@@ -1,4 +1,4 @@
-// F20 — Requisitos de arranque para despliegue.
+// Requisitos de arranque para despliegue.
 //
 // La deuda que cierra este fichero: `STRIPE_WEBHOOK_SECRET` sigue vacia y no se
 // inventa ningun valor de relleno (el secreto real lo emite Stripe). Lo que si se
@@ -7,7 +7,7 @@
 //
 //   1. En produccion el proceso ni arranca (config aborta con la lista de faltantes).
 //   2. Fuera de produccion arranca, pero el webhook rechaza en vez de verificar la
-//      firma contra la cadena vacia — que seria forjable por cualquiera (H-01).
+//      firma contra la cadena vacia — que seria forjable por cualquiera.
 //
 // Se fija la variable a '' ANTES de cualquier require: dotenv no pisa claves que ya
 // existen en process.env, asi que esto neutraliza el .env real del desarrollador y
@@ -16,7 +16,7 @@ process.env.STRIPE_WEBHOOK_SECRET = '';
 
 jest.mock('../src/db', () => ({
   pool: { query: jest.fn() },
-  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `resolveTenant` abre el ambito de tenant con el que `src/db` fija
   // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
   runWithTenant: (tenantId, fn) => fn(),
   getCurrentTenantId: () => null,
@@ -53,7 +53,7 @@ describe('config — arranque en produccion (fail fast)', () => {
   const PROD_ENV = {
     NODE_ENV: 'production',
     JWT_SECRET: 'x'.repeat(64),
-    // No puede ser '*' ni localhost en produccion (D-01).
+    // No puede ser '*' ni localhost en produccion.
     CORS_ORIGINS: 'https://portafolio.example',
     POSTGRES_PASSWORD: 'pg-password-de-prueba',
     RABBITMQ_ENABLED: 'false',

@@ -39,10 +39,10 @@ for f in $staged; do
 done
 
 # Un .json cualquiera con forma de workflow n8n exportado
-# Se excluye la carpeta projects/examples/ que contiene ejemplos sanitizados e intencionales.
+# Se excluye la carpeta examples/ que contiene ejemplos sanitizados e intencionales.
 for f in $staged; do
   case "$f" in
-    projects/examples/*.json) ;;
+    examples/*.json) ;;
     *.json)
       [ -f "$f" ] || continue
       if grep -qE '"type"[[:space:]]*:[[:space:]]*"n8n-nodes-' "$f" 2>/dev/null; then

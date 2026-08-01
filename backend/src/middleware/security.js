@@ -6,7 +6,7 @@ const securityMiddleware = (app) => {
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        // scriptSrc NO se toca a proposito (D-03): endurecerlo romperia Swagger UI
+        // scriptSrc NO se toca a proposito: endurecerlo romperia Swagger UI
         // y el frontend. Lo de abajo es aditivo y no afecta a la carga de scripts.
         scriptSrc: ["'self'"],
         imgSrc: ["'self'", "data:", "https:"],

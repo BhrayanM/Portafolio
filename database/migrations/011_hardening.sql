@@ -1,7 +1,6 @@
 -- ═════════════════════════════════════════════════════════════
---  F19(c) PARTE 1 — Auditoría e integridad en la capa de datos
+--  PARTE 1 — Auditoría e integridad en la capa de datos
 --  Requiere: 001–010 aplicadas (RLS activo).
---  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 
 BEGIN;
@@ -10,7 +9,7 @@ BEGIN;
 -- 1. AUDITORÍA — registro inmutable de cambios críticos
 -- ─────────────────────────────────────────────────────────────
 --
--- F21.3 · tres defectos corregidos respecto de la versión original:
+-- Tres defectos corregidos respecto de la versión original:
 --
 --   a) Los triggers eran BEFORE y la función terminaba en RETURN NULL.
 --      En PostgreSQL, un trigger BEFORE ... FOR EACH ROW que devuelve NULL
@@ -101,7 +100,7 @@ CREATE TRIGGER workflow_runs_audit AFTER INSERT OR UPDATE ON workflow_runs
 -- 2. INTEGRIDAD MULTI-TENANT
 -- ─────────────────────────────────────────────────────────────
 --
--- F21.3 · la versión original declaraba siete constraints de la forma
+-- La versión original declaraba siete constraints de la forma
 --
 --     CHECK (tenant_id IN (SELECT id FROM tenants))
 --
@@ -136,7 +135,7 @@ CREATE TRIGGER workflow_runs_audit AFTER INSERT OR UPDATE ON workflow_runs
 ALTER TABLE error_log ALTER COLUMN stack_trace SET DEFAULT '[MASKED]';
 
 -- ─────────────────────────────────────────────────────────────
--- 4. NOTAS DE REPARACIÓN (F21.3)
+-- 4. NOTAS DE REPARACIÓN
 -- ─────────────────────────────────────────────────────────────
 --
 -- Retirado · ALTER TABLE error_log ADD CONSTRAINT uk_error_log_unique

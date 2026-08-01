@@ -80,8 +80,9 @@ export interface ApiKey {
   last_used_at: string | null;
 }
 
-export interface ApiUsage {
-  total: number;
-  by_endpoint: Record<string, number>;
-  period: { from: string; to: string };
+// Aligned with the actual response contract of `GET /api/tenants/usage`.
+export interface TenantUsage {
+  total_leads: number;
+  total_runs: number;
+  total_users: number;
 }

@@ -58,7 +58,7 @@ class BillingService {
         const tenantId = session.metadata.tenant_id;
         const plan = session.metadata.plan;
 
-        // D-05(c) — Defensa en profundidad: `plan` y `tenant_id` vienen del metadata
+        // Defensa en profundidad: `plan` y `tenant_id` vienen del metadata
         // del evento. Aunque la firma ya se verifica, el UPDATE no debe poder escribir
         // un plan arbitrario en la tabla; solo los slugs del catalogo.
         if (!Object.prototype.hasOwnProperty.call(PLANS, plan)) {
@@ -126,7 +126,7 @@ class BillingService {
   }
 
   /**
-   * H-01 — Verificacion de firma del webhook.
+   * Verificacion de firma del webhook.
    *
    * Antes se pasaba `process.env.STRIPE_WEBHOOK_SECRET || ''`. Con la clave vacia
    * la verificacion no falla en cerrado: **cualquiera puede calcular el mismo

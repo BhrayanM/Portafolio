@@ -2,7 +2,7 @@ const billingService = require('../services/billing.service');
 const config = require('../config');
 
 /**
- * H-05 — Base para las URLs de retorno de Stripe Checkout.
+ * Base para las URLs de retorno de Stripe Checkout.
  *
  * Antes se usaba `req.headers.origin` tal cual. `Origin` lo controla el cliente, asi
  * que se podia conseguir que Stripe redirigiese al dominio del atacante despues de
@@ -35,7 +35,7 @@ const handleWebhook = async (req, res, next) => {
     await billingService.handleWebhook(event);
     res.json({ received: true });
   } catch (error) {
-    // H-11 — Antes devolvia `error.message` crudo, que expone detalles internos de
+    // Antes devolvia `error.message` crudo, que expone detalles internos de
     // la libreria de Stripe, y ademas se saltaba el handler central. Ahora pasa por
     // el handler, que ya decide que se puede contar y que solo va al log.
     next(error);

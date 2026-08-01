@@ -15,7 +15,6 @@
 
 services:
   nginx-local:
-    # F20 — patch exacto, misma version a la que `1.27-alpine` resolvia.
     image: nginx:1.27.5-alpine
     restart: unless-stopped
     ports:

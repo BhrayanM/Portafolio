@@ -2,7 +2,7 @@ const request = require('supertest');
 
 jest.mock('../src/db', () => ({
   pool: { query: jest.fn() },
-  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `resolveTenant` abre el ambito de tenant con el que `src/db` fija
   // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
   runWithTenant: (tenantId, fn) => fn(),
   getCurrentTenantId: () => null,
@@ -86,7 +86,7 @@ describe('GET /health', () => {
 });
 
 describe('GET /api/metrics', () => {
-  // F19(a) H-07: la ruta era publica y filtraba hostname, PID, version de Node y
+  // La ruta era publica y filtraba hostname, PID, version de Node y
   // plataforma. Ahora exige autenticacion; el test refleja el nuevo contrato.
   it('responde 401 sin token', async () => {
     const res = await request(app).get('/api/metrics');
@@ -120,7 +120,7 @@ describe('GET /api/leads/stats', () => {
 });
 
 describe('GET /api/leads (list)', () => {
-  it('filtra por category=HOT conservando el canonico HOT (F18.2)', async () => {
+  it('filtra por category=HOT conservando el canonico HOT', async () => {
     await request(app)
       .get('/api/leads?category=HOT')
       .set('Authorization', authHeader);
@@ -129,7 +129,7 @@ describe('GET /api/leads (list)', () => {
     expect(call[1]).toContain('HOT');
   });
 
-  it('filtra por category=COLD conservando el canonico COLD (F18.2)', async () => {
+  it('filtra por category=COLD conservando el canonico COLD', async () => {
     await request(app)
       .get('/api/leads?category=COLD')
       .set('Authorization', authHeader);
@@ -138,7 +138,7 @@ describe('GET /api/leads (list)', () => {
     expect(call[1]).toContain('COLD');
   });
 
-  it('rechaza 400 una categoria fuera del enum canonico (F18.2)', async () => {
+  it('rechaza 400 una categoria fuera del enum canonico', async () => {
     const res = await request(app)
       .get('/api/leads?category=Hot')
       .set('Authorization', authHeader);
@@ -219,7 +219,7 @@ describe('POST /api/billing/checkout', () => {
     expect(res.status).toBe(400);
   });
 
-  it('acepta plan growth (C-01: schema y service unificados)', async () => {
+  it('acepta plan growth (schema y service unificados)', async () => {
     const res = await request(app)
       .post('/api/billing/checkout')
       .set('Authorization', authHeader)

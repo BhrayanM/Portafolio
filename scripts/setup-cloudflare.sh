@@ -3,7 +3,7 @@
 # Requiere: cloudflare CLI (wrangler) o API Token
 # Uso: DOMAIN=tu-dominio.tld ./scripts/setup-cloudflare.sh
 #
-# F21.5 — El dominio estaba fijado en el codigo. Ahora se pasa por entorno: este
+# El dominio estaba fijado en el codigo. Ahora se pasa por entorno: este
 # repositorio es publico y no debe declarar infraestructura propia (SECURITY.md
 # regla 3). El script solo imprime instrucciones; no modifica nada.
 

@@ -1,11 +1,11 @@
 -- ═════════════════════════════════════════════════════════════
---  F21.5 — Activación real del aislamiento multi-tenant
+--  Activación real del aislamiento multi-tenant
 --  Requiere: 001–015 aplicadas.
 -- ═════════════════════════════════════════════════════════════
 --
 -- POR QUÉ EXISTE ESTA MIGRACIÓN
 --
--- La auditoría F21.4 comprobó que las políticas RLS de `010_enable_rls.sql`
+-- La comprobación previa mostró que las políticas RLS de `010_enable_rls.sql`
 -- **no tenían ningún efecto sobre la aplicación**. Reproducción:
 --
 --   -- conectado como el propietario de las tablas, que es como conectaba el backend
@@ -64,7 +64,7 @@ CREATE POLICY tenant_isolation_lead_log ON lead_log
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::UUID);
 
 -- Nota sobre WITH CHECK: las políticas son `FOR ALL` y no lo declaran, así que
--- PostgreSQL reutiliza la expresión de USING como WITH CHECK. Verificado en F21.4:
+-- PostgreSQL reutiliza la expresión de USING como WITH CHECK. Verificado en ejecución:
 -- un INSERT con `tenant_id` ajeno se rechaza con
 -- «new row violates row-level security policy». No hace falta declararlo aparte.
 
@@ -80,7 +80,7 @@ CREATE POLICY tenant_isolation_lead_log ON lead_log
 -- tablas. Es el precio de que la garantía sea real.
 --
 -- ATENCIÓN — FORCE RLS **no** alcanza a un superusuario ni a un rol con BYPASSRLS.
--- Verificado en F21.5 sobre esta misma migración:
+-- Verificado sobre esta misma migración:
 --
 --   SELECT rolname, rolsuper, rolbypassrls FROM pg_roles WHERE rolname = 'n8n';
 --   -- n8n | t | t        <- POSTGRES_USER de la imagen postgres es SUPERUSUARIO
@@ -117,10 +117,10 @@ BEGIN
   );
 
   IF sin_force IS NOT NULL THEN
-    RAISE EXCEPTION 'F21.5 FALLIDO: FORCE ROW LEVEL SECURITY ausente en: %', sin_force;
+    RAISE EXCEPTION 'FORCE RLS FALLIDO: FORCE ROW LEVEL SECURITY ausente en: %', sin_force;
   END IF;
 
-  RAISE NOTICE 'F21.5 OK: FORCE RLS activo en las 6 tablas multi-tenant';
+  RAISE NOTICE 'OK: FORCE RLS activo en las 6 tablas multi-tenant';
 END $$;
 
 COMMIT;

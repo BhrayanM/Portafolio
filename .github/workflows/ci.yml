@@ -61,6 +61,9 @@ jobs:
       - name: Typecheck
         run: npx tsc --noEmit
 
+      - name: Lint
+        run: npm run lint
+
       - name: Build
         run: npm run build
         env:
@@ -105,10 +108,6 @@ jobs:
           scan 'AKIA[0-9A-Z]{16}'                   'Posible AWS access key id'
           scan 'postgres(ql)?://[^:/@[:space:]]+:[^@[:space:]]+@' 'Cadena de conexion Postgres con credenciales'
           scan '-----BEGIN [A-Z ]*PRIVATE KEY-----' 'Clave privada'
-          # F22 R-02: los patrones de arriba solo buscan tokens con prefijo conocido
-          # (sk-, xox-, pat-...). NO detectaban una password en claro, y por eso el
-          # barrido salia verde con la del owner de n8n escrita en CLAUDE.md y en 3
-          # docs. Se acepta `"password":"<PLACEHOLDER>"`, se rechaza un valor literal.
           scan '"password"[[:space:]]*:[[:space:]]*"[^"<]' 'Password en claro en un ejemplo'
 
           if git ls-files | grep -qE '(^|/)n8n/workflows/.*\.json$|(^|/)workflows/.*\.json$'; then

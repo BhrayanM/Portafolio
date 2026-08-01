@@ -22,4 +22,12 @@ const listQuerySchema = Joi.object({
   offset: Joi.number().integer().min(0).optional(),
 });
 
-module.exports = { createLeadSchema, listQuerySchema };
+// Paginacion de /leads/activity. El servicio ya acota los valores, pero
+// se validan aqui tambien para rechazar basura con un 400 claro en vez de dejar que
+// `parseInt` la convierta silenciosamente en el valor por defecto.
+const activityQuerySchema = Joi.object({
+  limit: Joi.number().integer().min(1).max(200).optional(),
+  offset: Joi.number().integer().min(0).optional(),
+});
+
+module.exports = { createLeadSchema, listQuerySchema, activityQuerySchema };

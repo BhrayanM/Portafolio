@@ -11,7 +11,7 @@ const router = Router();
 router.post('/login', authLimiter, validate(loginSchema), login);
 router.post('/logout', logout);
 
-// D-07(b) — El alta deja de ser publica: la ejecuta un admin autenticado y el
+// El alta deja de ser publica: la ejecuta un admin autenticado y el
 // usuario nace SIEMPRE en el tenant de quien lo crea (el `tenantId` del body se
 // ignora, ver auth.controller). Antes, cualquiera que conociese el UUID de un
 // tenant podia crearse una cuenta dentro y leer sus datos.

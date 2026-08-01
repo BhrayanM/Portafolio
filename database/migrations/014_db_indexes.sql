@@ -1,7 +1,6 @@
 -- ═════════════════════════════════════════════════════════════
---  F19(c) PARTE 4 — Estrategia de índices multi-tenant
+--  PARTE 4 — Estrategia de índices multi-tenant
 --  Requiere: 001–013 aplicadas.
---  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 --
 -- ORIGEN DE ESTE FICHERO
@@ -70,7 +69,7 @@ DROP INDEX IF EXISTS idx_workflow_runs_tenant;
 DROP INDEX IF EXISTS idx_workflow_runs_status;
 DROP INDEX IF EXISTS idx_workflow_runs_started;
 
--- F21.3 · el original ordenaba por `created_at`, columna que workflow_runs no
+-- El original ordenaba por `created_at`, columna que workflow_runs no
 -- tiene (007 la llama `started_at`). Habría fallado con «column does not
 -- exist» de haber llegado a ejecutarse.
 
@@ -104,7 +103,7 @@ CREATE INDEX IF NOT EXISTS idx_error_log_tenant_source     ON error_log(tenant_i
 CREATE INDEX IF NOT EXISTS idx_audit_log_tenant_created_at ON audit_log(tenant_id, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_audit_log_resource          ON audit_log(resource, resource_id);
 
--- F21.3 · Retirado
+-- Retirado
 --
 --     CREATE UNIQUE INDEX idx_audit_log_unique_composite
 --       ON audit_log(tenant_id, resource_id, action, created_at);

@@ -1,4 +1,4 @@
-# F20 — Todas las imagenes pineadas a patch exacto (no a tags flotantes).
+# Todas las imagenes pineadas a patch exacto (no a tags flotantes).
 # Cada pin es la version a la que el tag flotante que habia aqui YA resolvia hoy:
 # no hay cambio de version, solo se congela la resolucion para que el despliegue
 # sea reproducible y una actualizacion de upstream no entre sin diff.
@@ -56,6 +56,17 @@ services:
       - ./n8n/workflows:/backup/workflows
     ports:
       - "127.0.0.1:5678:5678"
+    # Mismo healthcheck que el stack de produccion. Sin el, este n8n
+    # —el que hospeda el workflow ACTIVO de Lead Qualification— aparecia siempre
+    # como "Up" aunque hubiese dejado de atender el webhook, y `restart: always`
+    # nunca lo reiniciaba. `start_period` amplio porque el arranque en frio
+    # incluye las migraciones del propio esquema de n8n.
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:5678/healthz || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
     logging:
       driver: "json-file"
       options:

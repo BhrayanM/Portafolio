@@ -1,4 +1,4 @@
-# F20 — Imagen pineada a patch exacto, no al tag flotante `node:20-alpine`.
+# Imagen pineada a patch exacto, no al tag flotante `node:20-alpine`.
 # Con el tag flotante, dos builds del mismo commit pueden salir con runtimes
 # distintos: el build deja de ser reproducible y una regresion de Node entra sin
 # aparecer en ningun diff. Se mantiene la MISMA linea LTS (Node 20) que ya estaba

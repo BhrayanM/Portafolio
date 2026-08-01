@@ -27,6 +27,15 @@ const stats = async (req, res, next) => {
   }
 };
 
+const activity = async (req, res, next) => {
+  try {
+    const entries = await leadsService.getActivity(req.tenantId, req.query);
+    res.json(entries);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const create = async (req, res, next) => {
   try {
     const lead = await leadsService.create(req.tenantId, req.body);
@@ -36,4 +45,4 @@ const create = async (req, res, next) => {
   }
 };
 
-module.exports = { list, getById, stats, create };
+module.exports = { list, getById, stats, activity, create };

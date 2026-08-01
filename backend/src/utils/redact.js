@@ -1,5 +1,5 @@
 /**
- * Utilidades de redaccion para logs (F19(a) H-06).
+ * Utilidades de redaccion para logs.
  *
  * Los logs se guardan, se rotan y a veces se envian a terceros. Un telefono o el
  * texto de un mensaje son datos personales: no deben acabar ahi solo porque

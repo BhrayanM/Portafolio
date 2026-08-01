@@ -21,7 +21,7 @@ const logout = async (req, res) => {
 
 const register = async (req, res, next) => {
   try {
-    // D-07(b): el tenant lo pone el admin autenticado (`req.tenantId`, que
+    // El tenant lo pone el admin autenticado (`req.tenantId`, que
     // resolveTenant deriva de la identidad verificada), nunca el cuerpo de la
     // peticion. La logica de creacion en el servicio queda intacta.
     const user = await authService.register({ ...req.body, tenantId: req.tenantId });

@@ -23,7 +23,7 @@ const USER = {
 // por encima de las declaraciones del archivo. La implementacion se define en beforeAll.
 jest.mock('../src/db', () => ({
   pool: { query: jest.fn() },
-  // F21.5: `resolveTenant` abre el ambito de tenant con el que `src/db` fija
+  // `resolveTenant` abre el ambito de tenant con el que `src/db` fija
   // `app.tenant_id` en cada consulta. Aqui basta con ejecutar el callback.
   runWithTenant: (tenantId, fn) => fn(),
   getCurrentTenantId: () => null,

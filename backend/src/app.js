@@ -72,7 +72,7 @@ app.get('/health', (req, res) => {
     }));
 });
 
-// H-07 — Requiere autenticacion: expone hostname, PID, version de Node y plataforma,
+// Requiere autenticacion: expone hostname, PID, version de Node y plataforma,
 // que es reconocimiento util para un atacante (version -> CVEs conocidos).
 app.get('/api/metrics', authenticate, getMetrics);
 

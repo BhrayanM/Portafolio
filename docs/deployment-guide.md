@@ -49,7 +49,7 @@ mkdir -p docker/ssl
 
 ```bash
 # Start infrastructure services
-docker compose up -d postgres automation
+docker compose up -d postgres n8n
 
 # Start backend (with hot reload)
 cd backend && npm install && npm run dev
@@ -57,11 +57,13 @@ cd backend && npm install && npm run dev
 # Start frontend (with hot reload, separate terminal)
 cd frontend && npm install && npm run dev
 
-# Run database migrations
-cat database/migrations/*.sql | docker exec -i portafolio-postgres psql -U portafolio
-
-# Seed initial tenant and admin user
-cat database/seeds/*.sql | docker exec -i portafolio-postgres psql -U portafolio
+# Run database migrations and seeds.
+# Files are applied one by one with ON_ERROR_STOP=1: the naive `cat *.sql | psql`
+# does not stop on failure and the operator sees exit code 0.
+for f in database/migrations/*.sql database/seeds/*.sql; do
+  docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" \
+    -v ON_ERROR_STOP=1 -f - < "$f" || { echo "failed on $f"; break; }
+done
 ```
 
 ### Quality Checks
@@ -249,7 +251,7 @@ docker compose -f docker-compose.prod.yml down
 docker compose -f docker-compose.prod.yml up -d
 
 # Restore database from backup
-zcat /backups/portafolio_$(date +%Y%m%d).sql.gz | docker exec -i <postgres-container> psql -U portafolio
+zcat /backups/portafolio_$(date +%Y%m%d).sql.gz | docker compose exec -T postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"
 ```
 
 ---
@@ -257,5 +259,5 @@ zcat /backups/portafolio_$(date +%Y%m%d).sql.gz | docker exec -i <postgres-conta
 ## Related
 
 - [README](../README.md) — Project overview and architecture
-- [Engineering Notes](../ENGINEERING_NOTES.md) — Reliability, AI, and multi-tenant patterns
+- [Engineering Practices](./engineering-practices.md) — Reliability, LLM, and multi-tenant patterns
 - [Security Policy](../SECURITY.md) — Vulnerability disclosure and controls

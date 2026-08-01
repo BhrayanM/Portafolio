@@ -12,7 +12,7 @@ const authenticate = async (req, res, next) => {
       throw new UnauthorizedError('Token requerido');
     }
 
-    // H-13: algoritmo fijado explicitamente, no el que declare el propio token.
+    // Algoritmo fijado explicitamente, no el que declare el propio token.
     const decoded = jwt.verify(token, config.jwt.secret, { algorithms: config.jwt.algorithms });
 
     const result = await pool.query(

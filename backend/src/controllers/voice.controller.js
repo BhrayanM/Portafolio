@@ -9,7 +9,7 @@ const handleIncoming = async (req, res) => {
       return res.status(400).json({ error: 'Payload no válido' });
     }
 
-    // H-06 — El telefono es PII: se enmascara. `callSid` ya permite correlacionar.
+    // El telefono es PII: se enmascara. `callSid` ya permite correlacionar.
     logger.info('Voice incoming call', {
       callSid: call.callSid,
       from: maskPhone(call.from),
@@ -22,7 +22,7 @@ const handleIncoming = async (req, res) => {
   <Say voice="alice" language="es-MX">Bienvenido a Portafolio. Estamos procesando su llamada.</Say>
 </Response>`);
   } catch (error) {
-    // Mismo criterio que H-11: detalle al log, mensaje generico al cliente.
+    // Mismo criterio: detalle al log, mensaje generico al cliente.
     logger.error('Voice error', { error: error.message });
     res.status(500).json({ error: { code: 'INTERNAL_ERROR', message: 'Error interno del servidor' } });
   }

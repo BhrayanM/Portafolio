@@ -1,7 +1,6 @@
 -- ═════════════════════════════════════════════════════════════
---  F19(c) PARTE 3 — Permisos finos y atributos de rol
+--  PARTE 3 — Permisos finos y atributos de rol
 --  Requiere: 012 aplicada (roles app / app_admin existentes).
---  Reparada en F21.3. Ver docs/DATABASE_MIGRATION_AUDIT.md.
 -- ═════════════════════════════════════════════════════════════
 --
 -- ORIGEN DE ESTE FICHERO
@@ -53,7 +52,7 @@ ALTER ROLE app_admin NOREPLICATION NOSUPERUSER NOCREATEDB NOCREATEROLE NOBYPASSR
 -- leería todos los tenants ignorando las políticas de 010.
 
 -- ─────────────────────────────────────────────────────────────
--- 3. NOTAS DE REPARACIÓN (F21.3)
+-- 3. NOTAS DE REPARACIÓN
 -- ─────────────────────────────────────────────────────────────
 --
 -- Retirado · el bloque DO que volvía a crear los roles app y admin con

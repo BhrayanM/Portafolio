@@ -16,7 +16,7 @@
 
 </div>
 
-![Arquitectura del Bilingual Voice Receptionist](../../assets/voice-receptionist-architecture.png)
+![Arquitectura del Bilingual Voice Receptionist](../../assets/diagrams/voice-receptionist-architecture.png)
 
 ---
 

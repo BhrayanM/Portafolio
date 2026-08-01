@@ -137,6 +137,6 @@ The AI generates a context-aware reply and sends it via Twilio WhatsApp API. If 
 
 <div align="center">
 
-[⬅️ Back to Portfolio](../../README.md) · [Pattern Reference](../../docs/patterns/webhook-ai-crm-notify.md) · [Examples](../../projects/examples/crm-sync-demo.json)
+[⬅️ Back to Portfolio](../../README.md) · [Pattern Reference](../../docs/patterns/webhook-ai-crm-notify.md) · [Examples](../../examples/crm-sync-demo.json)
 
 </div>

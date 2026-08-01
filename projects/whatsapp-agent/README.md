@@ -17,7 +17,7 @@
 
 </div>
 
-![Arquitectura del WhatsApp Conversational Agent](../../assets/whatsapp-agent-architecture.png)
+![Arquitectura del WhatsApp Conversational Agent](../../assets/diagrams/whatsapp-agent-architecture.png)
 
 ---
 
@@ -83,7 +83,7 @@ flowchart TD
 
 <br>
 
-![Flujo del agente WhatsApp](../../assets/whatsapp-agent-flow.png)
+![Flujo del agente WhatsApp](../../assets/diagrams/whatsapp-agent-flow.png)
 
 *Vista conceptual: el agente recibe modelo, memoria y herramientas como dependencias
 declaradas, no como pasos secuenciales. El agente decide **si** usa una herramienta.*
@@ -180,7 +180,7 @@ incorrecta tenga coste real.
 
 El mismo esqueleto, con herramientas de tienda y detección de idioma EN/ES:
 
-![Variante e-commerce del agente](../../assets/whatsapp-agent-commerce.webp)
+![Variante e-commerce del agente](../../assets/diagrams/whatsapp-agent-commerce.webp)
 
 Se añaden consulta de estado de pedido y base de conocimiento de preguntas frecuentes. El
 patrón de fiabilidad — ACK, dedup, memoria, handoff — no cambia. **Eso es lo que hace que
