@@ -97,7 +97,7 @@ pg_dump*
 *.xls
 data/
 datasets/
-leads/
+/leads/
 contacts/
 transcripts/
 recordings/

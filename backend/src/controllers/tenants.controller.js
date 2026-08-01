@@ -18,6 +18,24 @@ const update = async (req, res, next) => {
   }
 };
 
+const getSettings = async (req, res, next) => {
+  try {
+    const settings = await tenantsService.getSettings(req.tenantId);
+    res.json(settings);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateSettings = async (req, res, next) => {
+  try {
+    const settings = await tenantsService.updateSettings(req.tenantId, req.body);
+    res.json(settings);
+  } catch (error) {
+    next(error);
+  }
+};
+
 const usage = async (req, res, next) => {
   try {
     const stats = await tenantsService.getUsageStats(req.tenantId);
@@ -27,4 +45,4 @@ const usage = async (req, res, next) => {
   }
 };
 
-module.exports = { getCurrent, update, usage };
+module.exports = { getCurrent, update, getSettings, updateSettings, usage };

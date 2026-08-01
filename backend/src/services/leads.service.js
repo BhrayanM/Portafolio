@@ -43,6 +43,17 @@ class LeadsService {
     `, [tenantId]);
     return result.rows[0];
   }
+
+  async create(tenantId, data) {
+    const { email, name, company, phone, message, source } = data;
+    const result = await pool.query(
+      `INSERT INTO leads (tenant_id, email, name, company, phone, message, source, status, ai_category)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, 'new', 'Cold')
+       RETURNING *`,
+      [tenantId, email.toLowerCase(), name || '', company || '', phone || '', message || '', source || 'api']
+    );
+    return result.rows[0];
+  }
 }
 
 module.exports = new LeadsService();
