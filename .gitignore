@@ -182,3 +182,7 @@ $RECYCLE.BIN/
 *invoice*
 *contrato*
 *nda*
+
+# Archivos transientes de sesion
+cookie.txt
+headers.txt
