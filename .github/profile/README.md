@@ -4,7 +4,7 @@ I build automation systems that connect business tools, APIs, AI and CRM: lead c
 and qualification, CRM synchronization, WhatsApp and voice agents, and n8n workflows
 designed with retries, deduplication and persistent error handling.
 
-Everything in this portfolio is backed by evidence: end-to-end verified flows, 103
+Everything in this portfolio is backed by evidence: end-to-end verified flows, 113
 passing automated tests and CI in GitHub Actions.
 
 ---
