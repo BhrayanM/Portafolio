@@ -7,13 +7,24 @@
 [![n8n](https://img.shields.io/badge/n8n-EA4B71?logo=n8n&logoColor=white)](#stack)
 [![OpenAI](https://img.shields.io/badge/OpenAI-412991?logo=openai&logoColor=white)](#stack)
 [![Anthropic](https://img.shields.io/badge/Anthropic-D97757?logo=anthropic&logoColor=white)](#stack)
-[![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?logo=hubspot&logoColor=white)](#stack)
+[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?logo=whatsapp&logoColor=white)](#stack)
 [![Slack](https://img.shields.io/badge/Slack-4A154B?logo=slack&logoColor=white)](#stack)
 [![Twilio](https://img.shields.io/badge/Twilio-F22F46?logo=twilio&logoColor=white)](#stack)
-[![WhatsApp](https://img.shields.io/badge/WhatsApp-25D366?logo=whatsapp&logoColor=white)](#stack)
+[![HubSpot](https://img.shields.io/badge/HubSpot-FF7A59?logo=hubspot&logoColor=white)](#stack)
+[![Supabase](https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase&logoColor=white)](#stack)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)](#stack)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#stack)
+[![Redis](https://img.shields.io/badge/Redis-FF4438?logo=redis&logoColor=white)](#stack)
+[![RabbitMQ](https://img.shields.io/badge/RabbitMQ-FF6600?logo=rabbitmq&logoColor=white)](#stack)
+[![Node.js](https://img.shields.io/badge/Node.js-5FA04E?logo=nodedotjs&logoColor=white)](#stack)
+[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](#stack)
+[![Next.js](https://img.shields.io/badge/Next.js-000000?logo=nextdotjs&logoColor=white)](#stack)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?logo=tailwindcss&logoColor=white)](#stack)
 [![REST API](https://img.shields.io/badge/REST_API-000000?logo=express&logoColor=white)](#stack)
+[![Swagger / OpenAPI](https://img.shields.io/badge/Swagger_/_OpenAPI-85EA2D?logo=swagger&logoColor=white)](#stack)
+[![Stripe](https://img.shields.io/badge/Stripe-008CDD?logo=stripe&logoColor=white)](#stack)
+[![JWT](https://img.shields.io/badge/JWT-000000?logo=jwt&logoColor=white)](#stack)
+[![Docker](https://img.shields.io/badge/Docker-2496ED?logo=docker&logoColor=white)](#stack)
+[![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)](#stack)
 
 [![CI](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml/badge.svg)](https://github.com/BhrayanM/Portafolio/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-113_passing-2ea44f)](#evidence)
@@ -124,6 +135,17 @@ flowchart LR
 - **Sanitized n8n workflow examples** in [`examples/`](./examples/README.md).
 - **Engineering decisions documented** with their rejected alternatives in the
   [ADRs](./docs/adr/README.md).
+
+## Stack
+
+| Layer | Technologies |
+|---|---|
+| **AI & orchestration** | n8n · OpenAI · Anthropic |
+| **Messaging & CRM** | WhatsApp Business API · Twilio · Slack · HubSpot |
+| **Data layer** | PostgreSQL · Redis · RabbitMQ · Supabase |
+| **Web platform** | Node.js · TypeScript · Next.js · Tailwind CSS |
+| **API & payments** | REST API · Swagger / OpenAPI · Stripe · JWT |
+| **Operations** | Docker · GitHub Actions |
 
 ## How we work
 
