@@ -6,6 +6,8 @@ and the relevant engineering decisions.
 
 | Project | What it solves | Documentation |
 |---|---|---|
+| [LocalGrowth AI System](localgrowth-ai/README.md) | SaaS lead qualification platform: AI assistant, scoring engine, CRM adapters (HubSpot · GoHighLevel · Zoho) and real-time dashboard | [case study](localgrowth-ai/case-study.md) · [README](localgrowth-ai/README.md) |
+| [Chicago Elite Roofing](chicago-elite-roofing/README.md) | AI-powered lead generation for a roofing business: Next.js site, local SEO, chatbot and qualified lead pipeline | [case study](chicago-elite-roofing/case-study.md) · [README](chicago-elite-roofing/README.md) |
 | [Lead Qualification](lead-qualification/README.md) | Automatic lead scoring with LLM, human approval for hot leads and CRM upsert | [docs](lead-qualification/) · [examples](lead-qualification/examples/) |
 | [WhatsApp Agent](whatsapp-agent/README.md) | Conversational agent with memory and tools on the WhatsApp Business API | [README](whatsapp-agent/README.md) |
 | [WhatsApp E-commerce Agent](whatsapp-ecommerce-agent/README.md) | Commerce variant of the agent: order lookup and bilingual support | [docs](whatsapp-ecommerce-agent/docs/) |

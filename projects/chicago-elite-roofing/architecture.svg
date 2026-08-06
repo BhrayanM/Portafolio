@@ -1,0 +1,170 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 760" font-family="system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e293b"/>
+    </linearGradient>
+    <linearGradient id="purple" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#4f46e5"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#2563eb"/>
+      <stop offset="100%" stop-color="#1d4ed8"/>
+    </linearGradient>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#059669"/>
+      <stop offset="100%" stop-color="#047857"/>
+    </linearGradient>
+    <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ea580c"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="teal" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#0f766e"/>
+    </linearGradient>
+    <linearGradient id="red" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#dc2626"/>
+      <stop offset="100%" stop-color="#b91c1c"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <rect width="900" height="760" fill="url(#bg)" rx="12"/>
+
+  <!-- Title -->
+  <text x="450" y="40" text-anchor="middle" fill="#e2e8f0" font-size="18" font-weight="700">Chicago Elite Roofing — Lead Generation System</text>
+  <line x1="200" y1="50" x2="700" y2="50" stroke="#334155" stroke-width="1"/>
+
+  <!-- Layer 1: Website + SEO -->
+  <rect x="250" y="70" width="400" height="56" rx="8" fill="#000000" stroke="#334155" stroke-width="1.5" filter="url(#shadow)"/>
+  <text x="450" y="94" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Modern Next.js Website</text>
+  <text x="450" y="112" text-anchor="middle" fill="#94a3b8" font-size="10">Server-rendered · Mobile-first · Core Web Vitals</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="126" x2="450" y2="150" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,148 450,156 455,148" fill="#475569"/>
+
+  <!-- Layer 2: Local SEO -->
+  <rect x="250" y="158" width="400" height="56" rx="8" fill="url(#teal)" filter="url(#shadow)"/>
+  <text x="450" y="182" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Local SEO Layer</text>
+  <text x="450" y="200" text-anchor="middle" fill="#ccfbf1" font-size="10">schema.org · Service Pages · Location Pages · Google Business Profile</text>
+
+  <!-- Branch lines down -->
+  <line x1="450" y1="214" x2="450" y2="226" stroke="#475569" stroke-width="2"/>
+  <line x1="130" y1="226" x2="770" y2="226" stroke="#475569" stroke-width="2"/>
+  <line x1="130" y1="226" x2="130" y2="244" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="226" x2="450" y2="244" stroke="#475569" stroke-width="2"/>
+  <line x1="770" y1="226" x2="770" y2="244" stroke="#475569" stroke-width="2"/>
+  <polygon points="125,242 130,250 135,242" fill="#475569"/>
+  <polygon points="445,242 450,250 455,242" fill="#475569"/>
+  <polygon points="765,242 770,250 775,242" fill="#475569"/>
+
+  <!-- Layer 3: Channels -->
+  <rect x="50" y="252" width="160" height="56" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="130" y="276" text-anchor="middle" fill="#60a5fa" font-size="11" font-weight="600">Website Form</text>
+  <text x="130" y="293" text-anchor="middle" fill="#64748b" font-size="9">validated payload</text>
+
+  <rect x="370" y="252" width="160" height="56" rx="8" fill="url(#purple)" filter="url(#shadow)"/>
+  <text x="450" y="276" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">AI Chatbot</text>
+  <text x="450" y="293" text-anchor="middle" fill="#ddd6fe" font-size="9">answers · qualifies · captures</text>
+
+  <rect x="690" y="252" width="160" height="56" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="770" y="276" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="600">Calls + GBP</text>
+  <text x="770" y="293" text-anchor="middle" fill="#64748b" font-size="9">call tracking · profile</text>
+
+  <!-- Arrows down to intake -->
+  <line x1="130" y1="308" x2="130" y2="336" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="308" x2="450" y2="336" stroke="#475569" stroke-width="2"/>
+  <line x1="770" y1="308" x2="770" y2="336" stroke="#475569" stroke-width="2"/>
+  <polygon points="125,334 130,342 135,334" fill="#475569"/>
+  <polygon points="445,334 450,342 455,334" fill="#475569"/>
+  <polygon points="765,334 770,342 775,334" fill="#475569"/>
+
+  <!-- Layer 4: Capture + validation -->
+  <rect x="150" y="344" width="600" height="52" rx="8" fill="url(#red)" filter="url(#shadow)"/>
+  <text x="450" y="367" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">Lead Capture API</text>
+  <text x="450" y="384" text-anchor="middle" fill="#fecaca" font-size="10">Sanitization · Validation · Deduplication by business identity</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="396" x2="450" y2="420" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,418 450,426 455,418" fill="#475569"/>
+
+  <!-- Layer 5: AI qualification -->
+  <rect x="200" y="428" width="500" height="56" rx="8" fill="url(#purple)" filter="url(#shadow)"/>
+  <text x="450" y="452" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">AI Qualification</text>
+  <text x="450" y="470" text-anchor="middle" fill="#ddd6fe" font-size="10">Service · Urgency · Budget · Score (structured output)</text>
+
+  <!-- Branch lines -->
+  <line x1="450" y1="484" x2="450" y2="494" stroke="#475569" stroke-width="2"/>
+  <line x1="200" y1="494" x2="700" y2="494" stroke="#475569" stroke-width="2"/>
+  <line x1="200" y1="494" x2="200" y2="512" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="494" x2="450" y2="512" stroke="#475569" stroke-width="2"/>
+  <line x1="700" y1="494" x2="700" y2="512" stroke="#475569" stroke-width="2"/>
+  <polygon points="195,510 200,518 205,510" fill="#475569"/>
+  <polygon points="445,510 450,518 455,510" fill="#475569"/>
+  <polygon points="695,510 700,518 705,510" fill="#475569"/>
+
+  <!-- Layer 6: Routing -->
+  <rect x="110" y="520" width="180" height="52" rx="8" fill="#4A154B" filter="url(#shadow)"/>
+  <text x="200" y="543" text-anchor="middle" fill="#fff" font-size="11" font-weight="600">Urgent / High value</text>
+  <text x="200" y="560" text-anchor="middle" fill="#d6bce4" font-size="9">Slack + SMS alert</text>
+
+  <rect x="360" y="520" width="180" height="52" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="450" y="543" text-anchor="middle" fill="#34d399" font-size="11" font-weight="600">Quote request</text>
+  <text x="450" y="560" text-anchor="middle" fill="#64748b" font-size="9">follow-up queue</text>
+
+  <rect x="610" y="520" width="180" height="52" rx="8" fill="#1e293b" stroke="#334155" stroke-width="1.5"/>
+  <text x="700" y="543" text-anchor="middle" fill="#94a3b8" font-size="11" font-weight="600">Nurture</text>
+  <text x="700" y="560" text-anchor="middle" fill="#64748b" font-size="9">campaign list</text>
+
+  <!-- Arrows down to CRM -->
+  <line x1="200" y1="572" x2="200" y2="596" stroke="#475569" stroke-width="2"/>
+  <line x1="450" y1="572" x2="450" y2="596" stroke="#475569" stroke-width="2"/>
+  <line x1="700" y1="572" x2="700" y2="596" stroke="#475569" stroke-width="2"/>
+  <polygon points="195,594 200,602 205,594" fill="#475569"/>
+  <polygon points="445,594 450,602 455,594" fill="#475569"/>
+  <polygon points="695,594 700,602 705,594" fill="#475569"/>
+
+  <!-- Layer 7: CRM sync -->
+  <rect x="250" y="604" width="400" height="48" rx="8" fill="url(#orange)" filter="url(#shadow)"/>
+  <text x="450" y="626" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">CRM Sync (idempotent upsert)</text>
+  <text x="450" y="642" text-anchor="middle" fill="#fed7aa" font-size="10">Attribution by channel · Swappable integration layer</text>
+
+  <!-- Arrow -->
+  <line x1="450" y1="652" x2="450" y2="676" stroke="#475569" stroke-width="2"/>
+  <polygon points="445,674 450,682 455,674" fill="#475569"/>
+
+  <!-- Layer 8: System of record -->
+  <rect x="200" y="684" width="500" height="48" rx="8" fill="url(#blue)" filter="url(#shadow)"/>
+  <text x="450" y="706" text-anchor="middle" fill="#fff" font-size="13" font-weight="600">PostgreSQL — System of Record</text>
+  <text x="450" y="722" text-anchor="middle" fill="#bfdbfe" font-size="10">Lead history · Attribution · Error table (persistent)</text>
+
+  <!-- Error workflow annotation -->
+  <rect x="40" y="428" width="150" height="48" rx="6" fill="#8b1a1a" stroke="#7f1d1d" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="115" y="450" text-anchor="middle" fill="#fca5a5" font-size="10" font-weight="600">Global Error Workflow</text>
+  <text x="115" y="466" text-anchor="middle" fill="#fecaca" font-size="9">persists failures</text>
+  <line x1="190" y1="452" x2="450" y2="452" stroke="#7f1d1d" stroke-width="1" stroke-dasharray="3,3"/>
+  <polygon points="447,449 455,452 447,455" fill="#7f1d1d"/>
+
+  <!-- Legend -->
+  <rect x="30" y="740" width="12" height="12" rx="2" fill="#000000" stroke="#334155"/>
+  <text x="48" y="750" fill="#94a3b8" font-size="9">Web</text>
+  <rect x="100" y="740" width="12" height="12" rx="2" fill="url(#teal)"/>
+  <text x="118" y="750" fill="#94a3b8" font-size="9">SEO</text>
+  <rect x="180" y="740" width="12" height="12" rx="2" fill="url(#purple)"/>
+  <text x="198" y="750" fill="#94a3b8" font-size="9">AI</text>
+  <rect x="250" y="740" width="12" height="12" rx="2" fill="url(#red)"/>
+  <text x="268" y="750" fill="#94a3b8" font-size="9">Security</text>
+  <rect x="360" y="740" width="12" height="12" rx="2" fill="#4A154B"/>
+  <text x="378" y="750" fill="#94a3b8" font-size="9">Alerts</text>
+  <rect x="450" y="740" width="12" height="12" rx="2" fill="url(#orange)"/>
+  <text x="468" y="750" fill="#94a3b8" font-size="9">CRM</text>
+  <rect x="530" y="740" width="12" height="12" rx="2" fill="url(#blue)"/>
+  <text x="548" y="750" fill="#94a3b8" font-size="9">Data</text>
+  <rect x="600" y="740" width="12" height="12" rx="2" fill="#8b1a1a"/>
+  <text x="618" y="750" fill="#94a3b8" font-size="9">Errors</text>
+</svg>

@@ -43,10 +43,40 @@ to a person when it matters. You stop chasing paperwork and focus on the jobs th
 Everything in this repository is **backed by evidence**: end-to-end verified flows, 113
 automated tests passing and CI on GitHub Actions.
 
+## Featured projects
+
+### ⭐ AI-Powered Lead Generation System for Roofing Business
+
+![Chicago Elite Roofing — system architecture](./projects/chicago-elite-roofing/architecture.svg)
+
+| | |
+|---|---|
+| **Problem** | A roofing company's website, ads and phone produced leads that never became jobs: forms sat in an inbox, no local search presence, no attribution, CRM updated by hand. |
+| **Solution** | A modern Next.js website built for local SEO (structured data, service pages), an AI chatbot that qualifies every visitor, and a lead pipeline that scores, deduplicates, syncs to the CRM and alerts the team on urgent jobs. |
+| **Technologies** | Next.js · TypeScript · Tailwind CSS · OpenAI · HubSpot · Slack · n8n · PostgreSQL |
+| **Business value** | Every channel converges on one pipeline, urgent leads alert the team in seconds, and the owner can finally answer *where do our jobs come from?* |
+
+📄 [Full case study →](./projects/chicago-elite-roofing/case-study.md) · [Technical documentation →](./projects/chicago-elite-roofing/README.md)
+
+### ⭐ AI Lead Qualification Platform | Next.js, OpenAI & CRM Automation
+
+![LocalGrowth AI System — platform architecture](./projects/localgrowth-ai/architecture.svg)
+
+| | |
+|---|---|
+| **Problem** | Leads arrive from several channels and are treated all the same: called in arrival order, typed into the CRM by hand, no attribution, and a CRM change means rebuilding the integration. |
+| **Solution** | A SaaS lead qualification platform: interactive AI assistant, scoring engine, CRM integration layer (HubSpot · GoHighLevel · Zoho), Slack/email/SMS notifications and a real-time dashboard with an activity feed. |
+| **Technologies** | Next.js · TypeScript · OpenAI · HubSpot / GoHighLevel / Zoho · Slack · Twilio · PostgreSQL · n8n |
+| **Business value** | Leads are qualified and prioritized automatically, CRMs are swappable behind one contract, and the team watches every event in real time — no more sorting by hand. |
+
+📄 [Full case study →](./projects/localgrowth-ai/case-study.md) · [Technical documentation →](./projects/localgrowth-ai/README.md)
+
 ## Services
 
 | Service | What it solves | Where to look |
 |---|---|---|
+| **Local lead generation** | Website + local SEO + AI chatbot + qualified lead pipeline | [Chicago Elite Roofing](./projects/chicago-elite-roofing/README.md) |
+| **Lead qualification platform** | SaaS dashboard, scoring engine, CRM adapters and notifications | [LocalGrowth AI System](./projects/localgrowth-ai/README.md) |
 | **Lead automation** | Automatic lead capture, qualification and prioritization | [Lead Qualification Engine](./projects/lead-qualification/README.md) |
 | **CRM automation** | CRM sync without duplicates | [Appointment Automation](./projects/appointment-automation/README.md) |
 | **AI workflows** | AI-powered flows: scoring, agents with memory, automated support | [WhatsApp Agent](./projects/whatsapp-agent/README.md) |
@@ -106,6 +136,28 @@ automated tests passing and CI on GitHub Actions.
 
 📄 [Full documentation →](./projects/appointment-automation/README.md)
 
+### 5. AI-powered lead generation for local businesses (web + chatbot)
+
+| | |
+|---|---|
+| **Problem** | A local business receives leads from the website, ads and Google — and loses them: slow follow-up, no qualification, no attribution, CRM by hand. |
+| **Solution** | A modern Next.js website with local SEO architecture, an AI chatbot that qualifies every visitor, and a lead pipeline that scores, deduplicates, syncs to the CRM and alerts the team on urgent jobs. |
+| **Technologies** | Next.js · TypeScript · Tailwind CSS · OpenAI · HubSpot · Slack · n8n · PostgreSQL |
+| **Result** | All channels converge on one pipeline, urgent leads alert the team in seconds and the owner knows which channel produces jobs. |
+
+📄 [Full documentation →](./projects/chicago-elite-roofing/README.md)
+
+### 6. AI lead qualification platform (SaaS)
+
+| | |
+|---|---|
+| **Problem** | Leads arrive from several channels and are treated all the same: no scoring, no prioritization, CRM typed by hand, integrations rebuilt on every CRM change. |
+| **Solution** | A SaaS platform: interactive AI assistant, lead scoring engine, CRM integration layer (HubSpot · GoHighLevel · Zoho), Slack/email/SMS notifications and a real-time dashboard with activity feed. |
+| **Technologies** | Next.js · TypeScript · OpenAI · HubSpot / GoHighLevel / Zoho · Slack · Twilio · PostgreSQL · n8n |
+| **Result** | Leads are qualified and prioritized automatically, CRMs are swappable behind one contract, and the team watches every event in real time. |
+
+📄 [Full documentation →](./projects/localgrowth-ai/README.md)
+
 ## How it works under the hood
 
 All systems share the same proven structure:
@@ -139,9 +191,9 @@ flowchart LR
 ## Stack
 
 | Layer | Technologies |
-|---|---|
+|---|---|---|
 | **AI & orchestration** | n8n · OpenAI · Anthropic |
-| **Messaging & CRM** | WhatsApp Business API · Twilio · Slack · HubSpot |
+| **Messaging & CRM** | WhatsApp Business API · Twilio · Slack · HubSpot · GoHighLevel · Zoho |
 | **Data layer** | PostgreSQL · Redis · RabbitMQ · Supabase |
 | **Web platform** | Node.js · TypeScript · Next.js · Tailwind CSS |
 | **API & payments** | REST API · Swagger / OpenAPI · Stripe · JWT |

@@ -18,6 +18,8 @@ Visual material of the portfolio, organized by type.
 | `diagrams/whatsapp-agent-flow.png` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | Graph view: model, memory and tools as dependencies |
 | `diagrams/whatsapp-agent-commerce.webp` | [WhatsApp Agent](../projects/whatsapp-agent/README.md) | E-commerce variant (EN/ES + orders) |
 | `diagrams/voice-receptionist-architecture.png` | [Voice Receptionist](../projects/voice-receptionist/README.md) | Bilingual voice receptionist pipeline |
+| `../projects/chicago-elite-roofing/architecture.svg` | [Chicago Elite Roofing](../projects/chicago-elite-roofing/README.md) | Website + local SEO + AI chatbot + qualified lead pipeline |
+| `../projects/localgrowth-ai/architecture.svg` | [LocalGrowth AI System](../projects/localgrowth-ai/README.md) | SaaS lead qualification platform: assistant, scoring, CRM adapters, notifications, dashboard |
 
 ## Screenshots
 
