@@ -45,6 +45,20 @@ automated tests passing and CI on GitHub Actions.
 
 ## Featured projects
 
+### 🚀 Revora | AI Revenue Automation SaaS
+
+![Revora Login](./projects/revora/assets/revora-login.png)
+
+| | |
+|---|---|
+| **Problem** | Managing inbound leads across fragmented tools (CRMs, scheduling software, webhooks, and chat platforms) leads to delayed response times and lost revenue. Without centralized visibility, qualifying leads accurately becomes a bottleneck. |
+| **Solution** | A strictly isolated multi-tenant SaaS that ingests leads, triggers automated webhook-based execution retries, syncs bi-directionally with popular CRMs, and safeguards organizational data using RLS and MFA. |
+| **Technologies** | Next.js • TypeScript • Tailwind CSS • Supabase • PostgreSQL • Upstash Redis |
+| **Business value** | Provides agencies and enterprise businesses a reliable, secure single source of truth for their revenue operations and lead pipelines. |
+
+📖 [View case study →](./projects/revora/README.md) 🔗 [Public Repository →](https://github.com/BhrayanM/revora)
+
+
 ### ⭐ AI-Powered Lead Generation System for Roofing Business
 
 ![Chicago Elite Roofing — system architecture](./projects/chicago-elite-roofing/architecture.svg)
